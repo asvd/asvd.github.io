@@ -6,7 +6,7 @@ var cb = function(result) {
         application.remote.done();
     }
 
-    application.remote.check(result == val*val);
+    application.remote.check(result == val*val, cb2);
 }
 
 
