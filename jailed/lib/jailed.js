@@ -1,6 +1,5 @@
 
 /*********************************************************************
-tt
   jailed - creates the jailed plugins and provides the opportunity
   to set up the custom interfaces for interraction with those
 
