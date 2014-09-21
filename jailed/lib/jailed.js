@@ -1,21 +1,20 @@
-
-/*********************************************************************
-  jailed - creates the jailed plugins and provides the opportunity
-  to set up the custom interfaces for interraction with those
-
-  Licensed under MIT license, see http://github.com/asvd/jailed
-
-  Main library script, the only one to be loaded by a developer into
-  the application. Other scrips shipped along will be loaded by the
-  library either here (application site), or into the plugin site
-  (Worker/child process):
-
-   _JailedSite.js loaded into both applicaiton and plugin sites
-   _pluginNode.js    platform-dependent plugin routines (Node.js)
-   _pluginWeb.js     platform-dependent plugin routines (web)
-   _pluginCore.js    common plugin site protocol implementation
-
-*********************************************************************/
+/**
+ * @fileoverview Jailed - safe yet flexible sandbox
+ * @version 0.1.1
+ * 
+ * @license MIT, see http://github.com/asvd/jailed
+ * Copyright (c) 2014 asvd <heliosframework@gmail.com> 
+ * 
+ * Main library script, the only one to be loaded by a developer into
+ * the application. Other scrips shipped along will be loaded by the
+ * library either here (application site), or into the plugin site
+ * (Worker/child process):
+ *
+ *  _JailedSite.js    loaded into both applicaiton and plugin sites
+ *  _pluginNode.js    platform-dependent plugin routines (Node.js)
+ *  _pluginWeb.js     platform-dependent plugin routines (web)
+ *  _pluginCore.js    common plugin site protocol implementation
+ */
 
 
 var __jailed__path__;
@@ -40,27 +39,23 @@ if (typeof window == 'undefined') {
         factory(exports);
     } else {
         factory((root.jailed = {}));
-    }     
+    }
 }(this, function (exports) {
+    var isNode = typeof window == 'undefined';
       
-    var platform = {
-        _isNode: typeof window == 'undefined'
-    };
-
-
 
     /**
      * A special kind of event:
      *  - which can only be emitted once;
      *  - executes a set of subscribed handlers upon emission;
-     *  - if a handler is subscibed after the event was emitted, it
-     *    will be issued immideately.
+     *  - if a handler is subscribed after the event was emitted, it
+     *    will be invoked immideately.
      * 
      * Used for the events which only happen once (or do not happen at
      * all) during a single plugin lifecycle - connect, disconnect and
      * connection failure
      */
-    platform._Whenable = function() {
+    var Whenable = function() {
         this._emitted = false;
         this._handlers = [];
     }
@@ -72,12 +67,19 @@ if (typeof window == 'undefined') {
      * all future subscibed listeners will be immideately issued
      * instead of being stored)
      */
-    platform._Whenable.prototype.emit = function(){
+    Whenable.prototype.emit = function(){
         if (!this._emitted) {
             this._emitted = true;
 
+            var me = this;
             for (var i = 0; i < this._handlers.length; i++) {
-                this._handlers[i].call(null);
+                setTimeout(
+                    (function(i) {
+                         return function() {
+                             me._handlers[i].call(null);
+                         }
+                    })(i),
+                0);
             }
         }
     }
@@ -91,7 +93,7 @@ if (typeof window == 'undefined') {
      * 
      * @param {Function} handler to subscribe for the event
      */
-    platform._Whenable.prototype.whenEmitted = function(handler){
+    Whenable.prototype.whenEmitted = function(handler){
         handler = this._checkHandler(handler);
         if (this._emitted) {
             setTimeout(handler, 0);
@@ -111,7 +113,7 @@ if (typeof window == 'undefined') {
      * 
      * @returns {Object} the provided object if yes
      */
-    platform._Whenable.prototype._checkHandler = function(handler){
+    Whenable.prototype._checkHandler = function(handler){
         var type = typeof handler;
         if (type != 'function') {
             var msg =
@@ -130,7 +132,7 @@ if (typeof window == 'undefined') {
      * Initializes the library site for Node.js environment (loads
      * _JailedSite.js)
      */
-    platform._initNode = function() {
+    var initNode = function() {
         require('./_JailedSite.js');
     }
       
@@ -139,9 +141,10 @@ if (typeof window == 'undefined') {
      * Initializes the library site for web environment (loads
      * _JailedSite.js)
      */
-    platform._initWeb = function() {
+    var platformInit;
+    var initWeb = function() {
         // loads additional script to the application environment
-        platform._load = function(path, cb) {
+        var load = function(path, cb) {
             var script = document.createElement('script');
             script.src = path;
 
@@ -169,25 +172,26 @@ if (typeof window == 'undefined') {
             document.body.appendChild(script);
         }
 
-        platform._init = new platform._Whenable;
-        platform._origOnload = window.onload || function(){};
+        platformInit = new Whenable;
+        var origOnload = window.onload || function(){};
 
         window.onload = function(){
-            platform._origOnload();
-            platform._load(
+            origOnload();
+            load(
                 __jailed__path__+'_JailedSite.js',
-                function(){ platform._init.emit(); }
+                function(){ platformInit.emit(); }
             );
         }
     }
 
-      
+
+    var BasicConnection;
       
     /**
      * Creates the platform-dependent BasicConnection object in the
      * Node.js environment
      */
-    platform._basicConnectionNode = function() {
+    var basicConnectionNode = function() {
         var childProcess = require('child_process');
 
         /**
@@ -197,7 +201,7 @@ if (typeof window == 'undefined') {
          * 
          * For Node.js the plugin is created as a forked process
          */
-        platform.BasicConnection = function() {
+        BasicConnection = function() {
             this._disconnected = false;
             this._messageHandler = function(){};
             this._disconnectHandler = function(){};
@@ -226,7 +230,7 @@ if (typeof window == 'undefined') {
          * 
          * @param {Function} handler to be called upon connection init
          */
-        platform.BasicConnection.prototype.whenInit = function(handler) {
+        BasicConnection.prototype.whenInit = function(handler) {
             handler();
         }
 
@@ -236,7 +240,7 @@ if (typeof window == 'undefined') {
          * 
          * @param {Object} data to send
          */
-        platform.BasicConnection.prototype.send = function(data) {
+        BasicConnection.prototype.send = function(data) {
             if (!this._disconnected) {
                 this._process.send(data);
             }
@@ -248,7 +252,7 @@ if (typeof window == 'undefined') {
          * 
          * @param {Function} handler to call upon a message
          */
-        platform.BasicConnection.prototype.onMessage = function(handler) {
+        BasicConnection.prototype.onMessage = function(handler) {
             this._messageHandler = function(data) {
                 // broken stack would break the IPC in Node.js
                 try {
@@ -267,7 +271,7 @@ if (typeof window == 'undefined') {
          * 
          * @param {Function} handler to call upon a disconnect
          */
-        platform.BasicConnection.prototype.onDisconnect = function(handler) {
+        BasicConnection.prototype.onDisconnect = function(handler) {
             this._disconnectHandler = handler;
         }
 
@@ -275,7 +279,7 @@ if (typeof window == 'undefined') {
         /**
          * Disconnects the plugin (= kills the forked process)
          */
-        platform.BasicConnection.prototype.disconnect = function() {
+        BasicConnection.prototype.disconnect = function() {
             this._process.kill('SIGKILL');
             this._disconnected = true;
         }
@@ -287,9 +291,9 @@ if (typeof window == 'undefined') {
      * Creates the platform-dependent BasicConnection object in the
      * web-browser environment
      */
-    platform._basicConnectionWeb = function() {
+    var basicConnectionWeb = function() {
         // Creating Worker from a blob enables import of local files
-        platform._blobCode = [
+        var blobCode = [
           ' self.addEventListener("message", function(m){          ',
           '     if (m.data.type == "initImport") {                 ',
           '         importScripts(m.data.url);                     ',
@@ -298,8 +302,8 @@ if (typeof window == 'undefined') {
           ' });                                                    '
         ].join('\n');
         
-        platform._blobUrl = window.URL.createObjectURL(
-            new Blob([platform._blobCode])
+        var blobUrl = window.URL.createObjectURL(
+            new Blob([blobCode])
         );
 
 
@@ -311,15 +315,15 @@ if (typeof window == 'undefined') {
          * For the web-browser environment, the plugin is created as a
          * Worker object
          */
-        platform.BasicConnection = function() {
-            this._init = new platform._Whenable;
-            this._worker = new Worker(platform._blobUrl);
+        BasicConnection = function() {
+            this._init = new Whenable;
+            this._worker = new Worker(blobUrl);
             this._messageHandler = function(){};
         
             var me = this;
             this._worker.addEventListener('message', function(m) {
                 if (m.data.type == 'initImportSuccess') {
-                    platform._init.whenEmitted(function() {
+                    platformInit.whenEmitted(function() {
                         me._init.emit();
                     });
                 } else {
@@ -345,7 +349,7 @@ if (typeof window == 'undefined') {
          * 
          * @param {Function} handler to be called upon connection init
          */
-        platform.BasicConnection.prototype.whenInit = function(handler) {
+        BasicConnection.prototype.whenInit = function(handler) {
             this._init.whenEmitted(handler);
         }
 
@@ -355,7 +359,7 @@ if (typeof window == 'undefined') {
          * 
          * @param {Object} data to send
          */
-        platform.BasicConnection.prototype.send = function(data) {
+        BasicConnection.prototype.send = function(data) {
             this._worker.postMessage({type: 'message', data: data});
         }
 
@@ -365,7 +369,7 @@ if (typeof window == 'undefined') {
          * 
          * @param {Function} handler to call upon a message
          */
-        platform.BasicConnection.prototype.onMessage = function(handler) {
+        BasicConnection.prototype.onMessage = function(handler) {
             this._messageHandler = handler;
         }
 
@@ -376,25 +380,25 @@ if (typeof window == 'undefined') {
          * 
          * @param {Function} handler to call upon a disconnect
          */
-        platform.BasicConnection.prototype.onDisconnect = function(){};
+        BasicConnection.prototype.onDisconnect = function(){};
 
 
         /**
          * Disconnects the plugin (= terminates the Worker)
          */
-        platform.BasicConnection.prototype.disconnect = function() {
+        BasicConnection.prototype.disconnect = function() {
             this._worker.terminate();
         }
 
     }
 
       
-    if (platform._isNode) {
-        platform._initNode();
-        platform._basicConnectionNode();
+    if (isNode) {
+        initNode();
+        basicConnectionNode();
     } else {
-        platform._initWeb();
-        platform._basicConnectionWeb();
+        initWeb();
+        basicConnectionWeb();
     }
 
 
@@ -408,7 +412,7 @@ if (typeof window == 'undefined') {
      * plugin
      */
     var Connection = function(){
-        this._platformConnection = new platform.BasicConnection;
+        this._platformConnection = new BasicConnection;
 
         this._importCallbacks = {};
         this._executeSCb = function(){};
@@ -596,9 +600,9 @@ if (typeof window == 'undefined') {
            Plugin.prototype._connect = function() {
         this.remote = null;
 
-        this._connect    = new platform._Whenable;
-        this._fail       = new platform._Whenable;
-        this._disconnect = new platform._Whenable;
+        this._connect    = new Whenable;
+        this._fail       = new Whenable;
+        this._disconnect = new Whenable;
                
         var me = this;
                
