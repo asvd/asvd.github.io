@@ -719,10 +719,10 @@
             // NORTH
             if (this._cmp.sides.north.ready) {
                 var image = this._images.north.getStretched();
-                var coord = beyond.north % image.size;
+                var coord = beyond.north % image.origSize;
                 
 
-                var size = image.size - image.size*.75* coord / image.size;
+                var size = image.size - image.size*.75 * coord / image.origSize;
                 
 //                var destiny = image.map.destiny[origCoord];
 //                var size = image.size * destiny;
