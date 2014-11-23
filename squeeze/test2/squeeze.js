@@ -721,17 +721,22 @@
                 var image = this._images.north.getStretched();
                 var origCoord = beyond.north % image.origSize;
                 
-
-//                var size = image.size - image.size*.75 * coord / image.origSize;
-                
                 var destiny = image.map.destiny[origCoord];
-                var size = image.size * destiny;
-                var offset = image.map.point[origCoord] * destiny;
+//                var offset = image.map.point[origCoord] * destiny;
+                var offset = image.map.point[origCoord];
 
-                var full = this._cmp.sides.north.size;
-                var top = full-offset;
+                var F = offset / image.size;
 
                 var subs = this._cmp.sides.north.subs;
+
+                console.log(this._cmp.sides.north.size);
+
+                var size = 3*this._cmp.sides.north.size /
+                    (1-Math.pow(1/4, subs.length-1) + 3*F);
+
+//                console.log(size);
+
+
 
                 var sizes = [];
                 for (var i = 0; i < subs.length; i++) {
