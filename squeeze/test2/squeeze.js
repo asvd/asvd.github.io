@@ -614,8 +614,9 @@
          */
         Squeeze.prototype._initSide = function(dir, image) {
             // counting number of actual images
+            var minpx = 20;
             var num = 1 + Math.ceil(
-                Math.log(4/image.size) /
+                Math.log(minpx/image.size) /
                 Math.log(1/4)
             );
 
@@ -729,7 +730,6 @@
 
                 var subs = this._cmp.sides.north.subs;
 
-                console.log(this._cmp.sides.north.size);
 
                 var size = 3*this._cmp.sides.north.size /
                     (1-Math.pow(1/4, subs.length-1) + 3*F);
@@ -745,7 +745,7 @@
                 }
 
 
-                var top = 0;
+                var top = -20;
                 for (i = 0; i < subs.length; i++) {
                     size = sizes[subs.length-i-1];
                     util.setStyle(subs[i], {
