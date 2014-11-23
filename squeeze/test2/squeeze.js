@@ -721,13 +721,14 @@
                 var image = this._images.north.getStretched();
                 var origCoord = beyond.north % image.origSize;
                 
-                
+
+                var size = image.size - (image.size-image.size/4)* origCoord / image.origSize;
                 
                 var destiny = image.map.destiny[origCoord];
-                var size = image.size * destiny;
-                var offset = image.map.point[origCoord] * destiny;
+//                var size = image.size * destiny;
+//                var offset = image.map.point[origCoord] * destiny;
 
-                var full = this._cmp.sides.north.size;
+//                var full = this._cmp.sides.north.size;
 //                var top = full-offset;
 
                 var subs = this._cmp.sides.north.subs;
