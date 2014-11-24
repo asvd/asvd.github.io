@@ -554,7 +554,7 @@
 
             this._cmp.scroller.appendChild(this._cmp.container);
             this._elem.appendChild(this._cmp.scroller);
-            
+
             this._cmp.sides = {};
             this._images = {};
             var url = this._elem.getAttribute('squeezeImg');
@@ -794,8 +794,36 @@
                 var realOffset = size * (offset/image.size);
 
 
-                var top = Math.round(layerSize - realOffset);
+//                var top = Math.round(layerSize - realOffset);
+                
+                
 
+                var total = 0;
+                var sizes = [];
+                var firstSize = size;
+                for (var i = 0; i < subs.length; i++) {
+                    sizes.push(size);
+                    total += size;
+                    size /= 4;
+                }
+
+                var top = Math.round(layerSize - total + firstSize - realOffset);
+
+                for (var i = 0; i < subs.length; i++) {
+                    size = sizes[subs.length-1-i]
+                    util.setStyle(subs[i], {
+                        top : Math.round(top),
+                        height: Math.round(size),
+                        backgroundSize:  image.sideSize + 'px '+Math.round(size)+'px',
+                        backgroundPosition: '-'+beyond.west + 'px 0px'
+                    });
+
+                    top += size;
+                }
+
+                
+/*                
+                
                 for (var i = 0; i < subs.length; i++) {
 //                    if (i == 0 || i == 1)
                     util.setStyle(subs[i], {
@@ -807,7 +835,7 @@
                     size /= 4;
                     top -= Math.round(size);
                 }
-
+*/
                 
                 /*
                 var sizes = [];
