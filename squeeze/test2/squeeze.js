@@ -765,6 +765,7 @@
 //                var destiny = image.map.destiny[origCoord];
                 var offset = image.map.point[origCoord];
                 
+                console.log(origCoord );
                 
                 var subs = this._cmp.sides.north.subs;
                 var layerSize = this._cmp.sides.north.size;
@@ -777,7 +778,6 @@
                     (1-Math.pow(1/4, num-1) + 3*F);
 
 
-                console.log(offset + ' ' + image.size);
 
                 
        /*                
