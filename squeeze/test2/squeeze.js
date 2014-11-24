@@ -817,6 +817,7 @@
                         backgroundSize:  image.sideSize + 'px '+Math.round(size)+'px',
                         backgroundPosition: '-'+beyond.west + 'px 0px'
                     });
+                    console.log(top);
 
                     top += Math.round(size);
                 }
