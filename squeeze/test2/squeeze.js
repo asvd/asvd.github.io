@@ -777,7 +777,7 @@
                     (1-Math.pow(1/4, num-1) + 3*F);
 
 
-                console.log(bigsize+ ' ' + Math.pow(1/4, num-1) + ' ' + F);
+                console.log(offset + ' ' + image.size);
 
                 
        /*                
