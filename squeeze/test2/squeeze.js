@@ -20,12 +20,9 @@
     this,
     function (exports) {
 
-        // squeeze factor at border
+        // number of steps achieving the max squeeze factor
         var MAXSQUEEZE = 20;
-
-        // number of steps
         var STEPS = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
-//        STEPS = 2;
         
         // space to leave out
         var SPACE = 0;
@@ -645,7 +642,7 @@
 
 
             // WTF?
-            size *= .98
+            size *= .99;
 
 
 
