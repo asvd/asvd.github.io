@@ -642,6 +642,13 @@
                 size += Math.floor(curSize);
             }
 
+
+
+            // WTF?
+            size *= .98
+
+
+
             size += SPACE;
 
             var side = this._cmp.sides[dir].main;
@@ -768,6 +775,7 @@
                 // actual size of the image
                 var size = 3*bigsize /
                     (1-Math.pow(1/4, num-1) + 3*F);
+
 
 
                 
