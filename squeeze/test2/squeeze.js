@@ -20,6 +20,16 @@
     this,
     function (exports) {
 
+        // squeeze factor at border
+        var MAXSQUEEZE = 20;
+
+        // number of steps
+        var STEPS = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
+//        STEPS = 2;
+        
+        // space to leave out
+        var SPACE = 0;
+
         var util = {};
 
         util.dir = ['north','east','south','west'];
@@ -613,12 +623,16 @@
          * @param {Object} image stretched image data
          */
         Squeeze.prototype._initSide = function(dir, image) {
+            /*
             // counting number of actual images
-            var minpx = 20;
             var num = 1 + Math.ceil(
-                Math.log(minpx/image.size) /
+                Math.log(MINPX/image.size) /
                 Math.log(1/4)
             );
+             */
+
+            var num = STEPS;
+
 
             // size of the side layer
             var size = 0;
@@ -627,6 +641,8 @@
                 curSize /= 4;
                 size += Math.floor(curSize);
             }
+
+            size += SPACE;
 
             var side = this._cmp.sides[dir].main;
             side.style.display = 'inline';
@@ -720,24 +736,72 @@
             // NORTH
             if (this._cmp.sides.north.ready) {
                 var image = this._images.north.getStretched();
+
+                // how many steps do we need to reach 1 px
+                var MINPX = 1;
+                var num = 1 + Math.ceil(
+                    Math.log(MINPX/image.size) /
+                    Math.log(1/4)
+                );
+
+                // counting the total height in normal position
+                var bigsize = 0;
+                var curSize = image.size;
+                for (var i = 1; i < num; i++) {
+                    curSize /= 4;
+                    bigsize += Math.floor(curSize);
+                }
+
+                
                 var origCoord = beyond.north % image.origSize;
                 
-                var destiny = image.map.destiny[origCoord];
-//                var offset = image.map.point[origCoord] * destiny;
+//                var destiny = image.map.destiny[origCoord];
                 var offset = image.map.point[origCoord];
+                
+                
+                var subs = this._cmp.sides.north.subs;
+                var layerSize = this._cmp.sides.north.size;
 
+                // percentage of visible area of the first entry
                 var F = offset / image.size;
 
-                var subs = this._cmp.sides.north.subs;
+                // actual size of the image
+                var size = 3*bigsize /
+                    (1-Math.pow(1/4, num-1) + 3*F);
 
 
-                var size = 3*this._cmp.sides.north.size /
+                
+       /*                
+                var offset = image.map.point[origCoord];
+
+                // percentage of visible area of the first entry
+                var F = offset / image.size;
+
+
+                var size = 3*(layerSize-SPACE) /
                     (1-Math.pow(1/4, subs.length-1) + 3*F);
 
-//                console.log(size);
+*/
+
+                var realOffset = size * (offset/image.size);
 
 
+                var top = Math.round(layerSize - realOffset);
 
+                for (var i = 0; i < subs.length; i++) {
+//                    if (i == 0 || i == 1)
+                    util.setStyle(subs[i], {
+                        top : top,
+                        height: Math.round(size),
+                        backgroundSize:  image.sideSize + 'px '+Math.round(size)+'px'
+                    });
+
+                    size /= 4;
+                    top -= Math.round(size);
+                }
+
+                
+                /*
                 var sizes = [];
                 for (var i = 0; i < subs.length; i++) {
                     sizes.push(size);
@@ -756,6 +820,7 @@
 
                     top += Math.round(size);
                 }
+                 */
 
             }
 
