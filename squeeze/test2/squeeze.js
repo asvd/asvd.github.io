@@ -760,12 +760,11 @@
                 }
 
                 
-                var origCoord = beyond.north % image.origSize;
+                var origCoord = Math.round(beyond.north) % image.origSize;
                 
 //                var destiny = image.map.destiny[origCoord];
                 var offset = image.map.point[origCoord];
                 
-                console.log(origCoord );
                 
                 var subs = this._cmp.sides.north.subs;
                 var layerSize = this._cmp.sides.north.size;
