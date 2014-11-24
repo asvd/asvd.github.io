@@ -777,6 +777,7 @@
                     (1-Math.pow(1/4, num-1) + 3*F);
 
 
+                console.log(size);
 
                 
        /*                
@@ -807,7 +808,6 @@
                     size /= 4;
                 }
 
-                    console.log(layerSize + ' ' + total + ' ' + firstSize + ' ' + realOffset );
                 var top = Math.round(layerSize - total + firstSize - realOffset);
 
                 for (var i = 0; i < subs.length; i++) {
