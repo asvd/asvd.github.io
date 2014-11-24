@@ -818,7 +818,7 @@
                         backgroundPosition: '-'+beyond.west + 'px 0px'
                     });
 
-                    top += size;
+                    top += Math.round(size);
                 }
 
                 
