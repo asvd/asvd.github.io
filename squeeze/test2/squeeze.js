@@ -807,6 +807,7 @@
                     size /= 4;
                 }
 
+                    console.log(layerSize + ' ' + total + ' ' + firstSize + ' ' + realOffset );
                 var top = Math.round(layerSize - total + firstSize - realOffset);
 
                 for (var i = 0; i < subs.length; i++) {
@@ -817,7 +818,6 @@
                         backgroundSize:  image.sideSize + 'px '+Math.round(size)+'px',
                         backgroundPosition: '-'+beyond.west + 'px 0px'
                     });
-                    console.log(top);
 
                     top += Math.round(size);
                 }
