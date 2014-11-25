@@ -19,12 +19,12 @@
 }(
     this,
     function (exports) {
-
-        // number of steps achieving the max squeeze factor
+        // squeeze factor at the last frame
         var MAXSQUEEZE = 20;
-        var STEPS = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
+
+        var FRAMENUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
         
-        // space to leave out
+        // space to leave out (debugging)
         var SPACE = 0;
 
         var util = {};
@@ -117,6 +117,44 @@
         util.cap1 = function(str){
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
+
+
+
+if (typeof window != 'undefined'
+     && typeof window.addEventListener != 'undefined') {
+    util.async = function(func, obj, args) {
+        util._threads.push([func, obj||window, args]);
+        window.postMessage(util._threadMsg, '*');
+    }
+
+    // Threading supplimentary routines
+    util._threads = []; // a list of pending threads
+    util._threadMsg = 'helios-thread-' + (new Date().getTime());
+    // starts a thread on event
+    util._startThread = function(event) {
+        if (event.source == window &&
+             event.data == util._threadMsg) {
+            if (util._threads.length > 0) {
+                var thread = util._threads.shift();
+                thread[0].apply(thread[1], thread[2]);
+            }
+        }
+    };
+
+    window.addEventListener('message', util._startThread, true);
+
+} else {
+    // fallback version (for ie/node)
+    util.async = function(func, obj, args) {
+        setTimeout(
+            function() {
+                func.apply(obj||null, args||[]);
+            }, 10
+       );
+    };
+}
+
+
         
         
         /**
@@ -209,9 +247,52 @@
          * @param {Array} args to provide to the listener
          */
         Whenable.prototype._invoke = function(listener, ctx, args) {
+            util.async(listener, ctx, args);
+            /*
             setTimeout(function() {
                 listener.apply(ctx, args);
             },0);
+             */
+        }
+
+
+        /**
+         * For the given whenable subscribers produces another
+         * whenable subscriber which fires when any of the given
+         * subscribers fire
+         * 
+         * @param {Function} when1
+         * @param {Function} when2
+         * 
+         * @returns {Function}
+         */
+        var whenAny = function(when1, when2) {
+            var when = new Whenable;
+
+            when1(function(){when.emit()});
+            when2(function(){when.emit()});
+
+            return when.getSubscriber();
+        }
+        
+        
+       
+        /**
+         * For the given whenable subscribers produces another
+         * whenable subscriber which fires when all of the given
+         * subscribers fire
+         * 
+         * @param {Function} when1
+         * @param {Function} when2
+         * 
+         * @returns {Function}
+         */
+        var whenAll = function(when1, when2) {
+            var when = new Whenable;
+
+            when1(function(){when2(function(){when.emit();});});
+
+            return when.getSubscriber();
         }
         
         
@@ -432,15 +513,27 @@
             ctxW.rotate(-Math.PI/2);
             ctxW.drawImage(canvas2, -w, 0);
 
+            // size of the side layer
+            var layerSize = 0;
+            var curSize = h2floor;
+            for (var i = 1; i < FRAMENUM; i++) {
+                curSize /= 4;
+                layerSize += Math.floor(curSize);
+            }
+            // layer may be a bit smaller depending on offset
+            layerSize = Math.floor(layerSize * .99);
+            layerSize += SPACE;
+
             return {
-                north: canvas2.toDataURL(),
-                south: S.toDataURL(),
-                east: E.toDataURL(),
-                west: W.toDataURL(),
-                size: h2floor,
-                origSize: h,
-                sideSize: w,
-                map: map
+                north    : canvas2.toDataURL(),
+                south    : S.toDataURL(),
+                east     : E.toDataURL(),
+                west     : W.toDataURL(),
+                size     : h2floor,
+                layerSize : layerSize,
+                origSize : h,
+                sideSize : w,
+                map      : map
             };
         }
         
@@ -501,11 +594,14 @@
         }
 
         
+
         /**
          * Handler for the resize event, to be defined for an instance
          */
         Resizable.prototype.onresize = function() {}
         
+
+
         /**
          * Removes the resize detector from the element
          */
@@ -555,7 +651,7 @@
             this._cmp.sides = {};
             this._images = {};
             var url = this._elem.getAttribute('squeezeImg');
-            var side, img;
+            var side, img, initialize;
             for (var i = 0; i < util.dir.length; i++) {
                 side = util.sample.div.cloneNode(false);
                 util.setStyle(side, {
@@ -578,17 +674,43 @@
                         'squeezeImg' + util.cap1(util.dir[i])
                     )||url
                 );
+                
+
+                img.initialize = new Whenable;
+                img.whenInitialized = img.initialize.getSubscriber();
 
                 this._images[util.dir[i]] = img;
 
                 img.whenLoaded(
                     (function(dir, img){
                          return function() {
+//    console.log('UUUUUUUUUUU');
                              me._initSide(dir, img.getStretched());
+                             me._images[dir].initialize.emit();
                          }
                      })(util.dir[i], img)
                 );
             }
+
+            whenAll(
+                whenAny(
+                    this._images.north.whenInitialized,
+                    this._images.north.whenFailed
+                ),
+                whenAny(
+                    this._images.east.whenInitialized,
+                    this._images.east.whenFailed
+                ),
+                whenAny(
+                    this._images.south.whenInitialized,
+                    this._images.south.whenFailed
+                ),
+                whenAny(
+                    this._images.west.whenInitialized,
+                    this._images.west.whenFailed
+                )
+            )(function(){me._indicate()});
+
 
             this._cmp.scroller.addEventListener(
                 'scroll', function(){me._indicate();}
@@ -620,103 +742,78 @@
          * @param {Object} image stretched image data
          */
         Squeeze.prototype._initSide = function(dir, image) {
-            /*
-            // counting number of actual images
-            var num = 1 + Math.ceil(
-                Math.log(MINPX/image.size) /
-                Math.log(1/4)
-            );
-             */
-
-            var num = STEPS;
-
-
-            // size of the side layer
-            var size = 0;
-            var curSize = image.size;
-            for (var i = 1; i < num; i++) {
-                curSize /= 4;
-                size += Math.floor(curSize);
-            }
-
-
-
-            // WTF?
-            size *= .99;
-
-
-
-            size += SPACE;
-
+            var size = image.layerSize;
             var side = this._cmp.sides[dir].main;
-            side.style.display = 'inline';
-//            side.style.backgroundColor = '#ccbbaa';
-            side.style.overflow = 'hidden';
-            
+            var style;
 
             switch(dir) {
             case 'north':
-                util.setStyle(side, {
+                style = {
                     width: '100%',
                     height: size,
                     top: 0,
                     left: 0
-                });
+                };
                 break;
             case 'east':
-                util.setStyle(side, {
+                style = {
                     width: size,
                     height: '100%',
                     top: 0,
                     right: 0
-                });
+                };
                 break;
             case 'south':
-                util.setStyle(side, {
+                style = {
                     width: '100%',
                     height: size,
                     bottom: 0,
                     left: 0
-                });
+                };
                 break;
             case 'west':
-                util.setStyle(side, {
+                style = {
                     width: size,
                     height: '100%',
                     top: 0,
                     left: 0
-                });
+                };
                 break;
             }
-            
+
+            style.display = 'inline';
+            style.overflow = 'hidden';
+//            style.backgroundColor = '#ccbbaa';
+
+            util.setStyle(side, style);
+
             // sub-elements
             var sub;
-            for (i = 0; i < num; i++) {
+            for (var i = 0; i < FRAMENUM; i++) {
                 sub = util.sample.div.cloneNode(false);
-                util.setStyle(sub, {
+                style = {
                     position: 'absolute',
                     backgroundImage: 'url('+image[dir]+')'
-                });
+                };
 
                 switch(dir) {
                 case 'north':
                 case 'south':
-                    sub.style.width = '100%';
+                    style.width = '100%';
                     break;
                 case 'west':
                 case 'east':
-                    sub.style.height = '100%';
+                    style.height = '100%';
                     break;
                 }
                 
+                util.setStyle(sub, style);
                 side.appendChild(sub);
-                this._cmp.sides[dir].subs[i] = sub;
+                this._cmp.sides[dir].subs.push(sub);
             }
 
             this._cmp.sides[dir].ready = true;
             this._cmp.sides[dir].size = size;
-
-            this._indicate();
         }
         
         
@@ -736,7 +833,6 @@
                 east  : el.scrollWidth - el.scrollLeft - geom.width
             };
 
-            
             // NORTH
             if (this._cmp.sides.north.ready) {
                 var image = this._images.north.getStretched();
@@ -764,7 +860,7 @@
                 
                 
                 var subs = this._cmp.sides.north.subs;
-                var layerSize = this._cmp.sides.north.size;
+                var layerSize = image.layerSize;
 
                 // percentage of visible area of the first entry
                 var F = offset / image.size;
