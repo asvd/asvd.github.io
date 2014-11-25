@@ -21,12 +21,8 @@
     function (exports) {
         // squeeze factor at the last frame
         var MAXSQUEEZE = 20;
-
         var FRAMENUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
         
-        // space to leave out (debugging)
-        var SPACE = 0;
-
         var util = {};
 
         util.dir = ['north','east','south','west'];
@@ -93,7 +89,6 @@
         }
 
 
-
         /**
          * Attaches to the given element the given set of nodes
          * 
@@ -105,7 +100,6 @@
                 elem.appendChild(nodes[i]);
             }
         }
-
 
 
         /**
@@ -120,39 +114,42 @@
 
 
 
-if (typeof window != 'undefined'
-     && typeof window.addEventListener != 'undefined') {
-    util.async = function(func, obj, args) {
-        util._threads.push([func, obj||window, args]);
-        window.postMessage(util._threadMsg, '*');
-    }
-
-    // Threading supplimentary routines
-    util._threads = []; // a list of pending threads
-    util._threadMsg = 'helios-thread-' + (new Date().getTime());
-    // starts a thread on event
-    util._startThread = function(event) {
-        if (event.source == window &&
-             event.data == util._threadMsg) {
-            if (util._threads.length > 0) {
-                var thread = util._threads.shift();
-                thread[0].apply(thread[1], thread[2]);
+        /**
+         * Messaging is a bit faster than setTimeout(func, 0) for the
+         * sake of invoking a function asynchronously
+         */
+        if (typeof window != 'undefined'
+            && typeof window.addEventListener != 'undefined') {
+            util.async = function(func, obj, args) {
+                util._asyncs.push([func, obj||window, args]);
+                window.postMessage(util._asyncMsg, '*');
             }
+
+            util._asyncs = [];
+            util._asyncMsg = 'squeeze-async-' +
+                (new Date().getTime());
+
+            util._invoke = function(event) {
+                if (event.source == window &&
+                     event.data == util._asyncMsg) {
+                    if (util._asyncs.length > 0) {
+                        var async = util._asyncs.shift();
+                        async[0].apply(async[1], async[2]);
+                    }
+                }
+            };
+
+            window.addEventListener('message', util._invoke, true);
+        } else {
+            // fallback version
+            util.async = function(func, obj, args) {
+                setTimeout(
+                    function() {
+                        func.apply(obj||null, args||[]);
+                    }, 0
+               );
+            };
         }
-    };
-
-    window.addEventListener('message', util._startThread, true);
-
-} else {
-    // fallback version (for ie/node)
-    util.async = function(func, obj, args) {
-        setTimeout(
-            function() {
-                func.apply(obj||null, args||[]);
-            }, 10
-       );
-    };
-}
 
 
         
@@ -161,9 +158,9 @@ if (typeof window != 'undefined'
          * Whenable event object constructor
          */
         var Whenable = function() {
-            this._emitted = false;  // event state, may be emitted or not
+            this._emitted = false;  // event state, emitted or not
             this._listeners = [];
-            this._result = [];      // args to transfer to the listener
+            this._result = [];  // args transfered to the listener
         }
 
           
@@ -182,7 +179,9 @@ if (typeof window != 'undefined'
 
                 var listener;
                 while(listener = this._listeners.pop()) {
-                    this._invoke(listener[0], listener[1], this._result);
+                    this._invoke(
+                        listener[0], listener[1], this._result
+                    );
                 }
             }
         }
@@ -248,11 +247,6 @@ if (typeof window != 'undefined'
          */
         Whenable.prototype._invoke = function(listener, ctx, args) {
             util.async(listener, ctx, args);
-            /*
-            setTimeout(function() {
-                listener.apply(ctx, args);
-            },0);
-             */
         }
 
 
@@ -290,7 +284,11 @@ if (typeof window != 'undefined'
         var whenAll = function(when1, when2) {
             var when = new Whenable;
 
-            when1(function(){when2(function(){when.emit();});});
+            when1(function(){
+                when2(function(){
+                    when.emit();
+                });
+            });
 
             return when.getSubscriber();
         }
@@ -324,9 +322,9 @@ if (typeof window != 'undefined'
                 this.whenFailed = this._fail.getSubscriber();
 
                 this._download();
-            }
 
-            return this;
+                return this;
+            }
         }
         
         
@@ -437,19 +435,11 @@ if (typeof window != 'undefined'
             var idx2;  // current pixel start idx (stretched image)
             var c;     // runs through color channels
 
-            // correspondance maps
-            var map = {
-                // saves the current coordinate of the stretched image
-                // indexed by original coordinate (so that we may
-                // later figure out where on the stretched image
-                // original coordinate could be located)
-                point : [],
-
-                // and the current destiny value so that we know how
-                // much to squeeze the stretched image in order to
-                // restore the original size at the given point
-                destiny: []
-            };
+            // saves the current coordinate of the stretched image
+            // indexed by original coordinate (so that we may
+            // later figure out where on the stretched image
+            // original coordinate could be located)
+            var points = [];
 
             var _15_68 = 15/68;
             var _12_17 = 12/17;
@@ -473,8 +463,7 @@ if (typeof window != 'undefined'
                 y1 = y1_norm * h2;
                 y1_floor = Math.floor(y1);
 
-                map.point[y1_floor] = y2;
-                map.destiny[y1_floor] = ro;
+                points[y1_floor] = y2;
                
                 rate0 = Math.min(ro, y1_floor + 1 - y1);
                 rate1 = ro - rate0;
@@ -520,9 +509,24 @@ if (typeof window != 'undefined'
                 curSize /= 4;
                 layerSize += Math.floor(curSize);
             }
+
             // layer may be a bit smaller depending on offset
             layerSize = Math.floor(layerSize * .99);
-            layerSize += SPACE;
+            
+            // how many steps do we need to reach 1 px
+            var fullNum = 1 + Math.ceil(
+                Math.log(1/h2floor) /
+                Math.log(1/4)
+            );
+            
+            // total height of the full num of layers
+            var fullSize = 0;
+            curSize = h2floor;
+            for (i = 1; i < fullNum; i++) {
+                curSize /= 4;
+                fullSize += Math.floor(curSize);
+            }
+            
 
             return {
                 north    : canvas2.toDataURL(),
@@ -531,9 +535,13 @@ if (typeof window != 'undefined'
                 west     : W.toDataURL(),
                 size     : h2floor,
                 layerSize : layerSize,
+                fullNum  : fullNum,
+                fullPow  : 1-Math.pow(1/4, fullNum-1),
+                fullSize : fullSize,
+                fullSize3 : fullSize*3,
                 origSize : h,
                 sideSize : w,
-                map      : map
+                points   : points
             };
         }
         
@@ -622,12 +630,22 @@ if (typeof window != 'undefined'
             var me = this;
 
             var children = util.detachChildren(this._elem);
-
-            this._backup = {
-                overflow: this._elem.style.overflow || ''
+            
+            this._styleBackup = {
+                margin : this._elem.style.overflow,
+                overflow : this._elem.style.margin
             };
 
-            this._elem.style.overflow = 'hidden';
+            var cs = getComputedStyle(elem);
+
+            var innerStyle = {
+                margin: cs.margin
+            };
+
+            util.setStyle(this._elem, {
+                overflow: 'hidden',
+                margin: 0
+            });
 
             this._resizable = new Resizable(elem);
             this._resizable.onresize = function() {
@@ -645,14 +663,19 @@ if (typeof window != 'undefined'
             this._cmp.container = util.sample.div.cloneNode(false);
             util.attachChildren(this._cmp.container, children);
 
+            util.setStyle(this._cmp.container, innerStyle);
+
             this._cmp.scroller.appendChild(this._cmp.container);
             this._elem.appendChild(this._cmp.scroller);
 
             this._cmp.sides = {};
             this._images = {};
+            this._sideInitialized = {};
+            this._whenSideInitialized = {};
             var url = this._elem.getAttribute('squeezeImg');
-            var side, img, initialize;
+            var side, img, initialize, dir;
             for (var i = 0; i < util.dir.length; i++) {
+                dir = util.dir[i];
                 side = util.sample.div.cloneNode(false);
                 util.setStyle(side, {
                     display       : 'none',
@@ -660,7 +683,7 @@ if (typeof window != 'undefined'
                     position      : 'absolute'
                 });
 
-                this._cmp.sides[util.dir[i]] = {
+                this._cmp.sides[dir] = {
                     main: side,
                     subs: [],
                     ready : false,
@@ -671,46 +694,46 @@ if (typeof window != 'undefined'
 
                 img = new CachedImg(
                     elem.getAttribute(
-                        'squeezeImg' + util.cap1(util.dir[i])
+                        'squeezeImg' + util.cap1(dir)
                     )||url
                 );
-                
 
-                img.initialize = new Whenable;
-                img.whenInitialized = img.initialize.getSubscriber();
+                this._sideInitialized[dir] = new Whenable;
+                this._whenSideInitialized[dir] =
+                    this._sideInitialized[dir].getSubscriber();
 
-                this._images[util.dir[i]] = img;
+                this._images[dir] = img;
 
                 img.whenLoaded(
                     (function(dir, img){
                          return function() {
-//    console.log('UUUUUUUUUUU');
                              me._initSide(dir, img.getStretched());
-                             me._images[dir].initialize.emit();
+                             me._sideInitialized[dir].emit();
                          }
-                     })(util.dir[i], img)
+                     })(dir, img)
                 );
             }
 
             whenAll(
                 whenAny(
-                    this._images.north.whenInitialized,
+                    this._whenSideInitialized.north,
                     this._images.north.whenFailed
                 ),
                 whenAny(
-                    this._images.east.whenInitialized,
+                    this._whenSideInitialized.east,
                     this._images.east.whenFailed
                 ),
                 whenAny(
-                    this._images.south.whenInitialized,
+                    this._whenSideInitialized.south,
                     this._images.south.whenFailed
                 ),
                 whenAny(
-                    this._images.west.whenInitialized,
+                    this._whenSideInitialized.west,
                     this._images.west.whenFailed
                 )
-            )(function(){me._indicate()});
-
+            )(function(){
+                me._indicate()
+            });
 
             this._cmp.scroller.addEventListener(
                 'scroll', function(){me._indicate();}
@@ -718,6 +741,7 @@ if (typeof window != 'undefined'
 
             this._setGeometry();
         }
+
         
         
         /**
@@ -743,7 +767,8 @@ if (typeof window != 'undefined'
          */
         Squeeze.prototype._initSide = function(dir, image) {
             var size = image.layerSize;
-            var side = this._cmp.sides[dir].main;
+            var sideObj = this._cmp.sides[dir];
+            var side = sideObj.main;
             var style;
 
             switch(dir) {
@@ -783,37 +808,36 @@ if (typeof window != 'undefined'
 
             style.display = 'inline';
             style.overflow = 'hidden';
-//            style.backgroundColor = '#ccbbaa';
 
             util.setStyle(side, style);
 
             // sub-elements
+            style = {
+                position: 'absolute',
+                backgroundImage: 'url(' + image[dir] + ')'
+            };
+
+            switch(dir) {
+            case 'north':
+            case 'south':
+                style.width = '100%';
+                break;
+            case 'west':
+            case 'east':
+                style.height = '100%';
+                break;
+            }
+
             var sub;
             for (var i = 0; i < FRAMENUM; i++) {
                 sub = util.sample.div.cloneNode(false);
-                style = {
-                    position: 'absolute',
-                    backgroundImage: 'url('+image[dir]+')'
-                };
-
-                switch(dir) {
-                case 'north':
-                case 'south':
-                    style.width = '100%';
-                    break;
-                case 'west':
-                case 'east':
-                    style.height = '100%';
-                    break;
-                }
-                
                 util.setStyle(sub, style);
                 side.appendChild(sub);
-                this._cmp.sides[dir].subs.push(sub);
+                sideObj.subs.push(sub);
             }
 
-            this._cmp.sides[dir].ready = true;
-            this._cmp.sides[dir].size = size;
+            sideObj.ready = true;
+            sideObj.size = size;
         }
         
         
@@ -833,76 +857,41 @@ if (typeof window != 'undefined'
                 east  : el.scrollWidth - el.scrollLeft - geom.width
             };
 
+            var i;
+
             // NORTH
-            if (this._cmp.sides.north.ready) {
-                var image = this._images.north.getStretched();
+            var dir = 'north';
+            if (this._cmp.sides[dir].ready) {
+                var image = this._images[dir].getStretched();
 
-                // how many steps do we need to reach 1 px
-                var MINPX = 1;
-                var num = 1 + Math.ceil(
-                    Math.log(MINPX/image.size) /
-                    Math.log(1/4)
-                );
-
-                // counting the total height in normal position
-                var bigsize = 0;
-                var curSize = image.size;
-                for (var i = 1; i < num; i++) {
-                    curSize /= 4;
-                    bigsize += Math.floor(curSize);
-                }
-
+                var origCoord = Math.round(beyond[dir]) % image.origSize;
                 
-                var origCoord = Math.round(beyond.north) % image.origSize;
+                var offset = image.points[origCoord];
                 
-//                var destiny = image.map.destiny[origCoord];
-                var offset = image.map.point[origCoord];
-                
-                
-                var subs = this._cmp.sides.north.subs;
-                var layerSize = image.layerSize;
-
                 // percentage of visible area of the first entry
                 var F = offset / image.size;
 
                 // actual size of the image
-                var size = 3*bigsize /
-                    (1-Math.pow(1/4, num-1) + 3*F);
-
-
-
-                
-       /*                
-                var offset = image.map.point[origCoord];
-
-                // percentage of visible area of the first entry
-                var F = offset / image.size;
-
-
-                var size = 3*(layerSize-SPACE) /
-                    (1-Math.pow(1/4, subs.length-1) + 3*F);
-
-*/
+                var size = image.fullSize3 / (image.fullPow + 3*F);
 
                 var realOffset = size * (offset/image.size);
 
-
-//                var top = Math.round(layerSize - realOffset);
-                
-                
+                var subs = this._cmp.sides[dir].subs;
 
                 var total = 0;
                 var sizes = [];
                 var firstSize = size;
-                for (var i = 0; i < subs.length; i++) {
+                for (i = 0; i < subs.length; i++) {
                     sizes.push(size);
                     total += size;
                     size /= 4;
                 }
 
-                var top = Math.round(layerSize - total + firstSize - realOffset);
+                var top = Math.round(
+                    image.layerSize - total + firstSize - realOffset
+                );
 
-                for (var i = 0; i < subs.length; i++) {
+                for (i = 0; i < subs.length; i++) {
                     size = sizes[subs.length-1-i]
                     util.setStyle(subs[i], {
                         top : Math.round(top),
@@ -914,52 +903,11 @@ if (typeof window != 'undefined'
                     top += Math.round(size);
                 }
 
-                
-/*                
-                
-                for (var i = 0; i < subs.length; i++) {
-//                    if (i == 0 || i == 1)
-                    util.setStyle(subs[i], {
-                        top : top,
-                        height: Math.round(size),
-                        backgroundSize:  image.sideSize + 'px '+Math.round(size)+'px'
-                    });
-
-                    size /= 4;
-                    top -= Math.round(size);
-                }
-*/
-                
-                /*
-                var sizes = [];
-                for (var i = 0; i < subs.length; i++) {
-                    sizes.push(size);
-                    size /= 4;
-                }
-
-
-                var top = -20;
-                for (i = 0; i < subs.length; i++) {
-                    size = sizes[subs.length-i-1];
-                    util.setStyle(subs[i], {
-                        top : Math.round(top),
-                        height: Math.round(size),
-                        backgroundSize:  image.sideSize + 'px '+Math.round(size)+'px'
-                    });
-
-                    top += Math.round(size);
-                }
-                 */
+                // mask
 
             }
 
 
-//            debugger;
-//            console.log(east);
-            
-            
-            
-            
             
             
         }
@@ -986,7 +934,13 @@ if (typeof window != 'undefined'
             util.detachChildren(this._elem);
             this._elem.squeeze = null;
             delete this._elem.squeeze;
-            this._elem.style.overflow = this._backup.overflow;
+
+            for (var prop in this._styleBackup) {
+                if (this._styleBackup.hasOwnProperty(prop)) {
+                    this._elem.style[prop] = this._styleBackup[prop];
+                }
+            }
+            
             util.attachChildren(this._elem, children);
         }
 
@@ -1032,7 +986,6 @@ if (typeof window != 'undefined'
         var resqueeze = function() {
             destroyUnsqueezed();
             createSqueezed();
-
         }
         
 
