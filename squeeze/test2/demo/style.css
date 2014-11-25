@@ -13,10 +13,11 @@ body {
     position: fixed;
     top: 100px;
     left: 100px;
-    width: 30%;
+    width: 20%;
     height: 600px;
     overflow: auto;
     background-color:#223344;
+
 }
 
 
