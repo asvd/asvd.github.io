@@ -9,13 +9,12 @@
 <svg>
   <defs>
     <linearGradient id="gradient" x1="0" y1="00%" x2 ="0" y2="100%">
-      <stop stop-color="black" offset="0"/>
-      <stop stop-color="white" offset="1"/>
+      <stop stop-color="white" offset="0"/>
+      <stop id="test" stop-color="black" offset="1"/>
     </linearGradient>
 
     <mask id="masking" maskUnits="objectBoundingBox" maskContentUnits="objectBoundingBox">
-      <rect y="0.3" width="1" height=".7" fill="url(#gradient)" />
-      <circle cx=".5" cy=".5" r=".35" fill="white" />
+      <rect y="0" width="1" height="1" fill="url(#gradient)" />
     </mask>
   </defs>
 </svg>
