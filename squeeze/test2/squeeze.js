@@ -123,6 +123,10 @@
         util.gradientMask = function(elem, dir, size) {
             var percent = Math.round(size * 100);
 
+            /*
+            elem.style.mask = '-moz-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%) top left / cover';
+*/
+
             elem.style.maskImage =
                 'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
             elem.style.MozMaskImage =
@@ -131,6 +135,9 @@
                 '-o-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
             elem.style.WebkitMaskImage =
                 '-webkit-linear-gradient(top, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+
+            elem.style.mask = "url(#masking)";
+
         }
 
 
@@ -924,7 +931,7 @@
                     top += Math.round(size);
                 }
 
-                var coef = 2000;
+                var coef = 1500;
                 var maskSize = 1 - 1 / (beyond.north/coef + 1);
 
                 // mask
