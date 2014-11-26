@@ -19,6 +19,30 @@
 }(
     this,
     function (exports) {
+
+        var BROWSER = null;
+        
+        if (!!window.opera ||
+            navigator.userAgent.indexOf(' OPR/') >= 0) {
+            // Opera 8.0+ (UA detection to detect Blink/v8-powered Opera)
+            BROWSER = 'opera';
+        } else if (typeof InstallTrigger !== 'undefined') {
+            // Firefox 1.0+        
+            BROWSER = 'firefox';
+        } else if (Object.prototype.toString.call(
+                       window.HTMLElement
+                   ).indexOf('Constructor') > 0) {
+            // At least Safari 3+: "[object HTMLElementConstructor]"
+            BROWSER = 'safari';
+        } else if (!!window.chrome) {
+            // Chrome 1+
+            BROWSER = 'chrome';
+        } else if (/*@cc_on!@*/false || !!document.documentMode) {
+            // At least IE6
+            BROWSER = 'IE';
+        }
+
+
         // squeeze factor at the last frame
         var MAXSQUEEZE = 20;
         var FRAMENUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
@@ -136,8 +160,8 @@
 
              */
             
-            elem.style.OMaskImage =
-                '-o-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+//            elem.style.OMaskImage =
+//                '-o-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
             elem.style.WebkitMaskImage =
                 '-webkit-linear-gradient(top, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
 
