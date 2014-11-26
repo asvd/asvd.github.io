@@ -144,32 +144,30 @@
          * @param {String} dir direction of the mask
          * @param {Number} size of the mask
          */
-        util.gradientMask = function(elem, dir, size) {
-            var percent = Math.round(size * 100);
 
-            /*
-            elem.style.mask = '-moz-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%) top left / cover';
-*/
+        switch (BROWSER) {
+        case 'opera':
+        case 'chrome':
+        case 'safari':
+            util.gradientMask = function(elem, dir, size) {
+                var percent = Math.round(size * 100);
+                elem.style.WebkitMaskImage =
+                    '-webkit-linear-gradient('+
+                    'top, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+            }
 
-            /*
+            break;
+        case 'firefox':
+            util.gradientMask = function(elem, dir, size) {
+                document.getElementById('test').setAttribute("offset", size);
 
-            elem.style.maskImage =
-                'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
-            elem.style.MozMaskImage =
-                '-moz-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+                elem.style.mask = "url(#masking)";
+            }
 
-             */
-            
-//            elem.style.OMaskImage =
-//                '-o-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
-//            elem.style.WebkitMaskImage =
-//                '-webkit-linear-gradient(top, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
-
-
-            document.getElementById('test').setAttribute("offset", size);
-
-            elem.style.mask = "url(#masking)";
-
+            break;
+        case 'ie':
+            util.gradientMask = function(){};
+            break;
         }
 
 
