@@ -111,6 +111,27 @@
         util.cap1 = function(str){
             return str.charAt(0).toUpperCase() + str.slice(1);
         }
+        
+        
+        /**
+         * Applies gradient mask on the given component
+         * 
+         * @param {Element} elem DOM element to apply mask to
+         * @param {String} dir direction of the mask
+         * @param {Number} size of the mask
+         */
+        util.gradientMask = function(elem, dir, size) {
+            var percent = Math.round(size * 100);
+
+            elem.style.maskImage =
+                'linear-gradient(to bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+            elem.style.MozMaskImage =
+                '-moz-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+            elem.style.OMaskImage =
+                '-o-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+            elem.style.WebkitMaskImage =
+                '-webkit-linear-gradient(top, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+        }
 
 
 
@@ -903,7 +924,12 @@
                     top += Math.round(size);
                 }
 
+                var coef = 2000;
+                var maskSize = 1 - 1 / (beyond.north/coef + 1);
+
                 // mask
+                util.gradientMask(this._cmp.sides[dir].main, dir, maskSize);
+                
 
             }
 
