@@ -162,8 +162,8 @@
             
 //            elem.style.OMaskImage =
 //                '-o-linear-gradient(bottom, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
-            elem.style.WebkitMaskImage =
-                '-webkit-linear-gradient(top, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+//            elem.style.WebkitMaskImage =
+//                '-webkit-linear-gradient(top, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
 
 
             document.getElementById('test').setAttribute("offset", size);
