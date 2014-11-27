@@ -20,6 +20,10 @@
     this,
     function (exports) {
 
+        // squeeze factor at the last frame
+        var MAXSQUEEZE = 40;
+        var FRAMENUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
+        
         var BROWSER = null;
         
         if (!!window.opera ||
@@ -47,10 +51,6 @@
         var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
 
 
-        // squeeze factor at the last frame
-        var MAXSQUEEZE = 20;
-        var FRAMENUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
-        
         var util = {};
 
         util.dir = ['north','east','south','west'];
