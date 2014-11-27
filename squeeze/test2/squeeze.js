@@ -146,7 +146,8 @@
          * Routines for applying a transparency mask in different
          * browsers
          */
-        util._applyWebkitMask = function(elem, dir, size) {
+
+        util._applyMaskWebkit = function(elem, dir, size) {
             var where;
             switch (dir) {
             case 'north': where = 'top';    break;
@@ -161,121 +162,171 @@
                 'rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
         }
 
-        util._maskSVG = null;
-        util._getSVGMaskIds = function() {
-            if (!util._maskSVG) {
-                var ns = 'http://www.w3.org/2000/svg';
+        /**
+         * Generates SVG mask image for the given element
+         * 
+         * @param {Element} elem
+         * @param {String} dir direction of the mask gradient
+         */
+        util._maskCounterSVG = 0;
+        util._genMaskSVG = function(elem, dir) {
+            var id = 'svg-mask-'+
+                (util._maskCounterSVG++)+'-'+
+                UNIQUE;
+            var pointId = 'point-'+id;
+            var maskId = 'mask-'+id;
+            var gradientId = 'gradient-'+id;
 
-                var create = function(name, parent, attrs) {
-                    var elem = document.createElementNS(ns, name);
+            var ns = 'http://www.w3.org/2000/svg';
 
-                    if (attrs) {
-                        for (var key in attrs) {
-                            if (attrs.hasOwnProperty(key)) {
-                                elem.setAttribute(key, attrs[key]); 
-                            }
+            var create = function(name, parent, attrs) {
+                var elem = document.createElementNS(ns, name);
+
+                if (attrs) {
+                    for (var key in attrs) {
+                        if (attrs.hasOwnProperty(key)) {
+                            elem.setAttribute(key, attrs[key]); 
                         }
                     }
-
-                    if (parent) {
-                        parent.appendChild(elem);
-                    }
-
-                    return elem;
                 }
 
-                
-                var svg = create('svg');
-                var defs = create('defs', svg);
-                var linearGradient = create(
-                    'linearGradient', defs, {
-                        id : 'gradient-'+UNIQUE,
-                        x1 : '0',
-                        y1: '00%',
-                        x2: '0',
-                        y2: '100%'
-                    }
-                );
+                if (parent) {
+                    parent.appendChild(elem);
+                }
 
-
-                var stop1 = create(
-                    'stop', linearGradient, {
-                        'stop-color': 'white',
-                        offset: '0'
-                    }
-                );
-                
-                var stop2 = create(
-                    'stop', linearGradient, {
-                        'stop-color': 'black',
-                        offset: '1',
-                        id: 'stop-end-'+UNIQUE
-                    }
-                );
-
-                var mask = create(
-                    'mask', defs, {
-                        id: 'gradientmask-'+UNIQUE,
-                        maskUnits: 'objectBoundingBox',
-                        maskContentUnits: 'objectBoundingBox'
-                    }
-                );
-
-                
-                var rect = create(
-                    'rect', mask, {
-                        y: '0',
-                        width: '1',
-                        height: '1',
-                        fill: 'url(#gradient-'+UNIQUE+')'
-                    }
-                );
-
-                util.setStyle(svg, {
-                    position: 'absolute',
-                    width: 0,
-                    height: 0
-                });
-                document.documentElement.appendChild(svg);
-
-                util._maskSVG = svg;
+                return elem;
             }
 
-            return {
-                mask: 'gradientmask-'+UNIQUE,
-                point: 'stop-end-'+UNIQUE
-            };
+            
+            var svg = create('svg');
+            var defs = create('defs', svg);
+            var linearGradient = create(
+                'linearGradient', defs, {
+                    id : gradientId,
+                    x1 : '0',
+                    y1: '00%',
+                    x2: '0',
+                    y2: '100%'
+                }
+            );
+
+
+            var stop1 = create(
+                'stop', linearGradient, {
+                    'stop-color': 'white',
+                    offset: '0'
+                }
+            );
+            
+            var stop2 = create(
+                'stop', linearGradient, {
+                    'stop-color': 'black',
+                    offset: '1',
+                    id: pointId
+                }
+            );
+
+            var mask = create(
+                'mask', defs, {
+                    id: maskId,
+                    maskUnits: 'objectBoundingBox',
+                    maskContentUnits: 'objectBoundingBox'
+                }
+            );
+
+            
+            var rect = create(
+                'rect', mask, {
+                    y: '0',
+                    width: '1',
+                    height: '1',
+                    fill: 'url(#'+gradientId+')'
+                }
+            );
+
+            util.setStyle(svg, {
+                position: 'absolute',
+                width: 0,
+                height: 0
+            });
+            
+            elem.appendChild(svg);
+            elem.setAttribute('pointId', pointId);
+            elem.setAttribute('maskId', maskId);
+
+            util._maskSVG = svg;
         }
 
-        util._applySVGMask = function(elem, dir, size) {
-            var ids = util._getSVGMaskIds();
-//            debugger;
-            document.getElementById(ids.point).setAttribute("offset", size);
-            elem.style.mask = 'url(#'+ids.mask+')';
+        util._applyMaskSVG = function(elem, dir, size) {
+            if (!elem.getAttribute('maskId')) {
+                util._genMaskSVG(elem, dir);
+            }
+
+            var maskId = elem.getAttribute('maskId');
+            var pointId = elem.getAttribute('pointId');
+            document.getElementById(pointId).setAttribute("offset", size);
+            elem.style.mask = 'url(#'+maskId+')';
         }
         
         
+        util._applyMaskAlphaFilter = function(elem, dir, size, fullSize) {
+            var x1, y1, x2, y2;
+            switch(dir) {
+            case 'north':
+                y2 = Math.floor(fullSize * size);
+                x1 = x2 = y1 = 0;
+                break;
+            case 'east':
+                x1 =  Math.floor(fullSize * size);
+                y1 = x2 = y2 = 0;
+                break;
+            case 'south':
+                y1 =  Math.floor(fullSize * size);
+                x1 = x2 = y2 = 0;
+                break;
+            case 'west':
+                x2 =  Math.floor(fullSize * size);
+                x1 = y1 = y2 = 0;
+                break;
+            }
+            elem.style.filter =
+                'filter: '+
+                'progid:'+
+                'DXImageTransform.Microsoft.Alpha('+
+                    'Opacity=100,'+
+                    'FinishOpacity=0,'+
+                    'Style=1,'+ // linear
+                    'StartX=' +x1+','+
+                    'FinishX='+x2+','+
+                    'StartY=' +y1+','+
+                    'FinishY='+y2+''+
+                ')';
+        }
+        
+        
+
         /**
          * Applies gradient mask on the given component
          * 
          * @param {Element} elem DOM element to apply mask to
          * @param {String} dir direction of the mask
-         * @param {Number} size of the mask
+         * @param {Number} size of the mask (0 to 1)
+         * @param {Number} fullSize of the element (px)
          */
         switch (BROWSER) {
         case 'opera':
         case 'chrome':
         case 'safari':
-            util.gradientMask = util._applyWebkitMask;
+            util.gradientMask = util._applyMaskWebkit;
             break;
         case 'firefox':
-            util.gradientMask = util._applySVGMask;
+            util.gradientMask = util._applyMaskSVG;
             break;
         case 'ie':
-            util.gradientMask = function(){};
+            util.gradientMask = util._applyMaskAlphaFilter;
             break;
         default:
-            util.gradientMask = util._applyWebkitMask;
+            util.gradientMask = util._applyMaskWebkit;
             break;
         }
         
@@ -294,11 +345,11 @@
             elem.style.backgroundImage = 'url('+canvas.dataURL+')';
         }
 
-        util._backgroundCanvasWebkitCounter = 0;
+        util._backgroundCanvasCSSCounter = 0;
         util._backgroundCanvasCSSContext = function(elem, canvas) {
             if (typeof canvas.CSSContextId == 'undefined') {
                 var id = 'CSSContext-'+
-                    (util._backgroundCanvasWebkitCounter++)+'-'+
+                    (util._backgroundCanvasCSSCounter++)+'-'+
                     UNIQUE;
 
                 var ctx = document.getCSSCanvasContext(
@@ -313,7 +364,29 @@
                 '-webkit-canvas('+canvas.CSSContextId+')';
         }
 
+        
+        util._backgroundCanvasMozElementCounter = 0;
+        util._backgroundCanvasMozElement = function(elem, canvas) {
+            if (!canvas.getAttribute('id')) {
+                var id = 'MozElement-'+
+                    (util._backgroundCanvasMozElementCounter++)+'-'+
+                    UNIQUE;
 
+                canvas.setAttribute('id', id);
+                util.setStyle(canvas, {
+                    position: 'absolute',
+                    width: 0,
+                    height: 0
+                });
+                
+                document.body.appendChild(canvas);
+            }
+
+            elem.style.background =
+                '-moz-element(#'+canvas.getAttribute('id')+')';
+        }
+        
+        
         /**
          * Uses the content of the given canvas element as a
          * background for the given element
@@ -325,6 +398,8 @@
             util.backgroundCanvas = util._backgroundCanvasCSSContext;
             break;
         case 'firefox':
+            util.backgroundCanvas = util._backgroundCanvasMozElement;
+            break;
         case 'ie':
         default:
             util.backgroundCanvas = util._backgroundCanvasDataURL;
@@ -891,7 +966,7 @@
             this._images = {};
             this._sideInitialized = {};
             this._whenSideInitialized = {};
-            var url = this._elem.getAttribute('squeezeImg');
+            var url = this._elem.getAttribute('squeezeImg')||'';
             var side, img, initialize, dir;
             for (var i = 0; i < util.dir.length; i++) {
                 dir = util.dir[i];
@@ -1130,9 +1205,10 @@
                 var maskSize = 1 - 1 / (beyond.north/coef + 1);
 
                 // mask
-                util.gradientMask(this._cmp.sides[dir].main, dir, maskSize);
-                
-
+                util.gradientMask(
+                    this._cmp.sides[dir].main,
+                    dir, maskSize, image.layerSize
+                );
             }
 
 
