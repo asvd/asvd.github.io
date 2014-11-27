@@ -21,7 +21,7 @@
     function (exports) {
 
         // squeeze factor at the last frame
-        var MAXSQUEEZE = 40;
+        var MAXSQUEEZE = 1000;
         var FRAMENUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
         
         var BROWSER = null;
