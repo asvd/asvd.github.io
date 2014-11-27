@@ -23,3 +23,18 @@ body {
 
 
 
+
+.second {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    width: 20%;
+    height: 600px;
+    overflow: auto;
+    background-color:#223344;
+
+}
+
+
+
+
