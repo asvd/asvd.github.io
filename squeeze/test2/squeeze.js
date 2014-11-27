@@ -275,7 +275,59 @@
             util.gradientMask = function(){};
             break;
         default:
-            util.gradientMask = function(){};
+            util.gradientMask = util._applyWebkitMask;
+            break;
+        }
+        
+
+
+
+        /**
+         * Using canvas as an element background in different browsers
+         */
+
+        util._backgroundCanvasDataURL = function(elem, canvas) {
+            if (typeof canvas.dataURL == 'undefined') {
+                canvas.dataURL = canvas.toDataURL();
+            }
+
+            elem.style.backgroundImage = 'url('+canvas.dataURL+')';
+        }
+
+        util._backgroundCanvasWebkitCounter = 0;
+        util._backgroundCanvasCSSContext = function(elem, canvas) {
+            if (typeof canvas.CSSContextId == 'undefined') {
+                var id = 'CSSContext-'+
+                    (util._backgroundCanvasWebkitCounter++)+'-'+
+                    UNIQUE;
+
+                var ctx = document.getCSSCanvasContext(
+                    '2d', id, canvas.width, canvas.height
+                );
+
+                ctx.drawImage(canvas, 0,0);
+                canvas.CSSContextId = id;
+            }
+
+            elem.style.background =
+                '-webkit-canvas('+canvas.CSSContextId+')';
+        }
+
+
+        /**
+         * Uses the content of the given canvas element as a
+         * background for the given element
+         */
+        switch (BROWSER) {
+        case 'opera':
+        case 'chrome':
+        case 'safari':
+            util.backgroundCanvas = util._backgroundCanvasCSSContext;
+            break;
+        case 'firefox':
+        case 'ie':
+        default:
+            util.backgroundCanvas = util._backgroundCanvasDataURL;
             break;
         }
 
@@ -652,22 +704,6 @@
 
             ctx2.putImageData(imageData2, 0, 0);
 
-            // rotated images
-            var S = this._genCanvas(w, h2floor);
-            var ctxS = S.getContext('2d');
-            ctxS.rotate(Math.PI);
-            ctxS.drawImage(canvas2, -w, -h2floor);
-
-            var E = this._genCanvas(h2floor, w);
-            var ctxE = E.getContext('2d');
-            ctxE.rotate(Math.PI/2);
-            ctxE.drawImage(canvas2, 0, -h2floor);
-
-            var W = this._genCanvas(h2floor, w);
-            var ctxW = W.getContext('2d');
-            ctxW.rotate(-Math.PI/2);
-            ctxW.drawImage(canvas2, -w, 0);
-
             // size of the side layer
             var layerSize = 0;
             var curSize = h2floor;
@@ -694,11 +730,28 @@
             }
             
 
+            // rotated images
+            var S = this._genCanvas(w, h2floor);
+            var ctxS = S.getContext('2d');
+            ctxS.rotate(Math.PI);
+            ctxS.drawImage(canvas2, -w, -h2floor);
+
+            var E = this._genCanvas(h2floor, w);
+            var ctxE = E.getContext('2d');
+            ctxE.rotate(Math.PI/2);
+            ctxE.drawImage(canvas2, 0, -h2floor);
+
+            var W = this._genCanvas(h2floor, w);
+            var ctxW = W.getContext('2d');
+            ctxW.rotate(-Math.PI/2);
+            ctxW.drawImage(canvas2, -w, 0);
+
+
             return {
-                north    : canvas2.toDataURL(),
-                south    : S.toDataURL(),
-                east     : E.toDataURL(),
-                west     : W.toDataURL(),
+                north    : canvas2,
+                south    : S,
+                east     : E,
+                west     : W,
                 size     : h2floor,
                 layerSize : layerSize,
                 fullNum  : fullNum,
@@ -898,8 +951,12 @@
                     this._images.west.whenFailed
                 )
             )(function(){
+// var end = (new Date).getTime();
+// console.log(end-start);
                 me._indicate()
             });
+
+// var start = (new Date).getTime();
 
             this._cmp.scroller.addEventListener(
                 'scroll', function(){me._indicate();}
@@ -979,8 +1036,7 @@
 
             // sub-elements
             style = {
-                position: 'absolute',
-                backgroundImage: 'url(' + image[dir] + ')'
+                position: 'absolute'
             };
 
             switch(dir) {
@@ -998,6 +1054,7 @@
             for (var i = 0; i < FRAMENUM; i++) {
                 sub = util.sample.div.cloneNode(false);
                 util.setStyle(sub, style);
+                util.backgroundCanvas(sub, image[dir]);
                 side.appendChild(sub);
                 sideObj.subs.push(sub);
             }
