@@ -43,6 +43,10 @@
         }
 
 
+        // string unique within a session
+        var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
+
+
         // squeeze factor at the last frame
         var MAXSQUEEZE = 20;
         var FRAMENUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
@@ -137,6 +141,120 @@
         }
         
         
+        
+        /**
+         * Routines for applying a transparency mask in different
+         * browsers
+         */
+        util._applyWebkitMask = function(elem, dir, size) {
+            var where;
+            switch (dir) {
+            case 'north': where = 'top';    break;
+            case 'east' : where = 'right';  break;
+            case 'south': where = 'bottom'; break;
+            case 'west' : where = 'left';   break;
+            }
+
+            var percent = Math.round(size * 100);
+            elem.style.WebkitMaskImage =
+                '-webkit-linear-gradient('+ where + ', '+
+                'rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
+        }
+
+        util._maskSVG = null;
+        util._getSVGMaskIds = function() {
+            if (!util._maskSVG) {
+                var ns = 'http://www.w3.org/2000/svg';
+
+                var create = function(name, parent, attrs) {
+                    var elem = document.createElementNS(ns, name);
+
+                    if (attrs) {
+                        for (var key in attrs) {
+                            if (attrs.hasOwnProperty(key)) {
+                                elem.setAttribute(key, attrs[key]); 
+                            }
+                        }
+                    }
+
+                    if (parent) {
+                        parent.appendChild(elem);
+                    }
+
+                    return elem;
+                }
+
+                
+                var svg = create('svg');
+                var defs = create('defs', svg);
+                var linearGradient = create(
+                    'linearGradient', defs, {
+                        id : 'gradient-'+UNIQUE,
+                        x1 : '0',
+                        y1: '00%',
+                        x2: '0',
+                        y2: '100%'
+                    }
+                );
+
+
+                var stop1 = create(
+                    'stop', linearGradient, {
+                        'stop-color': 'white',
+                        offset: '0'
+                    }
+                );
+                
+                var stop2 = create(
+                    'stop', linearGradient, {
+                        'stop-color': 'black',
+                        offset: '1',
+                        id: 'stop-end-'+UNIQUE
+                    }
+                );
+
+                var mask = create(
+                    'mask', defs, {
+                        id: 'gradientmask-'+UNIQUE,
+                        maskUnits: 'objectBoundingBox',
+                        maskContentUnits: 'objectBoundingBox'
+                    }
+                );
+
+                
+                var rect = create(
+                    'rect', mask, {
+                        y: '0',
+                        width: '1',
+                        height: '1',
+                        fill: 'url(#gradient-'+UNIQUE+')'
+                    }
+                );
+
+                util.setStyle(svg, {
+                    position: 'absolute',
+                    width: 0,
+                    height: 0
+                });
+                document.documentElement.appendChild(svg);
+
+                util._maskSVG = svg;
+            }
+
+            return {
+                mask: 'gradientmask-'+UNIQUE,
+                point: 'stop-end-'+UNIQUE
+            };
+        }
+
+        util._applySVGMask = function(elem, dir, size) {
+            var ids = util._getSVGMaskIds();
+//            debugger;
+            document.getElementById(ids.point).setAttribute("offset", size);
+            elem.style.mask = 'url(#'+ids.mask+')';
+        }
+        
+        
         /**
          * Applies gradient mask on the given component
          * 
@@ -144,28 +262,19 @@
          * @param {String} dir direction of the mask
          * @param {Number} size of the mask
          */
-
         switch (BROWSER) {
         case 'opera':
         case 'chrome':
         case 'safari':
-            util.gradientMask = function(elem, dir, size) {
-                var percent = Math.round(size * 100);
-                elem.style.WebkitMaskImage =
-                    '-webkit-linear-gradient('+
-                    'top, rgba(0,0,0,1), rgba(0,0,0,0) '+percent+'%)';
-            }
-
+            util.gradientMask = util._applyWebkitMask;
             break;
         case 'firefox':
-            util.gradientMask = function(elem, dir, size) {
-                document.getElementById('test').setAttribute("offset", size);
-
-                elem.style.mask = "url(#masking)";
-            }
-
+            util.gradientMask = util._applySVGMask;
             break;
         case 'ie':
+            util.gradientMask = function(){};
+            break;
+        default:
             util.gradientMask = function(){};
             break;
         }
@@ -184,8 +293,7 @@
             }
 
             util._asyncs = [];
-            util._asyncMsg = 'squeeze-async-' +
-                (new Date().getTime());
+            util._asyncMsg = UNIQUE + '-async';
 
             util._invoke = function(event) {
                 if (event.source == window &&
@@ -961,7 +1069,7 @@
                     top += Math.round(size);
                 }
 
-                var coef = 1500;
+                var coef = 4000;
                 var maskSize = 1 - 1 / (beyond.north/coef + 1);
 
                 // mask
