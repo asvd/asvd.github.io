@@ -269,38 +269,42 @@
         }
         
         
-        util._applyMaskAlphaFilter = function(elem, dir, size, fullSize) {
+        util._applyMaskAlphaFilter = function(elem, dir, size) {
             var x1, y1, x2, y2;
+            var percent = Math.floor(100*size);
             switch(dir) {
             case 'north':
-                y2 = Math.floor(fullSize * size);
+                y2 = percent;
                 x1 = x2 = y1 = 0;
                 break;
             case 'east':
-                x1 =  Math.floor(fullSize * size);
+                x1 = percent;
                 y1 = x2 = y2 = 0;
                 break;
             case 'south':
-                y1 =  Math.floor(fullSize * size);
+                y1 =  percent;
                 x1 = x2 = y2 = 0;
                 break;
             case 'west':
-                x2 =  Math.floor(fullSize * size);
+                x2 =  percent;
                 x1 = y1 = y2 = 0;
                 break;
             }
-            elem.style.filter =
-                'filter: '+
+
+            var filter =
                 'progid:'+
                 'DXImageTransform.Microsoft.Alpha('+
-                    'Opacity=100,'+
-                    'FinishOpacity=0,'+
-                    'Style=1,'+ // linear
-                    'StartX=' +x1+','+
-                    'FinishX='+x2+','+
-                    'StartY=' +y1+','+
-                    'FinishY='+y2+''+
+                    'opacity=100,'+
+                    'finishOpacity=0,'+
+                    'style=1,'+ // linear
+                    'startX=' +x1+','+
+                    'finishX='+x2+','+
+                    'startY=' +y1+','+
+                    'finishY='+y2+''+
                 ')';
+
+            elem.style.filter = filter;
+            elem.style.MsFilter = filter;
         }
         
         
@@ -1206,8 +1210,7 @@
 
                 // mask
                 util.gradientMask(
-                    this._cmp.sides[dir].main,
-                    dir, maskSize, image.layerSize
+                    this._cmp.sides[dir].main, dir, maskSize
                 );
             }
 
