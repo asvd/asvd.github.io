@@ -6,6 +6,7 @@ var start = function() {
     var pattern2 = document.getElementById('pattern2');
     var myrect = document.getElementById('myrect');
     var myimage = document.getElementById('myimage');
+    var maskrect = document.getElementById('maskrect');
 
     var heicoun = 0;
     var hei, yei;
@@ -25,6 +26,8 @@ var start = function() {
 
             myrect.setAttribute('y',''+yei+'px');
             pattern2.setAttribute('y',''+yei+'px');
+
+            maskrect.setAttribute('width',''+Math.round(hei*5)+'px');
         },
         50
     );
