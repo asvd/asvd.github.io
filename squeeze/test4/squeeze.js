@@ -128,7 +128,10 @@
          // cannot do anything without canvas
          SQUEEZE_ENABLED = false;
      }
-
+     
+METHODS.canvas = 'svg';
+METHODS.mask = 'svg';
+     
 console.log(features);
 console.log(METHODS)
 
@@ -1300,8 +1303,9 @@ console.log(METHODS)
         this._cmp.sides = {};
 
         var side, style, dir;
-        for (var i = 0; i < util.dir.length; i++) {
-            dir = util.dir[i];
+        var dirs = ['east','west','north','south'];
+        for (var i = 0; i < dirs.length; i++) {
+            dir = dirs[i];
             style = {
                 display       : 'inline',
                 pointerEvents : 'none',
