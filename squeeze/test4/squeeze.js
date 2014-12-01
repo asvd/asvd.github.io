@@ -1862,7 +1862,7 @@ console.log(METHODS)
      * Updates the scrolling indicators on each side according to the
      * current scroll state of the element
      */
-     Squeeze.prototype._indicate = function() {return;
+     Squeeze.prototype._indicate = function() {
         var geom = this._elem.getBoundingClientRect();
         var el = this._cmp.scroller;
 
