@@ -127,10 +127,11 @@
      } else {
          // cannot do anything without canvas
          SQUEEZE_ENABLED = false;
-     }
+     } 
      
-METHODS.canvas = 'svg';
-METHODS.mask = 'svg';
+//METHODS.canvas = 'svg';
+//METHODS.mask = 'svg';
+//         SQUEEZE_ENABLED = false;
      
 console.log(features);
 console.log(METHODS)
@@ -1214,6 +1215,7 @@ console.log(METHODS)
         };
 
         util.setStyle(this._elem, {
+            position: 'absolute',
             overflow: 'hidden',
             margin: 0
         });
