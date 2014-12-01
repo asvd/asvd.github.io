@@ -1286,8 +1286,8 @@ console.log(METHODS)
     Squeeze.prototype._setGeometry = function() {
         var geom = this._elem.getBoundingClientRect();
         util.setStyle(this._cmp.container, {
-            width  : geom.width,
-            height : geom.height
+            width  : Math.ceil(geom.width),
+            height : Math.ceil(geom.height)
         });
     }
 
