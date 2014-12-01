@@ -1868,10 +1868,10 @@
 
         // amount of pixels beyond the displayed area
         var beyond = {
-            north : el.scrollTop,
-            south : el.scrollHeight - el.scrollTop - geom.height,
-            west  : el.scrollLeft,
-            east  : el.scrollWidth - el.scrollLeft - geom.width
+            north : Math.floor(el.scrollTop),
+            south : Math.floor(el.scrollHeight - el.scrollTop - geom.height),
+            west  : Math.floor(el.scrollLeft),
+            east  : Math.floor(el.scrollWidth - el.scrollLeft - geom.width)
         };
         
 
@@ -1880,7 +1880,7 @@
             var dir = util.dir[i];
             if (this._cmp.sides[dir].ready) {
                 var data = this._images[dir].getData();
-                var origCoord = Math.round(beyond[dir]) % data.origSize;
+                var origCoord = beyond[dir] % data.origSize;
                 var offset = data.points[origCoord];
                 // percentage of visible area of the first entry
                 var F = offset / data.stretchedSize;
