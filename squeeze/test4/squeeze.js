@@ -1404,9 +1404,9 @@ console.log(METHODS)
             me._indicate()
         });
 
-//        this._cmp.scroller.addEventListener(
-//            'scroll', function(){me._indicate();}, false
-//        );
+        this._cmp.scroller.addEventListener(
+            'scroll', function(){me._indicate();}, false
+        );
     }
     
 
@@ -1862,7 +1862,7 @@ console.log(METHODS)
      * Updates the scrolling indicators on each side according to the
      * current scroll state of the element
      */
-    Squeeze.prototype._indicate = function() {
+     Squeeze.prototype._indicate = function() {return;
         var geom = this._elem.getBoundingClientRect();
         var el = this._cmp.scroller;
 
