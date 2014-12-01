@@ -131,9 +131,6 @@
      }
 
 
- METHODS.canvas = 'svg';
- METHODS.mask = 'svg';
-
 
      // string unique within a session
      var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
