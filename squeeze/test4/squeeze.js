@@ -95,12 +95,11 @@
      };
 
 
-
      // implementations to use according to the available features
 
      var SQUEEZE_ENABLED = true;
      var METHODS = {
-         async  : features.async ? 'event' : 'setTimeout',
+         async  : features.event ? 'event' : 'setTimeout',
          mask   : null,
          canvas : null
      };
@@ -130,7 +129,8 @@
          SQUEEZE_ENABLED = false;
      }
 
-
+console.log(features);
+console.log(METHODS)
 
      // string unique within a session
      var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
@@ -862,12 +862,12 @@
         this._img.addEventListener('load', function() {
             me._init();
             me._load.emit();
-        });
+        }, false);
 
         this._img.addEventListener('error', function() {
             document.body.removeChild(me._img);
             me._fail.emit();
-        });
+        }, false);
         
         document.body.appendChild(this._img);
     }
@@ -1139,7 +1139,7 @@
         var me = this;
         this._detector.onload = function() {
             this.contentDocument.defaultView.addEventListener(
-                'resize', me.onresize
+                'resize', me.onresize, false
             );
         }
 
@@ -1204,7 +1204,7 @@
             overflow : this._elem.style.margin
         };
 
-        var cs = getComputedStyle(this._elem);
+        var cs = getComputedStyle(this._elem, null);
 
         var innerStyle = {
             margin: cs.margin
@@ -1405,7 +1405,7 @@
         });
 
         this._cmp.scroller.addEventListener(
-            'scroll', function(){me._indicate();}
+            'scroll', function(){me._indicate();}, false
         );
     }
     
@@ -1663,8 +1663,8 @@
         blocks.svg.setAttribute('height', style.height);
         blocks.maskRect.setAttribute('width', style.width);
         blocks.maskRect.setAttribute('height', style.height);
-        
-        var i, top, left, width, height, offset;
+
+	var i, top, left, width, height, offset;
         switch (dir) {
         case 'north':
             for (i = 0; i < BLOCKSNUM; i++) {
@@ -1868,13 +1868,12 @@
 
         // amount of pixels beyond the displayed area
         var beyond = {
-            north : Math.floor(el.scrollTop),
-            south : Math.floor(el.scrollHeight - el.scrollTop - geom.height),
-            west  : Math.floor(el.scrollLeft),
-            east  : Math.floor(el.scrollWidth - el.scrollLeft - geom.width)
+            north : Math.max(0, Math.floor(el.scrollTop)),
+            south : Math.max(0, Math.floor(el.scrollHeight - el.scrollTop - geom.height)),
+            west  : Math.max(0, Math.floor(el.scrollLeft)),
+            east  : Math.max(0, Math.floor(el.scrollWidth - el.scrollLeft - geom.width))
         };
         
-
         var j;
         for (var i = 0; i < util.dir.length; i++) {
             var dir = util.dir[i];
@@ -1884,6 +1883,7 @@
                 var offset = data.points[origCoord];
                 // percentage of visible area of the first entry
                 var F = offset / data.stretchedSize;
+
                 // actual size of the image
                 var size = data.virtualSize3 / (data.virtualPow + 3*F);
                 var realOffset = size * (offset / data.stretchedSize);
