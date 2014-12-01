@@ -1404,9 +1404,9 @@ console.log(METHODS)
             me._indicate()
         });
 
-        this._cmp.scroller.addEventListener(
-            'scroll', function(){me._indicate();}, false
-        );
+//        this._cmp.scroller.addEventListener(
+//            'scroll', function(){me._indicate();}, false
+//        );
     }
     
 
