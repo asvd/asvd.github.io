@@ -1126,6 +1126,7 @@ function (exports) {
         }
     }
 
+
     
     /**
      * Handler for the resize event, to be defined for an instance
@@ -1175,9 +1176,22 @@ function (exports) {
             overflow : this._elem.style.overflow
         };
 
-        util.setStyle(this._elem, {
-            overflow: 'hidden'
-        });
+        var newStyle = {
+            overflow : 'hidden'
+        };
+
+        var wrapper2Style = {};
+        var createWrapper2 = false;
+
+        if (this._elem.nodeName.toLowerCase() == 'body') {
+            this._styleBackup.margin = this._elem.style.margin;
+            newStyle.margin = 0;
+            var cs = window.getComputedStyle(this._elem, null);
+            wrapper2Style.margin = cs.margin;
+            createWrapper2 = true;
+        }
+
+        util.setStyle(this._elem, newStyle);
 
         this._cmp = {};
 
@@ -1188,7 +1202,6 @@ function (exports) {
             width: '100%',
             height: '100%'
         });
-
         this._cmp.scroller = util.sample.div.cloneNode(false);
         util.setStyle(this._cmp.scroller, {
             position  : 'absolute',
@@ -1205,7 +1218,25 @@ function (exports) {
 
         util.attachChildren(this._cmp.container, children);
         this._cmp.scroller.appendChild(this._cmp.container);
-        this._cmp.wrapper.appendChild(this._cmp.scroller);
+
+
+
+        if (createWrapper2) {
+            this._cmp.wrapper2 = util.sample.div.cloneNode(false);
+            util.setStyle(this._cmp.wrapper2, {
+                position  : 'relative',
+                overflow : 'hidden',
+                width: '100%',
+                height: '100%'
+            });
+
+            util.setStyle(this._cmp.wrapper2, wrapper2Style);
+            this._cmp.wrapper2.appendChild(this._cmp.scroller);
+            this._cmp.wrapper.appendChild(this._cmp.wrapper2);
+        } else {
+            this._cmp.wrapper.appendChild(this._cmp.scroller);
+        }
+
         this._elem.appendChild(this._cmp.wrapper);
 
     }
