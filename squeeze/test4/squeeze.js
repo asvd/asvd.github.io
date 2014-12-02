@@ -1240,6 +1240,8 @@ function (exports) {
                 height: '100%'
             });
 
+            console.log(wrapper2Style);
+
             util.setStyle(this._cmp.wrapper2, wrapper2Style);
             this._cmp.wrapper2.appendChild(this._cmp.scroller);
             this._cmp.wrapper.appendChild(this._cmp.wrapper2);
