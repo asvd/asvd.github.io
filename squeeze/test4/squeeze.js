@@ -129,6 +129,8 @@ function (exports) {
         SQUEEZE_ENABLED = false;
     }
     
+// METHODS.canvas = 'svg';
+// METHODS.mask = 'svg';
     
     // string unique within a session
     var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
@@ -1600,127 +1602,88 @@ function (exports) {
         dir, blocks, coordinates, container, containerSize,
         sideOffset, sideSize, areaSize, areaSideSize
     ) {
-        var style = {
-            width: 0,
-            height: 0
-        };
-
+        var w = 0, h = 0;
         switch (dir) {
         case 'north':
-            style.width = areaSideSize;
-            style.height = containerSize;
+        case 'south':
+            w = areaSideSize;
+            h = containerSize;
             break;
         case 'east':
-            style.left = areaSize - containerSize;
-            style.width = containerSize;
-            style.height = areaSideSize;
-            break;
-        case 'south':
-            style.top = areaSize - containerSize;
-            style.width = areaSideSize;
-            style.height = containerSize;
-            break;
         case 'west':
-            style.width = containerSize;
-            style.height = areaSideSize;
+            w = containerSize;
+            h = areaSideSize;
             break;
         }
-        
-        util.setStyle(container, style);
-        util.setStyle(blocks.svg, {
-            width: style.width,
-            height: style.height
-        });
-        blocks.svg.setAttribute('width', style.width);
-        blocks.svg.setAttribute('height', style.height);
-        blocks.maskRect.setAttribute('width', style.width);
-        blocks.maskRect.setAttribute('height', style.height);
 
-	var i, top, left, width, height, offset;
+        var style = {
+            width: w,
+            height: h
+        };
+
+        util.setStyle(blocks.svg, style);
+
+        var coord = areaSize - containerSize;
         switch (dir) {
-        case 'north':
-            for (i = 0; i < BLOCKSNUM; i++) {
-                top = ''+coordinates[i].offset+'px';
-                blocks.rects[i].setAttribute('y',top);
-                blocks.patterns[i].setAttribute('y',top);
-                
-                blocks.rects[i].setAttribute(
-                    'width',''+areaSideSize+'px'
-                );
-
-                height = ''+coordinates[i].size+'px';
-                blocks.rects[i].setAttribute('height',height);
-                blocks.images[i].setAttribute('height',height);
-                blocks.patterns[i].setAttribute('height',height);
-
-                offset = '' + (-sideOffset%sideSize) + 'px';
-                blocks.patterns[i].setAttribute('x',offset);
-            }
-            break;
-
         case 'east':
-            for (i = 0; i < BLOCKSNUM; i++) {
-                left = ''+containerSize -
-                          coordinates[i].size -
-                          coordinates[i].offset+'px';
-                blocks.rects[i].setAttribute('x',left);
-                blocks.patterns[i].setAttribute('x',left);
-                
-                blocks.rects[i].setAttribute(
-                    'height',''+areaSideSize+'px'
-                );
-
-                width = ''+coordinates[i].size+'px';
-                blocks.rects[i].setAttribute('width',width);
-                blocks.images[i].setAttribute('width',width);
-                blocks.patterns[i].setAttribute('width',width);
-
-                offset = '' + (-sideOffset%sideSize) + 'px';
-                blocks.patterns[i].setAttribute('y',offset);
-            }
+            style.left = coord;
             break;
-
         case 'south':
-            for (i = 0; i < BLOCKSNUM; i++) {
-                top = ''+containerSize -
+            style.top = coord;
+            break;
+        }
+
+        util.setStyle(container, style);
+
+        blocks.svg.setAttribute('width', w);
+        blocks.svg.setAttribute('height', h);
+        blocks.maskRect.setAttribute('width', w);
+        blocks.maskRect.setAttribute('height', h);
+
+	var i, size;
+        var offset = '' + (-sideOffset%sideSize) + 'px';
+        for (i = 0; i < BLOCKSNUM; i++) {
+            switch (dir) {
+            case 'north':
+            case 'west':
+                coord = ''+coordinates[i].offset+'px';
+                break;
+            case 'south':
+            case 'east':
+                coord = ''+containerSize -
                          coordinates[i].size -
                          coordinates[i].offset + 'px';
-                blocks.rects[i].setAttribute('y',top);
-                blocks.patterns[i].setAttribute('y',top);
-                
+                break;
+            }
+
+            size = ''+coordinates[i].size+'px';
+
+            switch (dir) {
+            case 'north':
+            case 'south':
+                blocks.images[i].setAttribute('height',size);
+                blocks.rects[i].setAttribute('y',coord);
+                blocks.rects[i].setAttribute('height',size);
                 blocks.rects[i].setAttribute(
                     'width',''+areaSideSize+'px'
                 );
-
-                height = ''+coordinates[i].size+'px';
-                blocks.rects[i].setAttribute('height',height);
-                blocks.images[i].setAttribute('height',height);
-                blocks.patterns[i].setAttribute('height',height);
-
-                offset = '' + (-sideOffset%sideSize) + 'px';
+                blocks.patterns[i].setAttribute('y',coord);
                 blocks.patterns[i].setAttribute('x',offset);
-            }
-            break;
-
-        case 'west':
-            for (i = 0; i < BLOCKSNUM; i++) {
-                left = ''+coordinates[i].offset+'px';
-                blocks.rects[i].setAttribute('x',left);
-                blocks.patterns[i].setAttribute('x',left);
-                
+                blocks.patterns[i].setAttribute('height',size);
+                break;
+            case 'east':
+            case 'west':
+                blocks.images[i].setAttribute('width',size);
+                blocks.rects[i].setAttribute('x',coord);
+                blocks.rects[i].setAttribute('width',size);
                 blocks.rects[i].setAttribute(
                     'height',''+areaSideSize+'px'
                 );
-
-                width = ''+coordinates[i].size+'px';
-                blocks.rects[i].setAttribute('width',width);
-                blocks.images[i].setAttribute('width',width);
-                blocks.patterns[i].setAttribute('width',width);
-
-                offset = '' + (-sideOffset%sideSize) + 'px';
                 blocks.patterns[i].setAttribute('y',offset);
+                blocks.patterns[i].setAttribute('x',coord);
+                blocks.patterns[i].setAttribute('width',size);
+                break;
             }
-            break;
         }
     }
     
