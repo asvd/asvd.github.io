@@ -1,535 +1,514 @@
- /**
-  * @fileoverview squeeze - scrolling indicaton
-  * @version 0.1.0
-  * 
-  * @license MIT, see http://github.com/asvd/squeeze
-  * Copyright (c) 2014 asvd <heliosframework@gmail.com> 
-  * 
-  */
-
-
- (function (root, factory) {
-     if (typeof define === 'function' && define.amd) {
-         define(['exports'], factory);
-     } else if (typeof exports !== 'undefined') {
-         factory(exports);
-     } else {
-         factory((root.squeeze = {}));
-     }
- }(this,
- function (exports) {
-
-     // squeeze factor at the last frame
-     var MAXSQUEEZE = 1000;
-     var BLOCKSNUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
-
-     // gradient mask speed coefficient
-     var MASK_SLOWNESS = 4000;
-
-
-
-     // Duck-typing feature detection
-
-     /**
-      * Checks if the CSS property can have the CSS function with the
-      * given name as a value
-      * 
-      * @param {String} name of the property
-      * @param {String} func
-      * @param {String} params of a function as example
-      * 
-      * @returns {Boolean}
-      */
-     var checkCssProperty = function(name, func, params) {
-         var idx, camel = name;
-         while ((idx = camel.indexOf('-')) != -1) {
-             camel = camel.slice(0, idx) +
-                     camel.slice(idx+1, idx+2).toUpperCase() +
-                     camel.slice(idx+2);
-         }
-
-         var elem = document.createElement('div')
-         elem.style.cssText = name + ': ' + func + '('+params+')';
-         return camel in document.documentElement.style &&
-             elem.style[camel].indexOf(func) != '-1';
-     }
-
-
-     var IS_IE = /*@cc_on!@*/false || !!document.documentMode;
-
-     // list of features supported by the browser
-     var features = {
-         event : !!window.addEventListener,
-
-         canvas : !!document.createElement("canvas").getContext,
-
-         backgroundCanvas : {
-             webkit :
-               !!document.getCSSCanvasContext &&
-               checkCssProperty(
-                   'background', '-webkit-canvas', 'a'
-               ),
-
-             mozElement : checkCssProperty(
-                 'background', '-moz-element', '#a'
-             )
-         },
-
-         gradientMask : {
-             alphaFilter : checkCssProperty(
-                 'filter',
-                 'progid:DXImageTransform.Microsoft.Alpha',
-                 'opacity=100,finishOpacity=0,style=1,'+
-                     'startX=0,finishX=1,startY=0,finishY=1'
-             ),
-
-             webkit : checkCssProperty(
-                 '-webkit-mask-image',
-                 '-webkit-linear-gradient',
-                 'top, rgba(0,0,0,1), rgba(0,0,0,0) 100%'
-             ),
-
-             // check against firefox actually
-             svgReuse : typeof InstallTrigger !== 'undefined'
-         }
-     };
-
-
-     // implementations to use according to the available features
-
-     var SQUEEZE_ENABLED = true;
-     var METHODS = {
-         async  : features.event ? 'event' : 'setTimeout',
-         mask   : null,
-         canvas : null
-     };
-
-     if (features.canvas) {
-         if (features.gradientMask.webkit) {
-             METHODS.mask = 'webkit';
-             METHODS.canvas = features.backgroundCanvas.webkit ?
-                 'webkit' : 'dataURL';
-         } else if (features.gradientMask.svgReuse) {
-             if (features.backgroundCanvas.mozElement) {
-                 METHODS.canvas = 'mozElement';
-                 METHODS.mask = 'svgReuse';
-             } else {
-                 METHODS.canvas = 'svg';
-                 METHODS.mask = 'svg';
-             }
-         } else if (features.gradientMask.alphaFilter) {
-             METHODS.canvas = 'dataURL';
-             METHODS.mask = 'alphaFilter';
-         } else {
-             METHODS.canvas = 'svg';
-             METHODS.mask = 'svg';
-         }
-     } else {
-         // cannot do anything without canvas
-         SQUEEZE_ENABLED = false;
-     } 
-     
-//METHODS.canvas = 'svg';
-//METHODS.mask = 'svg';
-//         SQUEEZE_ENABLED = false;
-
-//     METHODS.canvas = 'dataURL';
-     
-console.log(features);
-console.log(METHODS)
-
-     // string unique within a session
-     var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
-
-
-     var util = {};
-
-     util.dir = ['north','east','south','west'];
-
-     util.sample = {
-         div    : document.createElement('div'),
-         img    : document.createElement('img'),
-         canvas : document.createElement('canvas'),
-         object : document.createElement('object')
-     };
-
-
-     /**
-      * Checks if the given element has the given class
-      * 
-      * @param {Element} elem to check against having the class
-      * @param {String} cls class name
-      */
-     util.hasClass = function(elem, cls) {
-         var result = false;
-         var list = elem.classList;
-         for (var i = 0; i < list.length; i++){
-             if (list[i] == cls) {
-                 result = true;
-                 break;
-             }
-         }
-
-         return result;
-     }
-
-
-     /**
-      * Applies the style to the element
-      * 
-      * @param {Element} elem to apply style to
-      * @param {Object} style
-      */
-     util.setStyle = function(elem, style) {
-         for (var key in style) {
-             if (style.hasOwnProperty(key)) {
-                 elem.style[key] = style[key];
-             }
-         }
-     }
-
-
-     /**
-      * Removes all child nodes from the given element, and returns
-      * those as array
-      * 
-      * @param {Element} elem to remove nodes from
-      * 
-      * @returns {Array} nodes removed from the element
-      */
-     util.detachChildren = function(elem) {
-         var detached = [];
-
-         while (elem.firstChild) {
-             detached.push(elem.removeChild(elem.firstChild));
-         }
-
-         return detached;
-     }
-
-
-     /**
-      * Attaches the given set of nodes to the given element
-      * 
-      * @param {Element} elem to attach nodes to
-      * @param {Array} nodes to attach as children
-      */
-     util.attachChildren = function(elem, nodes) {
-         for (var i = 0; i < nodes.length; i++) {
-             elem.appendChild(nodes[i]);
-         }
-     }
-
-
-     /**
-      * Returns the string with the first letter capitalized
-      * 
-      * @param {String} str
-      * @returns {String}
-      */
-     util.cap1 = function(str){
-         return str.charAt(0).toUpperCase() + str.slice(1);
-     }
-
-
-     /**
-      * Creates and returns a new SVG element
-      * 
-      * @param {String} name of the SVG element to create
-      * @param {Element} parent element
-      * @param {Object} attrs attributes for the new element
-      * 
-      * @returns {Element} newly created SVG element
-      */
-     util._svgNS = 'http://www.w3.org/2000/svg';
-     util._xlinkNS = 'http://www.w3.org/1999/xlink';
-     util.genSVGElement = function(name, parent, attrs) {
-         var elem = document.createElementNS(util._svgNS, name);
-         if (attrs) {
-             for (var key in attrs) {
-                 if (attrs.hasOwnProperty(key)) {
-                     if (key.indexOf('xlink') != -1) {
-                         elem.setAttributeNS(
-                             util._xlinkNS, key, attrs[key]
-                         );
-                     } else {
-                         elem.setAttribute(key, attrs[key]);
-                     }
-                 }
-             }
-         }
-
-         if (parent) {
-             parent.appendChild(elem);
-         }
-
-         return elem;
-     }
-
-
-     /**
-      * Creates and returns a new canvas element
-      * 
-      * @param {Number} w width
-      * @param {Number} h height
-      * 
-      * @returns {Element} created canvas element
-      */
-     util.genCanvas = function(w,h) {
-         var canvas = util.sample.canvas.cloneNode(false);
-         canvas.width = w;
-         canvas.height = h;
-         util.setStyle(canvas, {
-             width   : w,
-             height  : h,
-             display : 'none'
-         });
-
-         return canvas;
-     }
-
-
-     /**
-      * Produces the canvas element containing the image from the given
-      * img element
-      * 
-      * @param {Element} img
-      * 
-      * @returns {Element} canvas
-      */
-     util.img2canvas = function(img) {
-         var canvas = util.genCanvas(img.width, img.height);
-         var ctx = canvas.getContext('2d');
-         ctx.drawImage(img,0,0);
-         return canvas;
-     }
-
-
-
-     /**
-      * Generates a linearGradient SVG element in the given direction
-      * 
-      * @param {Element} paretn parent element (defs)
-      * @param {String} dir gradient direction (north, east, ...)
-      * @param {String} id of the gradient to assign
-      * 
-      * @returns {Element} generated element
-      */
-     util.genSVGLinearGradient = function(parent, dir, id) {
-         var full = {
-             north : 'y2',
-             east  : 'x1',
-             south : 'y1',
-             west  : 'x2'
-         };
-
-         var gradientAttr = {
-             id : id,
-             x1: '0%',
-             y1: '0%',
-             x2: '0%',
-             y2: '0%'
-         };
-
-         gradientAttr[full[dir]] = '100%';
-
-         var linearGradient = util.genSVGElement(
-             'linearGradient', parent, gradientAttr
-         );
-
-         var stop1 = util.genSVGElement(
-             'stop', linearGradient, {
-                 'stop-color': 'white',
-                 offset: '0%'
-             }
-         );
-
-         var stop2 = util.genSVGElement(
-             'stop', linearGradient, {
-                 'stop-color': 'black',
-                 offset: '100%'
-             }
-         );
-
-         return linearGradient;
-     }
-
-
-
-     // applying a transparency mask in different browsers
-
-     var gradientMask = {};
-
-     /**
-      * Generates an SVG image containing a gradient mask
-      * 
-      * @param {String} dir direction of the mask gradient
-      * 
-      * @return {String} mask id to reuse
-      */
-     var genMaskSVG = function(dir) {
-         var id = 'svg-mask-'+dir+'-'+UNIQUE;
-         var maskId = 'mask-'+id;
-         var gradientId = 'gradient-'+id;
-
-         var svg = util.genSVGElement('svg');
-         var defs = util.genSVGElement('defs', svg);
-
-         var linearGradient = util.genSVGLinearGradient(
-             defs, dir, gradientId
-         );
-
-         var mask = util.genSVGElement(
-             'mask', defs, {
-                 id: maskId,
-                 maskUnits: 'objectBoundingBox',
-                 maskContentUnits: 'objectBoundingBox'
-             }
-         );
-
-         var rect = util.genSVGElement(
-             'rect', mask, {
-                 y: '0',
-                 width: '1',
-                 height: '1',
-                 fill: 'url(#'+gradientId+')'
-             }
-         );
-
-         util.setStyle(svg, {
-             position: 'absolute',
-             width: 0,
-             height: 0
-         });
-
-         document.body.appendChild(svg);
-
-         return maskId;
-     }
-
-     var svgMaskIds = {
-         north: null,
-         east: null,
-         south: null,
-         west: null
-     };
-
-     /**
-      * Creates gradient mask on the given component
-      * 
-      * Uses generated SVG element
-      * 
-      * @param {Element} elem DOM element to apply mask to
-      * @param {String} dir direction of the mask
-      */
-     gradientMask.svgReuse = function(elem, dir) {
-         if (!svgMaskIds[dir]) {
-             svgMaskIds[dir] = genMaskSVG(dir);
-         }
-
-         elem.style.mask = 'url(#'+svgMaskIds[dir]+')';
-     }
-
-
-     /**
-      * Creates gradient mask on the given component
-      * 
-      * Uses -webkit-mask-image CSS property
-      * 
-      * @param {Element} elem DOM element to apply mask to
-      * @param {String} dir direction of the mask
-      */
-     gradientMask.webkit = function(elem, dir) {
-         var where = {
-             north : 'top',
-             east  : 'right',
-             south : 'bottom',
-             west  : 'left'
-         };
-
-         elem.style.WebkitMaskImage =
-             '-webkit-linear-gradient('+ where[dir] + ', '+
-             'rgba(0,0,0,1), rgba(0,0,0,0) 100%)';
-     }
-
-
-     /**
-      * Creates gradient mask on the given component
-      * 
-      * Uses DXImageTransform.Microsoft.Alpha filter
-      * 
-      * @param {Element} elem DOM element to apply mask to
-      * @param {String} dir direction of the mask
-      */
-     gradientMask.alphaFilter = function(elem, dir) {
-         var full = {
-             north : 'y2',
-             east  : 'x1',
-             south : 'y1',
-             west  : 'x2'
-         };
-
-         var pos = {
-             x1 : 0,
-             x2 : 0,
-             y1 : 0,
-             y2 : 0
-         };
-
-         pos[full[dir]] = '100%';
-
-         var filter =
-             'progid:'+
-             'DXImageTransform.Microsoft.Alpha('+
-                 'opacity=100,'+
-                 'finishOpacity=0,'+
-                 'style=1,'+ // linear
-                 'startX=' +pos.x1+','+
-                 'finishX='+pos.x2+','+
-                 'startY=' +pos.y1+','+
-                 'finishY='+pos.y2+''+
-             ')';
-
-         elem.style.filter = filter;
-         elem.style.MsFilter = filter;
-     }
-
-
-     /**
-      * Applies gradient mask on the given component
-      * 
-      * Changes the provided SVG element
-      * 
-      * @param {Element} elem DOM element to apply mask to
-      * @param {String} dir direction of the mask
-      */
-     gradientMask.svg = function() {
-         debugger;
-     }
-
-
-     /**
-      * Applies gradient mask on the given component
-      * 
-      * @param {Element} elem DOM element to apply mask to
-      * @param {String} dir direction of the mask
-      */
-     util.gradientMask = gradientMask[METHODS.mask];
-
-
-
-     // Using canvas as an element background in different browsers
-     var backgroundCanvas = {};
-
-
-     /**
-      * Sets the content of the given canvas as a background for the
-      * given element
-      * 
-      * Obtains the raw data using toDataURL() method and places it as
-      * a background
-      * 
-      * @param {Element} elem to set background for
+/**
+ * @fileoverview squeeze - scrolling indicaton
+ * @version 0.1.0
+ * 
+ * @license MIT, see http://github.com/asvd/squeeze
+ * Copyright (c) 2014 asvd <heliosframework@gmail.com> 
+ * 
+ */
+
+
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(['exports'], factory);
+    } else if (typeof exports !== 'undefined') {
+        factory(exports);
+    } else {
+        factory((root.squeeze = {}));
+    }
+}(this,
+function (exports) {
+
+    // squeeze factor at the last frame
+    var MAXSQUEEZE = 1000;
+    var BLOCKSNUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
+
+    // gradient mask speed coefficient
+    var MASK_SLOWNESS = 4000;
+
+
+
+    // Duck-typing feature detection
+
+    /**
+     * Checks if the CSS property can have the CSS function with the
+     * given name as a value
+     * 
+     * @param {String} name of the property
+     * @param {String} func
+     * @param {String} params of a function as example
+     * 
+     * @returns {Boolean}
+     */
+    var checkCssProperty = function(name, func, params) {
+        var idx, camel = name;
+        while ((idx = camel.indexOf('-')) != -1) {
+            camel = camel.slice(0, idx) +
+                    camel.slice(idx+1, idx+2).toUpperCase() +
+                    camel.slice(idx+2);
+        }
+
+        var elem = document.createElement('div')
+        elem.style.cssText = name + ': ' + func + '('+params+')';
+        return camel in document.documentElement.style &&
+            elem.style[camel].indexOf(func) != '-1';
+    }
+
+
+    var IS_IE = /*@cc_on!@*/false || !!document.documentMode;
+
+    // list of features supported by the browser
+    var features = {
+        event : !!window.addEventListener,
+
+        canvas : !!document.createElement("canvas").getContext,
+
+        backgroundCanvas : {
+            webkit :
+              !!document.getCSSCanvasContext &&
+              checkCssProperty(
+                  'background', '-webkit-canvas', 'a'
+              ),
+
+            mozElement : checkCssProperty(
+                'background', '-moz-element', '#a'
+            )
+        },
+
+        gradientMask : {
+            alphaFilter : checkCssProperty(
+                'filter',
+                'progid:DXImageTransform.Microsoft.Alpha',
+                'opacity=100,finishOpacity=0,style=1,'+
+                    'startX=0,finishX=1,startY=0,finishY=1'
+            ),
+
+            webkit : checkCssProperty(
+                '-webkit-mask-image',
+                '-webkit-linear-gradient',
+                'top, rgba(0,0,0,1), rgba(0,0,0,0) 100%'
+            ),
+
+            // check against firefox actually
+            svgReuse : typeof InstallTrigger !== 'undefined'
+        }
+    };
+
+
+    // implementations to use according to the available features
+
+    var SQUEEZE_ENABLED = true;
+    var METHODS = {
+        async  : features.event ? 'event' : 'setTimeout',
+        mask   : null,
+        canvas : null
+    };
+
+    if (features.canvas) {
+        if (features.gradientMask.webkit) {
+            METHODS.mask = 'webkit';
+            METHODS.canvas = features.backgroundCanvas.webkit ?
+                'webkit' : 'dataURL';
+        } else if (features.gradientMask.svgReuse) {
+            if (features.backgroundCanvas.mozElement) {
+                METHODS.canvas = 'mozElement';
+                METHODS.mask = 'svgReuse';
+            } else {
+                METHODS.canvas = 'svg';
+                METHODS.mask = 'svg';
+            }
+        } else if (features.gradientMask.alphaFilter) {
+            METHODS.canvas = 'dataURL';
+            METHODS.mask = 'alphaFilter';
+        } else {
+            METHODS.canvas = 'svg';
+            METHODS.mask = 'svg';
+        }
+    } else {
+        // cannot do anything without canvas
+        SQUEEZE_ENABLED = false;
+    }
+    
+    
+    // string unique within a session
+    var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
+
+
+    var util = {};
+
+    util.dir = ['north','east','south','west'];
+
+    util.sample = {
+        div    : document.createElement('div'),
+        img    : document.createElement('img'),
+        canvas : document.createElement('canvas'),
+        object : document.createElement('object')
+    };
+
+
+    /**
+     * Checks if the given element has the given class
+     * 
+     * @param {Element} elem to check against having the class
+     * @param {String} cls class name
+     */
+    util.hasClass = function(elem, cls) {
+        var result = false;
+        var list = elem.classList;
+        for (var i = 0; i < list.length; i++){
+            if (list[i] == cls) {
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+
+    /**
+     * Applies the style to the element
+     * 
+     * @param {Element} elem to apply style to
+     * @param {Object} style
+     */
+    util.setStyle = function(elem, style) {
+        for (var key in style) {
+            if (style.hasOwnProperty(key)) {
+                elem.style[key] = style[key];
+            }
+        }
+    }
+
+
+    /**
+     * Removes all child nodes from the given element, and returns
+     * those as array
+     * 
+     * @param {Element} elem to remove nodes from
+     * 
+     * @returns {Array} nodes removed from the element
+     */
+    util.detachChildren = function(elem) {
+        var detached = [];
+
+        while (elem.firstChild) {
+            detached.push(elem.removeChild(elem.firstChild));
+        }
+
+        return detached;
+    }
+
+
+    /**
+     * Attaches the given set of nodes to the given element
+     * 
+     * @param {Element} elem to attach nodes to
+     * @param {Array} nodes to attach as children
+     */
+    util.attachChildren = function(elem, nodes) {
+        for (var i = 0; i < nodes.length; i++) {
+            elem.appendChild(nodes[i]);
+        }
+    }
+
+
+    /**
+     * Returns the string with the first letter capitalized
+     * 
+     * @param {String} str
+     * @returns {String}
+     */
+    util.cap1 = function(str){
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+
+    /**
+     * Creates and returns a new SVG element
+     * 
+     * @param {String} name of the SVG element to create
+     * @param {Element} parent element
+     * @param {Object} attrs attributes for the new element
+     * 
+     * @returns {Element} newly created SVG element
+     */
+    util._svgNS = 'http://www.w3.org/2000/svg';
+    util._xlinkNS = 'http://www.w3.org/1999/xlink';
+    util.genSVGElement = function(name, parent, attrs) {
+        var elem = document.createElementNS(util._svgNS, name);
+        if (attrs) {
+            for (var key in attrs) {
+                if (attrs.hasOwnProperty(key)) {
+                    if (key.indexOf('xlink') != -1) {
+                        elem.setAttributeNS(
+                            util._xlinkNS, key, attrs[key]
+                        );
+                    } else {
+                        elem.setAttribute(key, attrs[key]);
+                    }
+                }
+            }
+        }
+
+        if (parent) {
+            parent.appendChild(elem);
+        }
+
+        return elem;
+    }
+
+
+    /**
+     * Creates and returns a new canvas element
+     * 
+     * @param {Number} w width
+     * @param {Number} h height
+     * 
+     * @returns {Element} created canvas element
+     */
+    util.genCanvas = function(w,h) {
+        var canvas = util.sample.canvas.cloneNode(false);
+        canvas.width = w;
+        canvas.height = h;
+        util.setStyle(canvas, {
+            width   : w,
+            height  : h,
+            display : 'none'
+        });
+
+        return canvas;
+    }
+
+
+    /**
+     * Produces the canvas element containing the image from the given
+     * img element
+     * 
+     * @param {Element} img
+     * 
+     * @returns {Element} canvas
+     */
+    util.img2canvas = function(img) {
+        var canvas = util.genCanvas(img.width, img.height);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0);
+        return canvas;
+    }
+
+
+
+    /**
+     * Generates a linearGradient SVG element in the given direction
+     * 
+     * @param {Element} paretn parent element (defs)
+     * @param {String} dir gradient direction (north, east, ...)
+     * @param {String} id of the gradient to assign
+     * 
+     * @returns {Element} generated element
+     */
+    util.genSVGLinearGradient = function(parent, dir, id) {
+        var full = {
+            north : 'y2',
+            east  : 'x1',
+            south : 'y1',
+            west  : 'x2'
+        };
+
+        var gradientAttr = {
+            id : id,
+            x1: '0%',
+            y1: '0%',
+            x2: '0%',
+            y2: '0%'
+        };
+
+        gradientAttr[full[dir]] = '100%';
+
+        var linearGradient = util.genSVGElement(
+            'linearGradient', parent, gradientAttr
+        );
+
+        var stop1 = util.genSVGElement(
+            'stop', linearGradient, {
+                'stop-color': 'white',
+                offset: '0%'
+            }
+        );
+
+        var stop2 = util.genSVGElement(
+            'stop', linearGradient, {
+                'stop-color': 'black',
+                offset: '100%'
+            }
+        );
+
+        return linearGradient;
+    }
+
+
+
+    // applying a transparency mask in different browsers
+
+    var gradientMask = {};
+
+    /**
+     * Generates an SVG image containing a gradient mask
+     * 
+     * @param {String} dir direction of the mask gradient
+     * 
+     * @return {String} mask id to reuse
+     */
+    var genMaskSVG = function(dir) {
+        var id = 'svg-mask-'+dir+'-'+UNIQUE;
+        var maskId = 'mask-'+id;
+        var gradientId = 'gradient-'+id;
+
+        var svg = util.genSVGElement('svg');
+        var defs = util.genSVGElement('defs', svg);
+
+        var linearGradient = util.genSVGLinearGradient(
+            defs, dir, gradientId
+        );
+
+        var mask = util.genSVGElement(
+            'mask', defs, {
+                id: maskId,
+                maskUnits: 'objectBoundingBox',
+                maskContentUnits: 'objectBoundingBox'
+            }
+        );
+
+        var rect = util.genSVGElement(
+            'rect', mask, {
+                y: '0',
+                width: '1',
+                height: '1',
+                fill: 'url(#'+gradientId+')'
+            }
+        );
+
+        util.setStyle(svg, {
+            position: 'absolute',
+            width: 0,
+            height: 0
+        });
+
+        document.body.appendChild(svg);
+
+        return maskId;
+    }
+
+    var svgMaskIds = {
+        north: null,
+        east: null,
+        south: null,
+        west: null
+    };
+
+    /**
+     * Creates gradient mask on the given component
+     * 
+     * Uses generated SVG element
+     * 
+     * @param {Element} elem DOM element to apply mask to
+     * @param {String} dir direction of the mask
+     */
+    gradientMask.svgReuse = function(elem, dir) {
+        if (!svgMaskIds[dir]) {
+            svgMaskIds[dir] = genMaskSVG(dir);
+        }
+
+        elem.style.mask = 'url(#'+svgMaskIds[dir]+')';
+    }
+
+
+    /**
+     * Creates gradient mask on the given component
+     * 
+     * Uses -webkit-mask-image CSS property
+     * 
+     * @param {Element} elem DOM element to apply mask to
+     * @param {String} dir direction of the mask
+     */
+    gradientMask.webkit = function(elem, dir) {
+        var where = {
+            north : 'top',
+            east  : 'right',
+            south : 'bottom',
+            west  : 'left'
+        };
+
+        elem.style.WebkitMaskImage =
+            '-webkit-linear-gradient('+ where[dir] + ', '+
+            'rgba(0,0,0,1), rgba(0,0,0,0) 100%)';
+    }
+
+
+    /**
+     * Creates gradient mask on the given component
+     * 
+     * Uses DXImageTransform.Microsoft.Alpha filter
+     * 
+     * @param {Element} elem DOM element to apply mask to
+     * @param {String} dir direction of the mask
+     */
+    gradientMask.alphaFilter = function(elem, dir) {
+        var full = {
+            north : 'y2',
+            east  : 'x1',
+            south : 'y1',
+            west  : 'x2'
+        };
+
+        var pos = {
+            x1 : 0,
+            x2 : 0,
+            y1 : 0,
+            y2 : 0
+        };
+
+        pos[full[dir]] = '100%';
+
+        var filter =
+            'progid:'+
+            'DXImageTransform.Microsoft.Alpha('+
+                'opacity=100,'+
+                'finishOpacity=0,'+
+                'style=1,'+ // linear
+                'startX=' +pos.x1+','+
+                'finishX='+pos.x2+','+
+                'startY=' +pos.y1+','+
+                'finishY='+pos.y2+''+
+            ')';
+
+        elem.style.filter = filter;
+        elem.style.MsFilter = filter;
+    }
+
+
+    /**
+     * Applies gradient mask on the given component
+     * 
+     * @param {Element} elem DOM element to apply mask to
+     * @param {String} dir direction of the mask
+     */
+    util.gradientMask = gradientMask[METHODS.mask]||null;
+
+
+
+    // Using canvas as an element background in different browsers
+    var backgroundCanvas = {};
+
+
+    /**
+     * Sets the content of the given canvas as a background for the
+     * given element
+     * 
+     * Obtains the raw data using toDataURL() method and places it as
+     * a background
+     * 
+     * @param {Element} elem to set background for
      * @param {Element} canvas element to use as a background
      */
     backgroundCanvas.dataURL = function(elem, canvas) {
@@ -604,22 +583,7 @@ console.log(METHODS)
     }
 
 
-    /**
-     * Sets the content of the given canvas as a background for the
-     * given element
-     * 
-     * Obtains the raw data using toDataURL() method and places it as
-     * a background of the given SVG element
-     * 
-     * @param {Element} elem to set background for
-     * @param {Element} canvas element to use as a background
-     */
-    backgroundCanvas.svg = function(elem, canvas) {
-        debugger;
-    }
-    
-    
-    util.backgroundCanvas = backgroundCanvas[METHODS.canvas];
+    util.backgroundCanvas = backgroundCanvas[METHODS.canvas]||null;
 
 
 
@@ -1206,24 +1170,23 @@ console.log(METHODS)
         var children = util.detachChildren(this._elem);
 
         this._styleBackup = {
-//            margin : this._elem.style.margin,
             overflow : this._elem.style.overflow
         };
 
-        /*
-        var cs = getComputedStyle(this._elem, null);
-
-        var innerStyle = {
-//            margin: cs.margin
-        };
-*/
-
         util.setStyle(this._elem, {
-            overflow: 'hidden',
-//            margin: 0
+            overflow: 'hidden'
         });
 
         this._cmp = {};
+
+        this._cmp.wrapper = util.sample.div.cloneNode(false);
+        util.setStyle(this._cmp.wrapper, {
+            position  : 'relative',
+            overflow : 'hidden',
+            width: '100%',
+            height: '100%'
+        });
+
         this._cmp.scroller = util.sample.div.cloneNode(false);
         util.setStyle(this._cmp.scroller, {
             position  : 'absolute',
@@ -1237,23 +1200,9 @@ console.log(METHODS)
         }
 
         this._cmp.container = util.sample.div.cloneNode(false);
+
         util.attachChildren(this._cmp.container, children);
-
-//        util.setStyle(this._cmp.container, innerStyle);
-
-
         this._cmp.scroller.appendChild(this._cmp.container);
-
-//        this._elem.appendChild(this._cmp.scroller);
-
-
-        this._cmp.wrapper = util.sample.div.cloneNode(false);
-        util.setStyle(this._cmp.wrapper, {
-            position  : 'relative',
-            overflow : 'hidden',
-            width: '100%',
-                          height: '100%'
-        });
         this._cmp.wrapper.appendChild(this._cmp.scroller);
         this._elem.appendChild(this._cmp.wrapper);
 
@@ -1892,13 +1841,21 @@ console.log(METHODS)
         // amount of pixels beyond the displayed area
         var beyond = {
             north : Math.max(0, Math.floor(el.scrollTop)),
-            south : Math.max(0, Math.floor(el.scrollHeight - el.scrollTop - geom.height)),
+            south : Math.max(
+                0, Math.floor(
+                    el.scrollHeight - el.scrollTop - geom.height
+                )
+            ),
             west  : Math.max(0, Math.floor(el.scrollLeft)),
-            east  : Math.max(0, Math.floor(el.scrollWidth - el.scrollLeft - geom.width))
+            east  : Math.max(
+                0, Math.floor(
+                    el.scrollWidth - el.scrollLeft - geom.width
+                )
+            )
         };
         
-        var j;
-        for (var i = 0; i < util.dir.length; i++) {
+        var i,j;
+        for (i = 0; i < util.dir.length; i++) {
             var dir = util.dir[i];
             if (this._cmp.sides[dir].ready) {
                 var data = this._images[dir].getData();
@@ -1963,76 +1920,6 @@ console.log(METHODS)
                 );
             }
         }
-        
-
-                /*
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        var j;
-
-
-        // NORTH
-        var dir = 'north';
-        if (this._cmp.sides[dir].ready) {
-            var data = this._images[dir].getData();
-
-            var origCoord = Math.round(beyond[dir]) % data.origSize;
-            
-            var offset = data.points[origCoord];
-            
-            // percentage of visible area of the first entry
-            var F = offset / data.stretchedSize;
-
-            // actual size of the image
-            var size = data.virtualSize3 / (data.virtualPow + 3*F);
-
-            var realOffset = size * (offset/data.stretchedSize);
-
-
-            var total = 0;
-            var sizes = [];
-            var firstSize = size;
-            for (i = 0; i < BLOCKSNUM; i++) {
-                sizes.push(size);
-                total += size;
-                size /= 4;
-            }
-
-            var top = Math.round(
-                data.maxLayerSize - total + firstSize - realOffset
-            );
-
-            var blocks = this._cmp.sides[dir].blocks;
-            for (j = 0; j < BLOCKSNUM; j++) {
-                size = sizes[BLOCKSNUM-1-j];
-                util.setStyle(blocks[j], {
-                    top : Math.round(top),
-                    height: Math.round(size),
-                    backgroundSize:  data.sideSize + 'px '+Math.round(size)+'px',
-                    backgroundPosition: '-'+beyond.west + 'px 0px'
-                });
-
-                top += Math.round(size);
-            }
-
-            var maskSize = 1 - 1 / (beyond.north/MASK_SLOWNESS + 1);
-
-            util.setStyle(this._cmp.sides[dir].main, {
-                top: 0,
-                height: Math.ceil(maskSize * data.maxLayerSize)
-            });
-        }
-
-*/
-        
-        
     }
 
     
