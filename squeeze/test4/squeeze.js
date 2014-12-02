@@ -1187,7 +1187,7 @@ function (exports) {
             this._styleBackup.margin = this._elem.style.margin;
             newStyle.margin = 0;
             var cs = window.getComputedStyle(this._elem, null);
-            wrapper2Style.padding = cs.margin;
+            wrapper2Style.margin = cs.margin;
             createWrapper2 = true;
         }
 
@@ -1222,6 +1222,7 @@ function (exports) {
 
 
         if (createWrapper2) {
+            this._cmp.wrapper2.setAttribute('id', 'wrapper2');
             this._cmp.wrapper2 = util.sample.div.cloneNode(false);
             util.setStyle(this._cmp.wrapper2, {
                 position  : 'relative',
