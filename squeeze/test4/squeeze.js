@@ -1185,12 +1185,16 @@ function (exports) {
 
         if (this._elem.nodeName.toLowerCase() == 'body') {
             var cs = window.getComputedStyle(this._elem, null);
-            wrapper2Style.margin = cs.margin;
-            wrapper2Style.marginTop = cs.marginTop;
-            wrapper2Style.marginRight = cs.marginRight;
-            wrapper2Style.marginBottom = cs.marginBottom;
-            wrapper2Style.marginLeft = cs.marginLeft;
+            wrapper2Style.padding = cs.margin;
+            wrapper2Style.paddingTop = cs.marginTop;
+            wrapper2Style.paddingRight = cs.marginRight;
+            wrapper2Style.paddingBottom = cs.marginBottom;
+            wrapper2Style.paddingLeft = cs.marginLeft;
             this._styleBackup.margin = this._elem.style.margin;
+            this._styleBackup.marginTop = this._elem.style.marginTop;
+            this._styleBackup.marginRight = this._elem.style.marginRight;
+            this._styleBackup.marginBottom = this._elem.style.marginBottom;
+            this._styleBackup.marginLeft = this._elem.style.marginLeft;
             newStyle.margin = 0;
             createWrapper2 = true;
         }
