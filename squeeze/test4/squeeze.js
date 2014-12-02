@@ -1187,7 +1187,7 @@ function (exports) {
             this._styleBackup.margin = this._elem.style.margin;
             newStyle.margin = 0;
             var cs = window.getComputedStyle(this._elem, null);
-            wrapper2Style.margin = cs.margin;
+            wrapper2Style.padding = cs.margin;
             createWrapper2 = true;
         }
 
