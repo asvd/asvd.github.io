@@ -1184,10 +1184,11 @@ function (exports) {
         var createWrapper2 = false;
 
         if (this._elem.nodeName.toLowerCase() == 'body') {
-            this._styleBackup.margin = this._elem.style.margin;
-            newStyle.margin = 0;
             var cs = window.getComputedStyle(this._elem, null);
             wrapper2Style.margin = cs.margin;
+            console.log(cs.margin);
+            this._styleBackup.margin = this._elem.style.margin;
+            newStyle.margin = 0;
             createWrapper2 = true;
         }
 
@@ -1224,7 +1225,7 @@ function (exports) {
         if (createWrapper2) {
             this._cmp.wrapper2 = util.sample.div.cloneNode(false);
             this._cmp.wrapper2.setAttribute('id', 'wrapper2');
-            debugger;
+
             util.setStyle(this._cmp.wrapper2, {
                 position  : 'relative',
                 overflow : 'hidden',
