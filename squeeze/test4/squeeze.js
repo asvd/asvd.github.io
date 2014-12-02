@@ -1987,7 +1987,7 @@ function (exports) {
 
 
 
-    SQUEEZE_ENABLED = false;
+//    SQUEEZE_ENABLED = false;
 
 
     exports.resqueeze = resqueeze;
