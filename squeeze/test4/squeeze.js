@@ -1215,7 +1215,7 @@ console.log(METHODS)
         };
 
         util.setStyle(this._elem, {
-            position: 'absolute',
+//            position: 'absolute',
             overflow: 'hidden',
             margin: 0
         });
@@ -1238,8 +1238,22 @@ console.log(METHODS)
 
         util.setStyle(this._cmp.container, innerStyle);
 
+
         this._cmp.scroller.appendChild(this._cmp.container);
-        this._elem.appendChild(this._cmp.scroller);
+
+//        this._elem.appendChild(this._cmp.scroller);
+
+
+        this._cmp.wrapper = util.sample.div.cloneNode(false);
+        util.setStyle(this._cmp.wrapper, {
+            position  : 'relative',
+            overflow : 'hidden',
+            width: '100%',
+            height: '100%'
+        });
+        this._cmp.wrapper.appendChild(this._cmp.scroller);
+        this._elem.appendChild(this._cmp.wrapper);
+
     }
 
 
@@ -1266,7 +1280,7 @@ console.log(METHODS)
      */
     Squeeze.prototype._createResizable = function() {
         var me = this;
-        this._resizable = new Resizable(this._elem);
+        this._resizable = new Resizable(this._cmp.wrapper);
         this._resizable.onresize = function() {
             me._setGeometry();
             me._indicate();
@@ -1289,7 +1303,7 @@ console.log(METHODS)
      * dimensions
      */
     Squeeze.prototype._setGeometry = function() {
-        var geom = this._elem.getBoundingClientRect();
+        var geom = this._cmp.wrapper.getBoundingClientRect();
         util.setStyle(this._cmp.container, {
             width  : Math.ceil(geom.width),
             height : Math.ceil(geom.height)
@@ -1340,7 +1354,7 @@ console.log(METHODS)
                 ready : false
             };
 
-            this._elem.appendChild(side);
+            this._cmp.wrapper.appendChild(side);
         }
     }
     
@@ -1350,7 +1364,7 @@ console.log(METHODS)
      */
     Squeeze.prototype._destroySides = function() {
         for (var i = 0; i < util.dir.length; i++) {
-            this._elem.removeChild(
+            this._cmp.wrapper.removeChild(
                 this._cmp.sides[util.dir[i]].main
             );
         }
@@ -1869,7 +1883,7 @@ console.log(METHODS)
      * current scroll state of the element
      */
      Squeeze.prototype._indicate = function() {
-        var geom = this._elem.getBoundingClientRect();
+        var geom = this._cmp.wrapper.getBoundingClientRect();
         var el = this._cmp.scroller;
 
         // amount of pixels beyond the displayed area
