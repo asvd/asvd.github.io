@@ -1184,6 +1184,7 @@ function (exports) {
         var createWrapper2 = false;
 
         if (this._elem.nodeName.toLowerCase() == 'body') {
+            debugger;
             var cs = window.getComputedStyle(this._elem, null);
             wrapper2Style.margin = cs.margin;
             console.log(cs.margin);
