@@ -1224,6 +1224,7 @@ function (exports) {
         if (createWrapper2) {
             this._cmp.wrapper2 = util.sample.div.cloneNode(false);
             this._cmp.wrapper2.setAttribute('id', 'wrapper2');
+            debugger;
             util.setStyle(this._cmp.wrapper2, {
                 position  : 'relative',
                 overflow : 'hidden',
