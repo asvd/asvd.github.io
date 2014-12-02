@@ -375,25 +375,25 @@ function (exports) {
 
         var mask = util.genSVGElement(
             'mask', defs, {
-                id: maskId,
-                maskUnits: 'objectBoundingBox',
-                maskContentUnits: 'objectBoundingBox'
+                id               : maskId,
+                maskUnits        : 'objectBoundingBox',
+                maskContentUnits : 'objectBoundingBox'
             }
         );
 
         var rect = util.genSVGElement(
             'rect', mask, {
-                y: '0',
-                width: '1',
-                height: '1',
-                fill: 'url(#'+gradientId+')'
+                y      : '0',
+                width  : '1',
+                height : '1',
+                fill   : 'url(#'+gradientId+')'
             }
         );
 
         util.setStyle(svg, {
-            position: 'absolute',
-            width: 0,
-            height: 0
+            position : 'absolute',
+            width    : 0,
+            height   : 0
         });
 
         document.body.appendChild(svg);
@@ -402,10 +402,10 @@ function (exports) {
     }
 
     var svgMaskIds = {
-        north: null,
-        east: null,
-        south: null,
-        west: null
+        north : null,
+        east  : null,
+        south : null,
+        west  : null
     };
 
     /**
@@ -1277,14 +1277,14 @@ function (exports) {
         for (var i = 0; i < dirs.length; i++) {
             dir = dirs[i];
             style = {
-                display       : 'inline',
                 pointerEvents : 'none',
-                position      : 'absolute',
-                overflow      : 'hidden',
-                width: 0,
-                height: 0,
-                top: 0,
-                left: 0
+                display  : 'inline',
+                position : 'absolute',
+                overflow : 'hidden',
+                width    : 0,
+                height   : 0,
+                top      : 0,
+                left     : 0
             };
 
             switch(dir) {
@@ -1528,16 +1528,10 @@ function (exports) {
             position: 'absolute'
         };
 
-        switch(dir) {
-        case 'north':
-        case 'south':
+        if (dir == 'north' || dir == 'south') {
             style.width = '100%';
-            break;
-
-        case 'west':
-        case 'east':
+        } else {
             style.height = '100%';
-            break;
         }
 
         var block, blocks = [];
@@ -1603,17 +1597,12 @@ function (exports) {
         sideOffset, sideSize, areaSize, areaSideSize
     ) {
         var w = 0, h = 0;
-        switch (dir) {
-        case 'north':
-        case 'south':
+        if (dir == 'north'||dir == 'south') {
             w = areaSideSize;
             h = containerSize;
-            break;
-        case 'east':
-        case 'west':
+        } else {
             w = containerSize;
             h = areaSideSize;
-            break;
         }
 
         var style = {
@@ -1643,24 +1632,17 @@ function (exports) {
 	var i, size;
         var offset = '' + (-sideOffset%sideSize) + 'px';
         for (i = 0; i < BLOCKSNUM; i++) {
-            switch (dir) {
-            case 'north':
-            case 'west':
+            if (dir == 'north'||dir =='west') {
                 coord = ''+coordinates[i].offset+'px';
-                break;
-            case 'south':
-            case 'east':
+            } else {
                 coord = ''+containerSize -
-                         coordinates[i].size -
-                         coordinates[i].offset + 'px';
-                break;
+                           coordinates[i].size -
+                           coordinates[i].offset + 'px';
             }
 
             size = ''+coordinates[i].size+'px';
 
-            switch (dir) {
-            case 'north':
-            case 'south':
+            if (dir =='north'||dir =='south') {
                 blocks.images[i].setAttribute('height',size);
                 blocks.rects[i].setAttribute('y',coord);
                 blocks.rects[i].setAttribute('height',size);
@@ -1670,9 +1652,7 @@ function (exports) {
                 blocks.patterns[i].setAttribute('y',coord);
                 blocks.patterns[i].setAttribute('x',offset);
                 blocks.patterns[i].setAttribute('height',size);
-                break;
-            case 'east':
-            case 'west':
+            } else {
                 blocks.images[i].setAttribute('width',size);
                 blocks.rects[i].setAttribute('x',coord);
                 blocks.rects[i].setAttribute('width',size);
@@ -1682,7 +1662,6 @@ function (exports) {
                 blocks.patterns[i].setAttribute('y',offset);
                 blocks.patterns[i].setAttribute('x',coord);
                 blocks.patterns[i].setAttribute('width',size);
-                break;
             }
         }
     }
@@ -1817,12 +1796,27 @@ function (exports) {
             )
         };
         
-        var i,j;
+        var i, j;
         for (i = 0; i < util.dir.length; i++) {
             var dir = util.dir[i];
             if (this._cmp.sides[dir].ready) {
                 var data = this._images[dir].getData();
+
                 var origCoord = beyond[dir] % data.origSize;
+
+                if (dir == 'south') {
+                    origCoord = data.origSize
+                        - beyond.north % data.origSize;
+                } else if (dir == 'east') {
+                    origCoord = data.origSize
+                        - beyond.west % data.origSize;
+                }
+
+                if (origCoord == data.origSize) {
+                    origCoord = 0;
+                }
+
+                
                 var offset = data.points[origCoord];
                 // percentage of visible area of the first entry
                 var F = offset / data.stretchedSize;
