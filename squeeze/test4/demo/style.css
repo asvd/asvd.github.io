@@ -16,7 +16,8 @@ body {
     height: 400px;
     overflow: auto;
     background-color:#223344;
-    position : static
+    position : static;
+    margin: 10px;
 
 }
 

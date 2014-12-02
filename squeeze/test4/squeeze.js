@@ -132,6 +132,8 @@
 //METHODS.canvas = 'svg';
 //METHODS.mask = 'svg';
 //         SQUEEZE_ENABLED = false;
+
+//     METHODS.canvas = 'dataURL';
      
 console.log(features);
 console.log(METHODS)
@@ -1204,20 +1206,21 @@ console.log(METHODS)
         var children = util.detachChildren(this._elem);
 
         this._styleBackup = {
-            margin : this._elem.style.overflow,
-            overflow : this._elem.style.margin
+//            margin : this._elem.style.margin,
+            overflow : this._elem.style.overflow
         };
 
+        /*
         var cs = getComputedStyle(this._elem, null);
 
         var innerStyle = {
-            margin: cs.margin
+//            margin: cs.margin
         };
+*/
 
         util.setStyle(this._elem, {
-//            position: 'absolute',
             overflow: 'hidden',
-            margin: 0
+//            margin: 0
         });
 
         this._cmp = {};
@@ -1236,7 +1239,7 @@ console.log(METHODS)
         this._cmp.container = util.sample.div.cloneNode(false);
         util.attachChildren(this._cmp.container, children);
 
-        util.setStyle(this._cmp.container, innerStyle);
+//        util.setStyle(this._cmp.container, innerStyle);
 
 
         this._cmp.scroller.appendChild(this._cmp.container);
@@ -1249,7 +1252,7 @@ console.log(METHODS)
             position  : 'relative',
             overflow : 'hidden',
             width: '100%',
-            height: '100%'
+                          height: '100%'
         });
         this._cmp.wrapper.appendChild(this._cmp.scroller);
         this._elem.appendChild(this._cmp.wrapper);
