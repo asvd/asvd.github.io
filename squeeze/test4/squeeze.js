@@ -1642,7 +1642,7 @@ function (exports) {
         };
     }
 
-    createBlocks.___svg = function(dir, container, canvas) {
+    createBlocks.svg = function(dir, container, canvas) {
         var geom = container.getBoundingClientRect();
 
         var blocksetId = 'svgBlock-'+
