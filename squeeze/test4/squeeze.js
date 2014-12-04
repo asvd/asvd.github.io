@@ -1594,6 +1594,7 @@ function (exports) {
         }
 
         var imageURL = util.getCanvasDataURL(canvas);
+        console.log('o');
         var patternId, imageId, rectId;
         var patterns = [];
         var images = [];
@@ -1642,7 +1643,7 @@ function (exports) {
         };
     }
 
-    createBlocks.svg = function(dir, container, canvas) {
+    createBlocks.___old___svg = function(dir, container, canvas) {
         var geom = container.getBoundingClientRect();
 
         var blocksetId = 'svgBlock-'+
