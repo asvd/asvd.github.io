@@ -1635,7 +1635,7 @@ function (exports) {
             height: rectHeight
         });
         
-        container.appendChild(svg);
+//        container.appendChild(svg);
 
         return {
             svg : svg,
