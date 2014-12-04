@@ -189,9 +189,9 @@ function (exports) {
      * if not yet performed
      */
     util.getCanvasDataURL = function(canvas) {
-//        if (typeof canvas.squeeze_data_url == 'undefined') {
+        if (typeof canvas.squeeze_data_url == 'undefined') {
             canvas.squeeze_data_url = canvas.toDataURL();
-//        }
+        }
 
         return canvas.squeeze_data_url;
     }
