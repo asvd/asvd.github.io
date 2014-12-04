@@ -129,8 +129,8 @@ function (exports) {
         SQUEEZE_ENABLED = false;
     }
     
-// METHODS.canvas = 'svg';
-// METHODS.mask = 'svg';
+ METHODS.canvas = 'svg';
+ METHODS.mask = 'svg';
 
     
     // string unique within a session
@@ -181,6 +181,19 @@ function (exports) {
                 elem.style[key] = style[key];
             }
         }
+    }
+    
+    
+    /**
+     * Returns cached dataURL of the canvas element (performs caching
+     * if not yet performed
+     */
+    util.getCanvasDataURL = function(canvas) {
+//        if (typeof canvas.squeeze_data_url == 'undefined') {
+            canvas.squeeze_data_url = canvas.toDataURL();
+//        }
+
+        return canvas.squeeze_data_url;
     }
 
 
@@ -517,7 +530,8 @@ function (exports) {
      */
     backgroundCanvas.dataURL = function(elem, canvas) {
         if (typeof canvas.dataURL == 'undefined') {
-            canvas.dataURL = canvas.toDataURL();
+//            canvas.dataURL = canvas.toDataURL();
+            canvas.dataURL = util.getCanvasDataURL(canvas);
         }
 
         elem.style.backgroundImage = 'url('+canvas.dataURL+')';
@@ -1418,8 +1432,12 @@ function (exports) {
                 this._images.west.whenFailed
             )
         )(function(){
+ var newtime = (new Date).getTime();
+ console.log(newtime-time);
             me._indicate();
         });
+
+ var time = (new Date).getTime();
 
 
         this._cmp.scroller.addEventListener(
@@ -1499,7 +1517,8 @@ function (exports) {
             blockHeight = canvas.height;
         }
 
-        var imageURL = canvas.toDataURL();
+//        var imageURL = canvas.toDataURL();
+        var imageURL = util.getCanvasDataURL(canvas);
         console.log('one');
         var patternId;
         var patterns = [];
