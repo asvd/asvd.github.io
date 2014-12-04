@@ -1498,7 +1498,7 @@ function (exports) {
                     height : '0px',
                     patternUnits : 'userSpaceOnUse'
                 });
-/*
+
                 images[i] = util.genSVGElement('image', patterns[i], {
                     x : '0',
                     y : '0',
@@ -1506,7 +1506,7 @@ function (exports) {
                     height : '0px',
                     preserveAspectRatio : 'none'
                 });
-*/
+
                 rects[i] = util.genSVGElement('rect', g, {
                     x : '0px',
                     y : '0px'
@@ -1524,7 +1524,7 @@ function (exports) {
             return svg;
         }
 
-        var svgBlocksTemplate = createSVGTemplate();
+//        var svgBlocksTemplate = createSVGTemplate();
     }
     
 
@@ -1605,18 +1605,6 @@ function (exports) {
         var images = [];
         var rects = [];
 
-//*
-        var imagetpl  = util.genSVGElement('image', patterns[i], {
-                x : '0',
-                y : '0',
-                width : '' + blockWidth + 'px',
-                height : '' + blockHeight + 'px',
-                preserveAspectRatio : 'none'
-
-            });
-        set__url(imagetpl, imageURL);
-//*/
-        
         for (var i = 0; i < BLOCKSNUM; i++) {
             patternId = 'pattern-'+i+'-'+blocksetId;
             patterns[i] = defs.childNodes[i+2];
@@ -1625,18 +1613,11 @@ function (exports) {
             patterns[i].setAttribute('height', ''+blockHeight+'px');
             
             imageId = 'image-'+i+'-'+blocksetId;
-
-            images[i] = imagetpl.cloneNode(false);
-            images[i].setAttribute('id', imageId);
-            patterns[i].appendChild(images[i]);
-
-            /*
             images[i] = patterns[i].childNodes[0];
             images[i].setAttribute('id', imageId);
             images[i].setAttribute('width', ''+blockWidth+'px');
             images[i].setAttribute('height', ''+blockHeight+'px');
             set__url(images[i], imageURL);
-             */
 
             rectId = 'rect-'+i+'-'+blocksetId;
             rects[i] = g.childNodes[i];
@@ -1665,7 +1646,7 @@ function (exports) {
         };
     }
 
-    createBlocks.___old___svg = function(dir, container, canvas) {
+    createBlocks.svg = function(dir, container, canvas) {
         var geom = container.getBoundingClientRect();
 
         var blocksetId = 'svgBlock-'+
