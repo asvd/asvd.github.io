@@ -129,8 +129,8 @@ function (exports) {
         SQUEEZE_ENABLED = false;
     }
     
-// METHODS.canvas = 'svg';
-// METHODS.mask = 'svg';
+ METHODS.canvas = 'svg';
+ METHODS.mask = 'svg';
 
     console.log(METHODS);
     
@@ -1527,13 +1527,13 @@ function (exports) {
             });
 
             images[i] = util.genSVGElement('image', patterns[i], {
+                id : 'image-'+i+'-'+blocksetId,
                 x : '0',
                 y : '0',
                 width : '' + blockWidth + 'px',
                 height : '' + blockHeight + 'px',
                 preserveAspectRatio : 'none',
-                'xlink:href' : imageURL,
-                id : 'image-'+i+'-'+blocksetId
+                'xlink:href' : imageURL
             });
 
             rects[i] = util.genSVGElement('rect', g, {
@@ -1542,7 +1542,7 @@ function (exports) {
                 y : '0px',
                 width : '' + geom.width + 'px',
                 height : '' + geom.height + 'px',
-                style : 'fill: url(#' + patternId + ');'
+//                style : 'fill: url(#' + patternId + ');'
             });
         }
 
