@@ -1896,7 +1896,7 @@ function (exports) {
                     blockOffset += Math.round(blockSize);
                 }
 
-                var intensity = 1 - 1 / (beyond[dir]/MASK_SLOWNESS + 1);
+                var intensity = 1 / (beyond[dir]/MASK_SLOWNESS + 1);
                 var containerSize = Math.ceil(
                     intensity * data.maxLayerSize
                 );
