@@ -17,7 +17,7 @@ body {
     overflow: auto;
     background-color:#223344;
     position : static;
-    margin: 10px;
+    margin: 20px;
 
 }
 
@@ -27,7 +27,7 @@ body {
 
 .second {
     position: fixed;
-    top: 100px;
+    top: 200px;
     left: 50%;
     width: 20%;
     height: 400px;
