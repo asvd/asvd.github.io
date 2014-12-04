@@ -225,6 +225,23 @@ function (exports) {
     util.cap1 = function(str){
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
+    
+    
+    /**
+     * Returns cached copy of canvas dataURL, performs caching when
+     * needed
+     * 
+     * @param {Element} canvas to get dataURL for
+     * 
+     * @returns {String} dataURL with the canvas image
+     */
+    util.getCanvasDataURL = function(canvas) {
+        if (typeof canvas.squeeze_cached_dataURL == 'undefined') {
+            canvas.squeeze_cached_dataURL = canvas.toDataURL();
+        }
+
+        return canvas.squeeze_cached_dataURL;
+    }
 
 
     /**
@@ -516,11 +533,8 @@ function (exports) {
      * @param {Element} canvas element to use as a background
      */
     backgroundCanvas.dataURL = function(elem, canvas) {
-        if (typeof canvas.dataURL == 'undefined') {
-            canvas.dataURL = canvas.toDataURL();
-        }
-
-        elem.style.backgroundImage = 'url('+canvas.dataURL+')';
+        elem.style.backgroundImage =
+            'url('+util.getCanvasDataURL(canvas)+')';
     }
     
     
@@ -1503,8 +1517,7 @@ function (exports) {
             blockHeight = canvas.height;
         }
 
-        var imageURL = canvas.toDataURL();
-        console.log('one');
+        var imageURL = util.getCanvasDataURL(canvas);
         var patternId;
         var patterns = [];
         var images = [];
