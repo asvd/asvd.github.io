@@ -129,10 +129,9 @@ function (exports) {
         SQUEEZE_ENABLED = false;
     }
     
- METHODS.canvas = 'svg';
- METHODS.mask = 'svg';
+// METHODS.canvas = 'svg';
+// METHODS.mask = 'svg';
 
-    console.log(METHODS);
     
     // string unique within a session
     var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
@@ -234,19 +233,13 @@ function (exports) {
      * @param {String} name of the SVG element to create
      * @param {Element} parent element
      * @param {Object} attrs attributes for the new element
-     * @param {Element} sample node to clone from
      * 
      * @returns {Element} newly created SVG element
      */
     util._svgNS = 'http://www.w3.org/2000/svg';
     util._xlinkNS = 'http://www.w3.org/1999/xlink';
-    util.genSVGElement = function(name, parent, attrs, sample) {
-        var elem;
-        if (sample) {
-            elem = sample.cloneNode(false);
-        } else {
-            elem = document.createElementNS(util._svgNS, name);
-        }
+    util.genSVGElement = function(name, parent, attrs) {
+        var elem = document.createElementNS(util._svgNS, name);
 
         if (attrs) {
             for (var key in attrs) {
@@ -1425,12 +1418,9 @@ function (exports) {
                 this._images.west.whenFailed
             )
         )(function(){
-            var newtime = (new Date).getTime();
-              console.log(newtime-time);
             me._indicate();
         });
 
-        var time = (new Date).getTime();
 
         this._cmp.scroller.addEventListener(
             'scroll', function(){me._indicate();}, false
@@ -1510,6 +1500,7 @@ function (exports) {
         }
 
         var imageURL = canvas.toDataURL();
+        console.log('one');
         var patternId;
         var patterns = [];
         var images = [];
@@ -1542,7 +1533,7 @@ function (exports) {
                 y : '0px',
                 width : '' + geom.width + 'px',
                 height : '' + geom.height + 'px',
-//                style : 'fill: url(#' + patternId + ');'
+                style : 'fill: url(#' + patternId + ');'
             });
         }
 
