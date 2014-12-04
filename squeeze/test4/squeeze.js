@@ -1541,6 +1541,11 @@ function (exports) {
      * @returns {Object} set of created elements
      */
     var svgBlockCounter = 0;
+    var set__url = function(el, url) {
+            el.setAttributeNS(
+                util._xlinkNS, 'xling:href', url
+            );
+    }
 
     createBlocks.svg = function(dir, container, canvas) {
         var geom = container.getBoundingClientRect();
@@ -1600,14 +1605,16 @@ function (exports) {
         var images = [];
         var rects = [];
 
+        /*
         var imagetpl  = util.genSVGElement('image', patterns[i], {
-            x : '0',
-            y : '0',
-            width : '' + blockWidth + 'px',
-            height : '' + blockHeight + 'px',
-            preserveAspectRatio : 'none',
-            'xlink:href' : imageURL
-        });
+                x : '0',
+                y : '0',
+                width : '' + blockWidth + 'px',
+                height : '' + blockHeight + 'px',
+                preserveAspectRatio : 'none',
+                'xlink:href' : imageURL
+            });
+*/
         
         for (var i = 0; i < BLOCKSNUM; i++) {
             patternId = 'pattern-'+i+'-'+blocksetId;
@@ -1617,9 +1624,11 @@ function (exports) {
             patterns[i].setAttribute('height', ''+blockHeight+'px');
 
             imageId = 'image-'+i+'-'+blocksetId;
-            images[i] = imagetpl.cloneNode(false);
+            images[i] = patterns[i].childNodes[0];
             images[i].setAttribute('id', imageId);
-            patterns[i].appendChild(images[i]);
+            images[i].setAttribute('width', ''+blockWidth+'px');
+            images[i].setAttribute('height', ''+blockHeight+'px');
+            set__url(images[i], imageURL);
 
             rectId = 'rect-'+i+'-'+blocksetId;
             rects[i] = g.childNodes[i];
