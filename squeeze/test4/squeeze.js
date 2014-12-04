@@ -232,13 +232,19 @@ function (exports) {
      * @param {String} name of the SVG element to create
      * @param {Element} parent element
      * @param {Object} attrs attributes for the new element
+     * @param {Element} sample node to clone from
      * 
      * @returns {Element} newly created SVG element
      */
     util._svgNS = 'http://www.w3.org/2000/svg';
     util._xlinkNS = 'http://www.w3.org/1999/xlink';
-    util.genSVGElement = function(name, parent, attrs) {
-        var elem = document.createElementNS(util._svgNS, name);
+    util.genSVGElement = function(name, parent, attrs, sample) {
+        var elem;
+        if (sample) {
+            elem = sample.cloneNode(false);
+        } else {
+            elem = document.createElementNS(util._svgNS, name);
+        }
         if (attrs) {
             for (var key in attrs) {
                 if (attrs.hasOwnProperty(key)) {
@@ -1505,6 +1511,10 @@ function (exports) {
         var patterns = [];
         var images = [];
         var rects = [];
+        var imageSample = util.genSVGElement('image', null, {
+            'xlink:href' : imageURL
+        });
+
         for (var i = 0; i < BLOCKSNUM; i++) {
             patternId = 'pattern-'+i+'-'+blocksetId;
             patterns[i] = util.genSVGElement('pattern', defs, {
@@ -1522,9 +1532,8 @@ function (exports) {
                 y : '0',
                 width : '' + blockWidth + 'px',
                 height : '' + blockHeight + 'px',
-                preserveAspectRatio : 'none',
-                'xlink:href' : imageURL
-            });
+                preserveAspectRatio : 'none'
+            }, imageSample);
 
             rects[i] = util.genSVGElement('rect', g, {
                 id : 'rect-'+i+'-'+blocksetId,
