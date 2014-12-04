@@ -329,22 +329,27 @@ function (exports) {
      * @returns {Element} generated element
      */
     util.genSVGLinearGradient = function(parent, dir, id) {
-        var full = {
-            north : 'y2',
-            east  : 'x1',
-            south : 'y1',
-            west  : 'x2'
-        };
-
         var gradientAttr = {
-            id : id,
             x1: '0%',
             y1: '0%',
             x2: '0%',
             y2: '0%'
         };
 
-        gradientAttr[full[dir]] = '100%';
+        if (dir) {
+            var full = {
+                north : 'y2',
+                east  : 'x1',
+                south : 'y1',
+                west  : 'x2'
+            };
+
+            gradientAttr[full[dir]] = '100%';
+        }
+
+        if (id) {
+            gradientAttr.id = id;
+        }
 
         var linearGradient = util.genSVGElement(
             'linearGradient', parent, gradientAttr
@@ -658,7 +663,7 @@ function (exports) {
     
     
 
-    // Whenable patter
+    // Whenable pattern
 
     var wl = {};
     
@@ -1449,7 +1454,81 @@ function (exports) {
     // initializes a set of blocks on each side
 
     var createBlocks = {};
+
+    if (METHODS.canvas == 'svg') {
+        /**
+         * @returns {Element} template of the SVG blocks
+         */
+        var createSVGTemplate = function() {
+            var svg = util.genSVGElement('svg');
+            var defs = util.genSVGElement('defs', svg);
+
+            var linearGradient = util.genSVGLinearGradient(
+                defs, null, null
+            );
+
+            var mask = util.genSVGElement('mask', defs, {
+                x : '0',
+                y : '0',
+                width : '100%',
+                height : '100%'
+            });
+
+            var rectWidth = '0';
+            var rectHeight = '0';
+
+            var maskRect = util.genSVGElement('rect', mask, {
+                x : '0',
+                y : '0',
+                width : '0',
+                height : '0'
+            });
+
+            var g = util.genSVGElement('g', svg);
+
+            var patterns = [];
+            var images = [];
+            var rects = [];
+
+            for (var i = 0; i < BLOCKSNUM; i++) {
+                patterns[i] = util.genSVGElement('pattern', defs, {
+                    x : '0',
+                    y : '0',
+                    width : '0px',
+                    height : '0px',
+                    patternUnits : 'userSpaceOnUse'
+                });
+
+                images[i] = util.genSVGElement('image', patterns[i], {
+                    x : '0',
+                    y : '0',
+                    width : '0px',
+                    height : '0px',
+                    preserveAspectRatio : 'none'
+                });
+
+                rects[i] = util.genSVGElement('rect', g, {
+                    x : '0px',
+                    y : '0px'
+                });
+            }
+
+            util.setStyle(svg, {
+                position: 'absolute',
+                top : 0,
+                left : 0,
+                width: 0,
+                height: 0
+            });
+
+            return svg;
+        }
+
+        var svgBlocksTemplate = createSVGTemplate();
+    }
     
+
+
     /**
      * Creates a set of blocks for the scrolling indication
      * 
@@ -1463,6 +1542,107 @@ function (exports) {
      */
     var svgBlockCounter = 0;
     createBlocks.svg = function(dir, container, canvas) {
+        var geom = container.getBoundingClientRect();
+
+        var blocksetId = 'svgBlock-'+
+                (svgBlockCounter++)+'-'+
+                UNIQUE;
+        var gradientId = 'gradient-'+blocksetId;
+        var maskId = 'mask-'+blocksetId;
+
+        var svg = svgBlocksTemplate.cloneNode(true);
+
+        var full = {
+            north : 'y2',
+            east  : 'x1',
+            south : 'y1',
+            west  : 'x2'
+        };
+
+        var defs = svg.childNodes[0];
+        var linearGradient = defs.childNodes[0];
+        linearGradient.setAttribute('id', gradientId);
+        linearGradient.setAttribute(full[dir], '100%');
+
+        var mask = defs.childNodes[1];
+        mask.setAttribute('id', maskId);
+
+        var rectWidth = '100%';
+        var rectHeight = '100%';
+        if (dir == 'north' || dir == 'south') {
+            rectHeight = '0';
+        } else {
+            rectWidth = '0';
+        }
+        
+        var maskRect = mask.childNodes[0];
+        maskRect.setAttribute('width', rectWidth);
+        maskRect.setAttribute('height', rectHeight);
+        maskRect.setAttribute('style',
+            'stroke: none; fill: url(#'+gradientId+')');
+
+        var g = svg.childNodes[1];
+        g.setAttribute('style', 'mask:url(#'+maskId+');');
+        
+        var blockWidth = 0;
+        var blockHeight = 0;
+
+        if (dir == 'north' || dir == 'south') {
+            blockWidth = canvas.width;
+        } else {
+            blockHeight = canvas.height;
+        }
+
+        var imageURL = util.getCanvasDataURL(canvas);
+        var patternId, imageId, rectId;
+        var patterns = [];
+        var images = [];
+        var rects = [];
+        
+        for (var i = 0; i < BLOCKSNUM; i++) {
+            patternId = 'pattern-'+i+'-'+blocksetId;
+            patterns[i] = defs.childNodes[i+2];
+            patterns[i].setAttribute('id', patternId);
+            patterns[i].setAttribute('width', ''+blockWidth+'px');
+            patterns[i].setAttribute('height', ''+blockHeight+'px');
+
+            imageId = 'image-'+i+'-'+blocksetId;
+            images[i] = patterns[i].childNodes[0];
+            images[i].setAttribute('id', imageId);
+            images[i].setAttribute('width', ''+blockWidth+'px');
+            images[i].setAttribute('height', ''+blockHeight+'px');
+            images[i].setAttributeNS(
+                util._xlinkNS, 'xling:href', imageURL
+            );
+
+            rectId = 'rect-'+i+'-'+blocksetId;
+            rects[i] = g.childNodes[i];
+            rects[i].setAttribute('id', rectId);
+            rects[i].setAttribute('width', ''+blockWidth+'px');
+            rects[i].setAttribute('height', ''+blockHeight+'px');
+            rects[i].setAttribute('style', 'fill: url(#' + patternId + ');');
+        }
+
+        util.setStyle(svg, {
+            position: 'absolute',
+            top : 0,
+            left : 0,
+            width: rectWidth,
+            height: rectHeight
+        });
+        
+        container.appendChild(svg);
+
+        return {
+            svg : svg,
+            maskRect : maskRect,
+            patterns : patterns,
+            images : images,
+            rects : rects
+        };
+    }
+
+    createBlocks.___svg = function(dir, container, canvas) {
         var geom = container.getBoundingClientRect();
 
         var blocksetId = 'svgBlock-'+
