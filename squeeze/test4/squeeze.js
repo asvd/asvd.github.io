@@ -1524,7 +1524,7 @@ function (exports) {
             return svg;
         }
 
-//        var svgBlocksTemplate = createSVGTemplate();
+        var svgBlocksTemplate = createSVGTemplate();
     }
     
 
@@ -1646,7 +1646,7 @@ function (exports) {
         };
     }
 
-    createBlocks.svg = function(dir, container, canvas) {
+    createBlocks._______svg = function(dir, container, canvas) {
         var geom = container.getBoundingClientRect();
 
         var blocksetId = 'svgBlock-'+
