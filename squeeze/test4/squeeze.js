@@ -1541,6 +1541,16 @@ function (exports) {
      * @returns {Object} set of created elements
      */
     var svgBlockCounter = 0;
+    var clone__svg = function() {
+        return svgBlocksTemplate.cloneNode(true);
+    }
+    
+    var set__url = function(el, url) {
+            el.setAttributeNS(
+                util._xlinkNS, 'xling:href', url
+            );
+    }
+
     createBlocks.svg = function(dir, container, canvas) {
         var geom = container.getBoundingClientRect();
 
@@ -1550,7 +1560,7 @@ function (exports) {
         var gradientId = 'gradient-'+blocksetId;
         var maskId = 'mask-'+blocksetId;
 
-        var svg = svgBlocksTemplate.cloneNode(true);
+        var svg = clone__svg();
 
         var full = {
             north : 'y2',
@@ -1594,7 +1604,6 @@ function (exports) {
         }
 
         var imageURL = util.getCanvasDataURL(canvas);
-        console.log('o');
         var patternId, imageId, rectId;
         var patterns = [];
         var images = [];
@@ -1612,9 +1621,7 @@ function (exports) {
             images[i].setAttribute('id', imageId);
             images[i].setAttribute('width', ''+blockWidth+'px');
             images[i].setAttribute('height', ''+blockHeight+'px');
-            images[i].setAttributeNS(
-                util._xlinkNS, 'xling:href', imageURL
-            );
+            set__url(images[i], imageURL);
 
             rectId = 'rect-'+i+'-'+blocksetId;
             rects[i] = g.childNodes[i];
