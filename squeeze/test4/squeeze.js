@@ -245,6 +245,7 @@ function (exports) {
         } else {
             elem = document.createElementNS(util._svgNS, name);
         }
+
         if (attrs) {
             for (var key in attrs) {
                 if (attrs.hasOwnProperty(key)) {
@@ -1512,6 +1513,11 @@ function (exports) {
         var images = [];
         var rects = [];
         var imageSample = util.genSVGElement('image', null, {
+            x : '0',
+            y : '0',
+            width : '' + blockWidth + 'px',
+            height : '' + blockHeight + 'px',
+            preserveAspectRatio : 'none',
             'xlink:href' : imageURL
         });
 
@@ -1527,12 +1533,7 @@ function (exports) {
             });
 
             images[i] = util.genSVGElement('image', patterns[i], {
-                id : 'image-'+i+'-'+blocksetId,
-                x : '0',
-                y : '0',
-                width : '' + blockWidth + 'px',
-                height : '' + blockHeight + 'px',
-                preserveAspectRatio : 'none'
+                id : 'image-'+i+'-'+blocksetId
             }, imageSample);
 
             rects[i] = util.genSVGElement('rect', g, {
