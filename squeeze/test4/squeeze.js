@@ -131,6 +131,8 @@ function (exports) {
     
  METHODS.canvas = 'svg';
  METHODS.mask = 'svg';
+
+    console.log(METHODS);
     
     // string unique within a session
     var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
