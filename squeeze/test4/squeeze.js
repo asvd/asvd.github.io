@@ -1532,7 +1532,7 @@ function (exports) {
                 width : '' + blockWidth + 'px',
                 height : '' + blockHeight + 'px',
                 preserveAspectRatio : 'none',
-//                'xlink:href' : imageURL,
+                'xlink:href' : imageURL,
                 id : 'image-'+i+'-'+blocksetId
             });
 
