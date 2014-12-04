@@ -1185,11 +1185,11 @@ function (exports) {
 
         if (this._elem.nodeName.toLowerCase() == 'body') {
             var cs = window.getComputedStyle(this._elem, null);
-            wrapper2Style.padding = cs.margin;
-            wrapper2Style.paddingTop = cs.marginTop;
-            wrapper2Style.paddingRight = cs.marginRight;
-            wrapper2Style.paddingBottom = cs.marginBottom;
-            wrapper2Style.paddingLeft = cs.marginLeft;
+            wrapper2Style.margin = cs.margin;
+            wrapper2Style.marginTop = cs.marginTop;
+            wrapper2Style.marginRight = cs.marginRight;
+            wrapper2Style.marginBottom = cs.marginBottom;
+            wrapper2Style.marginLeft = cs.marginLeft;
             this._styleBackup.margin = this._elem.style.margin;
             this._styleBackup.marginTop = this._elem.style.marginTop;
             this._styleBackup.marginRight = this._elem.style.marginRight;
@@ -1239,8 +1239,6 @@ function (exports) {
                 width: '100%',
                 height: '100%'
             });
-
-            console.log(wrapper2Style);
 
             util.setStyle(this._cmp.wrapper2, wrapper2Style);
             this._cmp.wrapper2.appendChild(this._cmp.scroller);
@@ -1418,8 +1416,12 @@ function (exports) {
                 this._images.west.whenFailed
             )
         )(function(){
-            me._indicate()
+            var newtime = (new Date).getTime();
+              console.log(newtime-time);
+            me._indicate();
         });
+
+        var time = (new Date).getTime();
 
         this._cmp.scroller.addEventListener(
             'scroll', function(){me._indicate();}, false
