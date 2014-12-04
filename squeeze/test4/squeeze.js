@@ -129,8 +129,8 @@ function (exports) {
         SQUEEZE_ENABLED = false;
     }
     
- METHODS.canvas = 'svg';
- METHODS.mask = 'svg';
+// METHODS.canvas = 'svg';
+// METHODS.mask = 'svg';
 
     console.log(METHODS);
     
@@ -1514,14 +1514,6 @@ function (exports) {
         var patterns = [];
         var images = [];
         var rects = [];
-        var imageSample = util.genSVGElement('image', null, {
-            x : '0',
-            y : '0',
-            width : '' + blockWidth + 'px',
-            height : '' + blockHeight + 'px',
-            preserveAspectRatio : 'none',
-            'xlink:href' : imageURL
-        });
 
         for (var i = 0; i < BLOCKSNUM; i++) {
             patternId = 'pattern-'+i+'-'+blocksetId;
@@ -1535,8 +1527,14 @@ function (exports) {
             });
 
             images[i] = util.genSVGElement('image', patterns[i], {
+                x : '0',
+                y : '0',
+                width : '' + blockWidth + 'px',
+                height : '' + blockHeight + 'px',
+                preserveAspectRatio : 'none',
+//                'xlink:href' : imageURL,
                 id : 'image-'+i+'-'+blocksetId
-            }, imageSample);
+            });
 
             rects[i] = util.genSVGElement('rect', g, {
                 id : 'rect-'+i+'-'+blocksetId,
