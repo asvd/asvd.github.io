@@ -11,18 +11,23 @@ var start = function() {
     var myuse2 = document.getElementById('myuse2');
 
 
+    var myimage = document.getElementById('myimage');
+
     var heicoun = 0;
     var hei, yei, hei2;
 
     setInterval(
         function() {
+            myimage.setAttribute('height','140px');
+
             offset = (offset+2)%100;
-            mypattern.setAttribute('x',-offset);
-            mypattern2.setAttribute('x',offset);
 
             heicoun+=.1;
             hei = Math.round(Math.sin(heicoun)*30)+110;
             yei = Math.round(hei / 2);
+
+            mypattern.setAttribute('x',-offset);
+            mypattern2.setAttribute('x',offset);
 
             myrect.setAttribute('height',''+hei+'px');
             mypattern.setAttribute('height',''+hei+'px');
