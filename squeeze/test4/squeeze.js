@@ -56,6 +56,7 @@ function (exports) {
 
 
     var IS_IE = /*@cc_on!@*/false || !!document.documentMode;
+    var IS_FIREFOX = typeof InstallTrigger !== 'undefined';
 
     // list of features supported by the browser
     var features = {
@@ -90,7 +91,7 @@ function (exports) {
             ),
 
             // check against firefox actually
-            svgReuse : typeof InstallTrigger !== 'undefined'
+            svgReuse : IS_FIREFOX
         }
     };
 
@@ -245,42 +246,6 @@ function (exports) {
 
 
     /**
-     * Creates and returns a new SVG element
-     * 
-     * @param {String} name of the SVG element to create
-     * @param {Element} parent element
-     * @param {Object} attrs attributes for the new element
-     * 
-     * @returns {Element} newly created SVG element
-     */
-    util._svgNS = 'http://www.w3.org/2000/svg';
-    util._xlinkNS = 'http://www.w3.org/1999/xlink';
-    util.genSVGElement = function(name, parent, attrs) {
-        var elem = document.createElementNS(util._svgNS, name);
-
-        if (attrs) {
-            for (var key in attrs) {
-                if (attrs.hasOwnProperty(key)) {
-                    if (key.indexOf('xlink') != -1) {
-                        elem.setAttributeNS(
-                            util._xlinkNS, key, attrs[key]
-                        );
-                    } else {
-                        elem.setAttribute(key, attrs[key]);
-                    }
-                }
-            }
-        }
-
-        if (parent) {
-            parent.appendChild(elem);
-        }
-
-        return elem;
-    }
-
-
-    /**
      * Creates and returns a new canvas element
      * 
      * @param {Number} w width
@@ -315,6 +280,67 @@ function (exports) {
         var ctx = canvas.getContext('2d');
         ctx.drawImage(img,0,0);
         return canvas;
+    }
+
+
+
+    /**
+     * Creates and returns a new SVG element
+     * 
+     * @param {String} name of the SVG element to create
+     * @param {Element} parent element
+     * @param {Object} attrs attributes for the new element
+     * 
+     * @returns {Element} newly created SVG element
+     */
+    util._svgNS = 'http://www.w3.org/2000/svg';
+    util._xlinkNS = 'http://www.w3.org/1999/xlink';
+    util.genSVGElement = function(name, parent, attrs) {
+        var elem = document.createElementNS(util._svgNS, name);
+
+        if (attrs) {
+            for (var key in attrs) {
+                if (attrs.hasOwnProperty(key)) {
+                    if (key.indexOf('xlink') != -1) {
+                        elem.setAttributeNS(
+                            util._xlinkNS, key, attrs[key]
+                        );
+                    } else {
+                        elem.setAttribute(key, attrs[key]);
+                    }
+                }
+            }
+        }
+
+        if (parent) {
+            parent.appendChild(elem);
+        }
+
+        return elem;
+    }
+    
+    
+    /**
+     * Generates (if not done yet) an SVG element with a <defs>
+     * section and returns the <defs> which is intended to store
+     * common SVG objects later reused along the page
+     * 
+     * @returns {Element} common defs element
+     */
+    util._commonSVGDefs = null;
+    util.getCommonSVGDefs = function() {
+        if (!util._commonSVGDefs) {
+            var svg = util.genSVGElement('svg', document.body);
+            util.setStyle(svg, {
+                position : 'absolute',
+                width    : 0,
+                height   : 0
+            });
+
+            util._commonSVGDefs = util.genSVGElement('defs', svg);
+        }
+
+        return util._commonSVGDefs;
     }
 
 
@@ -371,6 +397,13 @@ function (exports) {
 
         return linearGradient;
     }
+    
+    
+    
+
+
+
+    var methods = {};
 
 
 
@@ -519,7 +552,7 @@ function (exports) {
      * @param {Element} elem DOM element to apply mask to
      * @param {String} dir direction of the mask
      */
-    util.gradientMask = gradientMask[METHODS.mask]||null;
+    methods.gradientMask = gradientMask[METHODS.mask]||null;
 
 
 
@@ -606,7 +639,7 @@ function (exports) {
     }
 
 
-    util.backgroundCanvas = backgroundCanvas[METHODS.canvas]||null;
+    methods.backgroundCanvas = backgroundCanvas[METHODS.canvas]||null;
 
 
 
@@ -659,7 +692,7 @@ function (exports) {
        );
     }
 
-    util.async = async[METHODS.async];
+    methods.async = async[METHODS.async];
     
     
 
@@ -759,7 +792,7 @@ function (exports) {
      * @param {Array} args to provide to the listener
      */
     wl.Whenable.prototype._invoke = function(listener, ctx, args) {
-        util.async(listener, ctx, args);
+        methods.async(listener, ctx, args);
     }
 
 
@@ -851,6 +884,8 @@ function (exports) {
         this._sides = {};  // stretched canvases
         this._data = {};
 
+        this._SVGImageId = null;
+
         var me = this;
         this._img.addEventListener('load', function() {
             me._init();
@@ -872,6 +907,37 @@ function (exports) {
      */
     CachedImg.prototype.getSides = function() {
         return this._sides;
+    }
+    
+    
+    /**
+     * Creates (if not done yet) an SVG image element containing the
+     * stretched image and stored in the common <defs> element, and
+     * returns its id
+     * 
+     * @param {String} id of an SVG element with the stretched image
+     */
+    var SVGImageCounter = 0;
+    CachedImg.prototype.getSVGImageId = function() {
+        if (!this._SVGImageId) {
+            this._SVGImageId =
+                'SVG-Image-'+(SVGImageCounter++)+'-'+UNIQUE;
+            var canvas = this._sides.north;
+            var url = util.getCanvasDataURL(canvas);
+            var defs = util.getCommonSVGDefs();
+            var image = util.genSVGElement('image', defs, {
+                id     : this._SVGImageId,
+                x      : '0',
+                y      : '0',
+                width  : '' + canvas.width + 'px',
+                height : '' + canvas.height + 'px',
+                preserveAspectRatio : 'none',
+                'xlink:href' : url
+            });
+            
+        }
+
+        return this._SVGImageId;
     }
     
 
@@ -1487,7 +1553,7 @@ function (exports) {
             var g = util.genSVGElement('g', svg);
 
             var patterns = [];
-            var images = [];
+            var uses = [];
             var rects = [];
 
             for (var i = 0; i < BLOCKSNUM; i++) {
@@ -1499,13 +1565,7 @@ function (exports) {
                     patternUnits : 'userSpaceOnUse'
                 });
 
-                images[i] = util.genSVGElement('image', patterns[i], {
-                    x : '0',
-                    y : '0',
-                    width : '0px',
-                    height : '0px',
-                    preserveAspectRatio : 'none'
-                });
+                uses[i] = util.genSVGElement('use', patterns[i]);
 
                 rects[i] = util.genSVGElement('rect', g, {
                     x : '0px',
@@ -1536,18 +1596,13 @@ function (exports) {
      * 
      * @param {String} dir direction of indication
      * @param {Element} container to create blocks on
-     * @param {Element} canvas element to use as a background
+     * @param {CachedImg} image to use data from
      * 
      * @returns {Object} set of created elements
      */
     var svgBlockCounter = 0;
-    var set__url = function(el, url) {
-            el.setAttributeNS(
-                util._xlinkNS, 'xling:href', url
-            );
-    }
-
-    createBlocks.svg = function(dir, container, canvas) {
+    createBlocks.svg = function(dir, container, image) {
+        var canvas = image.getSides()[dir];
         var geom = container.getBoundingClientRect();
 
         var blocksetId = 'svgBlock-'+
@@ -1599,10 +1654,10 @@ function (exports) {
             blockHeight = canvas.height;
         }
 
-        var imageURL = util.getCanvasDataURL(canvas);
-        var patternId, imageId, rectId;
+        var patternId, useId, rectId;
+        var imageId = image.getSVGImageId();
         var patterns = [];
-        var images = [];
+        var uses = [];
         var rects = [];
 
         for (var i = 0; i < BLOCKSNUM; i++) {
@@ -1611,13 +1666,13 @@ function (exports) {
             patterns[i].setAttribute('id', patternId);
             patterns[i].setAttribute('width', ''+blockWidth+'px');
             patterns[i].setAttribute('height', ''+blockHeight+'px');
-            
-            imageId = 'image-'+i+'-'+blocksetId;
-            images[i] = patterns[i].childNodes[0];
-            images[i].setAttribute('id', imageId);
-            images[i].setAttribute('width', ''+blockWidth+'px');
-            images[i].setAttribute('height', ''+blockHeight+'px');
-            set__url(images[i], imageURL);
+
+            useId = 'use-'+i+'-'+blocksetId;
+            uses[i] = patterns[i].childNodes[0];
+            uses[i].setAttribute('id', useId);
+            uses[i].setAttributeNS(
+                util._xlinkNS, 'xlink:href', '#'+imageId
+            );
 
             rectId = 'rect-'+i+'-'+blocksetId;
             rects[i] = g.childNodes[i];
@@ -1641,11 +1696,17 @@ function (exports) {
             svg : svg,
             maskRect : maskRect,
             patterns : patterns,
-            images : images,
+            uses : uses,
             rects : rects
         };
     }
-
+    
+    
+    
+    
+    // REMOVE BELOW, WORKS SLOWER
+    
+    
     createBlocks._______svg = function(dir, container, canvas) {
         var geom = container.getBoundingClientRect();
 
@@ -1766,11 +1827,12 @@ function (exports) {
      * 
      * @param {String} dir direction of indication
      * @param {Element} container to create blocks on
-     * @param {Element} canvas element to use as a background
+     * @param {CachedImg} image to use data from
      * 
-     * @returns {Array} of created blocks
+     * @returns {Object} set of created elements
      */
-    createBlocks.div = function(dir, container, canvas) {
+    createBlocks.div = function(dir, container, image) {
+        var canvas = image.getSides()[dir];
         var style = {
             position: 'absolute'
         };
@@ -1785,12 +1847,12 @@ function (exports) {
         for (var i = 0; i < BLOCKSNUM; i++) {
             block = util.sample.div.cloneNode(false);
             util.setStyle(block, style);
-            util.backgroundCanvas(block, canvas);
+            methods.backgroundCanvas(block, canvas);
             container.appendChild(block);
             blocks.push(block);
         }
 
-        util.gradientMask(container, dir);
+        methods.gradientMask(container, dir);
 
         return blocks;
     }
@@ -1814,7 +1876,7 @@ function (exports) {
     Squeeze.prototype._initSide = function(dir, image) {
         var side = this._cmp.sides[dir];
         side.blocks = this._createBlocks(
-            dir, side.main, image.getSides()[dir]
+            dir, side.main, image
         );
 
         side.ready = true;
@@ -1837,11 +1899,15 @@ function (exports) {
      * @param {Number} containerSize in px
      * @param {Number} sideOffset
      * @param {Number} sideSize
+     * @param {Number} stretchedSize
      * @param {Number} areaSize
+     * @param {Number} areaSidSize
      */
     updateBlocks.svg = function(
         dir, blocks, coordinates, container, containerSize,
-        sideOffset, sideSize, areaSize, areaSideSize
+        sideOffset,
+        sideSize, stretchedSize,
+        areaSize, areaSideSize
     ) {
         var w = 0, h = 0;
         if (dir == 'north'||dir == 'south') {
@@ -1876,7 +1942,27 @@ function (exports) {
         blocks.maskRect.setAttribute('width', w);
         blocks.maskRect.setAttribute('height', h);
 
-	var i, size;
+        var rotate = '';
+        var translate = '';
+        switch(dir) {
+        case 'north':
+            break;
+        case 'east':
+            rotate = 'rotate(90)';
+            translate = 'translate('+stretchedSize+',0)';
+            break;
+        case 'south':
+            rotate = 'rotate(180)';
+            translate = 'translate('+sideSize+','+stretchedSize+')';
+            break;
+        case 'west':
+            rotate = 'rotate(270)';
+            translate = 'translate(0,'+sideSize+')';
+            break;
+        }
+
+
+	var i, size, scale, transform;
         var offset = '' + (-sideOffset%sideSize) + 'px';
         for (i = 0; i < BLOCKSNUM; i++) {
             if (dir == 'north'||dir =='west') {
@@ -1889,8 +1975,10 @@ function (exports) {
 
             size = ''+coordinates[i].size+'px';
 
+
             if (dir =='north'||dir =='south') {
-                blocks.images[i].setAttribute('height',size);
+                scale = 'scale(1,'+(coordinates[i].size/stretchedSize)+')';
+//                blocks.images[i].setAttribute('height',size);
                 blocks.rects[i].setAttribute('y',coord);
                 blocks.rects[i].setAttribute('height',size);
                 blocks.rects[i].setAttribute(
@@ -1900,7 +1988,8 @@ function (exports) {
                 blocks.patterns[i].setAttribute('x',offset);
                 blocks.patterns[i].setAttribute('height',size);
             } else {
-                blocks.images[i].setAttribute('width',size);
+                scale = 'scale('+(coordinates[i].size/stretchedSize)+',1)';
+//                blocks.images[i].setAttribute('width',size);
                 blocks.rects[i].setAttribute('x',coord);
                 blocks.rects[i].setAttribute('width',size);
                 blocks.rects[i].setAttribute(
@@ -1910,6 +1999,10 @@ function (exports) {
                 blocks.patterns[i].setAttribute('x',coord);
                 blocks.patterns[i].setAttribute('width',size);
             }
+
+            transform = [scale, translate, rotate].join(' ');
+
+            blocks.uses[i].setAttribute('transform', transform);
         }
     }
     
@@ -1927,11 +2020,14 @@ function (exports) {
      * @param {Number} containerSize in px
      * @param {Number} sideOffset
      * @param {Number} sideSize
+     * @param {Number} stretchedSize
      * @param {Number} areaSize
+     * @param {Number} areaSidSize
      */
     updateBlocks.div = function(
         dir, blocks, coordinates, container, containerSize,
-        sideOffset, sideSize, areaSize
+        sideOffset, sideSize, stretchedSize,
+        areaSize, areaSideSize
     ) {
         var style = {};
 
@@ -2119,7 +2215,8 @@ function (exports) {
                 this._updateBlocks(
                     dir, this._cmp.sides[dir].blocks, coordinates,
                     this._cmp.sides[dir].main, containerSize,
-                    beyond[sideOffsets[dir]], data.sideSize,
+                    beyond[sideOffsets[dir]],
+                    data.sideSize, data.stretchedSize,
                     areaSize, areaSideSize
                 );
             }
