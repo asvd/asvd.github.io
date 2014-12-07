@@ -947,8 +947,9 @@ function (exports) {
      */
     CachedImg.prototype.touchSVGImage = function() {
         if (this._SVGImage) {
+            console.log('tch');
             this._SVGImage.setAttribute(
-                'height', this._data.stretchedSize
+                'height', ''+this._data.stretchedSize+'px'
             );
         }
     }
@@ -2225,6 +2226,8 @@ function (exports) {
                     areaSideSize = geom.height;
                 }
 
+                this._images[dir].touchSVGImage();
+
                 this._updateBlocks(
                     dir, this._cmp.sides[dir].blocks, coordinates,
                     this._cmp.sides[dir].main, containerSize,
@@ -2233,7 +2236,6 @@ function (exports) {
                     areaSize, areaSideSize
                 );
 
-                this._images[dir].touchSVGImage();
             }
         }
     }
