@@ -884,6 +884,7 @@ function (exports) {
         this._sides = {};  // stretched canvases
         this._data = {};
 
+        this._SVGImage = null;
         this._SVGImageId = null;
 
         var me = this;
@@ -919,13 +920,13 @@ function (exports) {
      */
     var SVGImageCounter = 0;
     CachedImg.prototype.getSVGImageId = function() {
-        if (!this._SVGImageId) {
+        if (!this._SVGImage) {
             this._SVGImageId =
                 'SVG-Image-'+(SVGImageCounter++)+'-'+UNIQUE;
             var canvas = this._sides.north;
             var url = util.getCanvasDataURL(canvas);
             var defs = util.getCommonSVGDefs();
-            var image = util.genSVGElement('image', defs, {
+            this._SVGImage = util.genSVGElement('image', defs, {
                 id     : this._SVGImageId,
                 x      : '0',
                 y      : '0',
@@ -934,10 +935,22 @@ function (exports) {
                 preserveAspectRatio : 'none',
                 'xlink:href' : url
             });
-            
         }
 
         return this._SVGImageId;
+    }
+    
+    
+    /**
+     * Updates image geometry without changing it. Needed for IE,
+     * otherwise it will not redraw
+     */
+    CachedImg.prototype.touchSVGImage = function() {
+        if (this._SVGImage) {
+            this._SVGImage.setAttribute(
+                'height', this._data.stretchedSize
+            );
+        }
     }
     
 
@@ -2219,6 +2232,8 @@ function (exports) {
                     data.sideSize, data.stretchedSize,
                     areaSize, areaSideSize
                 );
+
+                this._images[dir].touchSVGImage();
             }
         }
     }
