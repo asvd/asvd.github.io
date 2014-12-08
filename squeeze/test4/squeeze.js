@@ -1904,8 +1904,6 @@ function (exports) {
      */
     Squeeze.prototype._initSide = function(dir, image) {
         var side = this._cmp.sides[dir];
-        util.setStyle(side, {
-        });
         side.blocks = this._createBlocks(
             dir, side.main, image
         );
@@ -1979,6 +1977,9 @@ function (exports) {
         blocks.svg.setAttribute('height', h);
         blocks.maskRect.setAttribute('width', w);
         blocks.maskRect.setAttribute('height', h);
+        
+        container.setAttribute('width', w);
+        container.setAttribute('height', h);
 
         var rotate = '';
         var translate = '';
