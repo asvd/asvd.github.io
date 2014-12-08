@@ -867,6 +867,8 @@ function (exports) {
 
             this._download();
 
+            this._touchTimeout = null;
+
             return this;
         }
     }
@@ -946,12 +948,24 @@ function (exports) {
      * otherwise it will not redraw
      */
     CachedImg.prototype.touchSVGImage = function() {
-        if (this._SVGImage) {
-            console.log('tch');
-            this._SVGImage.setAttribute(
-                'height', ''+this._data.stretchedSize+'px'
+        if (IS_IE && this._SVGImage) {
+            if (this._touchTimeout) {
+                clearTimeout(this._touchTimeout);
+            }
+
+            var me = this;
+            this._touchTimeout = setTimeout(
+                function() {
+                    me._doTouch();
+                }, 10
             );
         }
+    }
+    
+    CachedImg.prototype._doTouch = function() {
+        this._SVGImage.setAttribute(
+            'height', ''+this._data.stretchedSize+'px'
+        );
     }
     
 
@@ -1160,7 +1174,8 @@ function (exports) {
         }
 
         // layer may be a bit smaller depending on offset
-        maxLayerSize = Math.floor(maxLayerSize * .99);
+//        maxLayerSize = Math.floor(maxLayerSize * .99);
+//        maxLayerSize = Math.floor(maxLayerSize * .5);
         
         // how many virtual elements do we need to reach 1 px
         var virtualNum = 1 + Math.ceil(
@@ -1916,13 +1931,16 @@ function (exports) {
      * @param {Number} stretchedSize
      * @param {Number} areaSize
      * @param {Number} areaSidSize
+     * @param {CachedImg} image
      */
     updateBlocks.svg = function(
         dir, blocks, coordinates, container, containerSize,
         sideOffset,
         sideSize, stretchedSize,
-        areaSize, areaSideSize
+        areaSize, areaSideSize, image
     ) {
+        image.touchSVGImage();
+
         var w = 0, h = 0;
         if (dir == 'north'||dir == 'south') {
             w = areaSideSize;
@@ -2037,11 +2055,12 @@ function (exports) {
      * @param {Number} stretchedSize
      * @param {Number} areaSize
      * @param {Number} areaSidSize
+     * @param {CachedImg} image
      */
     updateBlocks.div = function(
         dir, blocks, coordinates, container, containerSize,
         sideOffset, sideSize, stretchedSize,
-        areaSize, areaSideSize
+        areaSize, areaSideSize, image
     ) {
         var style = {};
 
@@ -2226,14 +2245,13 @@ function (exports) {
                     areaSideSize = geom.height;
                 }
 
-                this._images[dir].touchSVGImage();
-
                 this._updateBlocks(
                     dir, this._cmp.sides[dir].blocks, coordinates,
                     this._cmp.sides[dir].main, containerSize,
                     beyond[sideOffsets[dir]],
                     data.sideSize, data.stretchedSize,
-                    areaSize, areaSideSize
+                    areaSize, areaSideSize,
+                    this._images[dir]
                 );
 
             }
