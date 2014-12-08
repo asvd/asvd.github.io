@@ -1962,11 +1962,10 @@ function (exports) {
         var coord = areaSize - containerSize;
         switch (dir) {
         case 'east':
-            style.left = coord;
+            style.left = Math.ceil(coord);
             break;
         case 'south':
-            console.log(coord);
-            style.top = coord;
+            style.top = Math.ceil(coord);
             break;
         }
 
