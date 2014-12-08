@@ -1960,14 +1960,14 @@ function (exports) {
         var coord = areaSize - containerSize;
         switch (dir) {
         case 'east':
-            style.left = coord;
+            style.left = Math.ceil(coord);
             break;
         case 'south':
                 // ??? ORLY?
                 // should always be int?
                 // do the same in updateBlocks.div?
                 // what if the container is itself float height?
-            style.top = coord;
+            style.top = Math.ceil(coord);
             break;
         }
 
@@ -1978,9 +1978,6 @@ function (exports) {
         blocks.maskRect.setAttribute('width', w);
         blocks.maskRect.setAttribute('height', h);
         
-        container.setAttribute('width', w);
-        container.setAttribute('height', h);
-
         var rotate = '';
         var translate = '';
         switch(dir) {
