@@ -2232,12 +2232,6 @@ function (exports) {
                     blockOffset += Math.round(blockSize);
                 }
 
-                coordinates[0].offset-=2;
-                coordinates[0].size+=5;
-
-                coordinates[1].offset-=4;
-                coordinates[1].size+=5;
-
                 var intensity = 1 - 1 / (beyond[dir]/MASK_SLOWNESS + 1);
                 var containerSize = Math.ceil(
                     intensity * data.maxLayerSize
