@@ -1960,14 +1960,14 @@ function (exports) {
         var coord = areaSize - containerSize;
         switch (dir) {
         case 'east':
-            style.left = Math.ceil(coord);
+            style.left = Math.ceil(coord)+1;
             break;
         case 'south':
                 // ??? ORLY?
                 // should always be int?
                 // do the same in updateBlocks.div?
                 // what if the container is itself float height?
-            style.top = Math.ceil(coord);
+            style.top = Math.ceil(coord)+1;
             break;
         }
 
