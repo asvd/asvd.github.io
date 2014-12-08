@@ -1962,10 +1962,14 @@ function (exports) {
         var coord = areaSize - containerSize;
         switch (dir) {
         case 'east':
-            style.left = Math.ceil(coord);
+            style.left = coord;
             break;
         case 'south':
-            style.top = Math.ceil(coord);
+                // ??? ORLY?
+                // should always be int?
+                // do the same in updateBlocks.div?
+                // what if the container is itself float height?
+            style.top = coord;
             break;
         }
 
@@ -2227,6 +2231,9 @@ function (exports) {
 
                     blockOffset += Math.round(blockSize);
                 }
+
+                blockSize[0]++;
+                blockOffset[0]--;
 
                 var intensity = 1 - 1 / (beyond[dir]/MASK_SLOWNESS + 1);
                 var containerSize = Math.ceil(
