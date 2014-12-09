@@ -1958,16 +1958,23 @@ function (exports) {
         util.setStyle(blocks.svg, style);
 
         var coord = areaSize - containerSize;
+
+        // ??? ORLY?
+        // should always be int?
+        // do the same in updateBlocks.div?
+        // what if the container is itself float height?
         switch (dir) {
+        case 'north':
+            style.top = -1;
+            break;
         case 'east':
             style.left = coord+1;
             break;
         case 'south':
-                // ??? ORLY?
-                // should always be int?
-                // do the same in updateBlocks.div?
-                // what if the container is itself float height?
             style.top = coord+1;
+            break;
+        case 'west':
+            style.left = -1;
             break;
         }
 
