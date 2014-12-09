@@ -1212,10 +1212,13 @@ function (exports) {
     var Resizable = function(elem, isBody) {
         this._elem = elem;
 
+        var me = this;
+        var handler = function() {
+            me.onresize();
+        }
+
         if (isBody) {
-            window.addEventListener(
-                'resize', this.onresize, false
-            );
+            window.addEventListener('resize', handler, false);
         } else {
             this._detector = util.sample.object.cloneNode(false);
             util.setStyle(this._detector, {
@@ -1230,10 +1233,9 @@ function (exports) {
                 zIndex        : -2048
             });
 
-            var me = this;
             this._detector.onload = function() {
                 this.contentDocument.defaultView.addEventListener(
-                    'resize', me.onresize, false
+                    'resize', handler, false
                 );
             }
 
