@@ -1207,13 +1207,14 @@ function (exports) {
      * Represents the element upgraded with the resize event detector
      * 
      * @param {Element} elem to upgarde
+     * @param {Boolean} isBody true if element is body
      */
-    var Resizable = function(elem) {
+    var Resizable = function(elem, isBody) {
         this._elem = elem;
 
-        if (this._elem.tagName == 'BODY') {
+        if (isBody) {
             document.defaultView.addEventListener(
-                'resize', me.onresize, false
+                'resize', this.onresize, false
             );
         } else {
             this._detector = util.sample.object.cloneNode(false);
@@ -1305,6 +1306,7 @@ function (exports) {
         var wrapper2Style = {};
         var createWrapper2 = false;
 
+        // avoid extra padding
         if (this._elem.nodeName.toLowerCase() == 'body') {
             var cs = window.getComputedStyle(this._elem, null);
             wrapper2Style.margin = cs.margin;
@@ -1353,7 +1355,6 @@ function (exports) {
 
         if (createWrapper2) {
             this._cmp.wrapper2 = util.sample.div.cloneNode(false);
-            this._cmp.wrapper2.setAttribute('id', 'wrapper2');
 
             util.setStyle(this._cmp.wrapper2, {
                 position  : 'relative',
@@ -1397,7 +1398,10 @@ function (exports) {
      */
     Squeeze.prototype._createResizable = function() {
         var me = this;
-        this._resizable = new Resizable(this._cmp.wrapper);
+        this._resizable = new Resizable(
+            this._cmp.wrapper,
+            this._elem.nodeName.toLowerCase() == 'body'
+        );
         this._resizable.onresize = function() {
             me._setGeometry();
             me._indicate();
