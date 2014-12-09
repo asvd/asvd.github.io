@@ -1213,7 +1213,7 @@ function (exports) {
         this._elem = elem;
 
         if (isBody) {
-            document.defaultView.addEventListener(
+            window.addEventListener(
                 'resize', this.onresize, false
             );
         } else {
