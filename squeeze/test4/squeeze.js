@@ -90,7 +90,6 @@ function (exports) {
                 'top, rgba(0,0,0,1), rgba(0,0,0,0) 100%'
             ),
 
-            // check against firefox actually
             svgReuse : IS_FIREFOX
         }
     };
@@ -1211,34 +1210,41 @@ function (exports) {
      */
     var Resizable = function(elem) {
         this._elem = elem;
-        this._detector = util.sample.object.cloneNode(false);
-        util.setStyle(this._detector, {
-            display       : 'block',
-            position      : 'absolute',
-            top           : 0,
-            left          : 0,
-            height        : '100%',
-            width         : '100%',
-            overflow      : 'hidden',
-            pointerEvents : 'none',
-            zIndex        : -2048
-        });
 
-        var me = this;
-        this._detector.onload = function() {
-            this.contentDocument.defaultView.addEventListener(
+        if (this._elem.tagName == 'BODY') {
+            document.defaultView.addEventListener(
                 'resize', me.onresize, false
             );
-        }
-
-        this._detector.type = 'text/html';
-
-        if (IS_IE) {
-            this._elem.appendChild(this._detector);
-            this._detector.data = 'about:blank';
         } else {
-            this._detector.data = 'about:blank';
-            this._elem.appendChild(this._detector);
+            this._detector = util.sample.object.cloneNode(false);
+            util.setStyle(this._detector, {
+                display       : 'block',
+                position      : 'absolute',
+                top           : 0,
+                left          : 0,
+                height        : '100%',
+                width         : '100%',
+                overflow      : 'hidden',
+                pointerEvents : 'none',
+                zIndex        : -2048
+            });
+
+            var me = this;
+            this._detector.onload = function() {
+                this.contentDocument.defaultView.addEventListener(
+                    'resize', me.onresize, false
+                );
+            }
+
+            this._detector.type = 'text/html';
+
+            if (IS_IE) {
+                this._elem.appendChild(this._detector);
+                this._detector.data = 'about:blank';
+            } else {
+                this._detector.data = 'about:blank';
+                this._elem.appendChild(this._detector);
+            }
         }
     }
 
@@ -1963,6 +1969,9 @@ function (exports) {
         // should always be int?
         // do the same in updateBlocks.div?
         // what if the container is itself float height?
+
+        // may not meet the border in some browsers / zoom-levels
+        // adding 1px to cover the border for sure
         switch (dir) {
         case 'north':
             style.top = -1;
