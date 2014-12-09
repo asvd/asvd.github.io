@@ -333,7 +333,8 @@ function (exports) {
             util.setStyle(svg, {
                 position : 'absolute',
                 width    : 0,
-                height   : 0
+                height   : 0,
+                display  : 'none'
             });
 
             util._commonSVGDefs = util.genSVGElement('defs', svg);
