@@ -4,7 +4,6 @@
  * 
  * @license MIT, see http://github.com/asvd/squeeze
  * Copyright (c) 2014 asvd <heliosframework@gmail.com> 
- * 
  */
 
 
@@ -19,20 +18,21 @@
 }(this,
 function (exports) {
 
-    // squeeze factor at the last frame
-    var MAXSQUEEZE = 1000;
+    var MAXSQUEEZE = 1000;   // max squeeze factor at the border
     var BLOCKSNUM = 1+Math.ceil(Math.log(MAXSQUEEZE)/Math.log(4));
 
-    // gradient mask speed coefficient
-    var MASK_SLOWNESS = 4000;
+    // indication size gain speed coefficient
+    var GAIN_SLOWNESS = 4000;
 
+    // string unique within a session
+    var UQ = 'squeeze-unique-' + (new Date().getTime());
 
 
     // Duck-typing feature detection
 
     /**
      * Checks if the CSS property can have the CSS function with the
-     * given name as a value
+     * given string as a value
      * 
      * @param {String} name of the property
      * @param {String} func
@@ -96,14 +96,13 @@ function (exports) {
 
 
     // implementations to use according to the available features
-
-    var SQUEEZE_ENABLED = true;
     var METHODS = {
         async  : features.event ? 'event' : 'setTimeout',
         mask   : null,
         canvas : null
     };
 
+    var SQUEEZE_ENABLED = true;
     if (features.canvas) {
         if (features.gradientMask.webkit) {
             METHODS.mask = 'webkit';
@@ -128,287 +127,16 @@ function (exports) {
         // cannot do anything without canvas
         SQUEEZE_ENABLED = false;
     }
-    
+
+
 // METHODS.canvas = 'svg';
 // METHODS.mask = 'svg';
-
-    
-    // string unique within a session
-    var UNIQUE = 'squeeze-unique-' + (new Date().getTime());
-
-
-    var util = {};
-
-    util.dir = ['north','east','south','west'];
-
-    util.sample = {
-        div    : document.createElement('div'),
-        img    : document.createElement('img'),
-        canvas : document.createElement('canvas'),
-        object : document.createElement('object')
-    };
-
-
-    /**
-     * Checks if the given element has the given class
-     * 
-     * @param {Element} elem to check against having the class
-     * @param {String} cls class name
-     */
-    util.hasClass = function(elem, cls) {
-        var result = false;
-        var list = elem.classList;
-        for (var i = 0; i < list.length; i++){
-            if (list[i] == cls) {
-                result = true;
-                break;
-            }
-        }
-
-        return result;
-    }
-
-
-    /**
-     * Applies the style to the element
-     * 
-     * @param {Element} elem to apply style to
-     * @param {Object} style
-     */
-    util.setStyle = function(elem, style) {
-        for (var key in style) {
-            if (style.hasOwnProperty(key)) {
-                elem.style[key] = style[key];
-            }
-        }
-    }
-    
-    
-    /**
-     * Removes all child nodes from the given element, and returns
-     * those as array
-     * 
-     * @param {Element} elem to remove nodes from
-     * 
-     * @returns {Array} nodes removed from the element
-     */
-    util.detachChildren = function(elem) {
-        var detached = [];
-
-        while (elem.firstChild) {
-            detached.push(elem.removeChild(elem.firstChild));
-        }
-
-        return detached;
-    }
-
-
-    /**
-     * Attaches the given set of nodes to the given element
-     * 
-     * @param {Element} elem to attach nodes to
-     * @param {Array} nodes to attach as children
-     */
-    util.attachChildren = function(elem, nodes) {
-        for (var i = 0; i < nodes.length; i++) {
-            elem.appendChild(nodes[i]);
-        }
-    }
-
-
-    /**
-     * Returns the string with the first letter capitalized
-     * 
-     * @param {String} str
-     * @returns {String}
-     */
-    util.cap1 = function(str){
-        return str.charAt(0).toUpperCase() + str.slice(1);
-    }
-    
-    
-    /**
-     * Returns cached copy of canvas dataURL, performs caching when
-     * needed
-     * 
-     * @param {Element} canvas to get dataURL for
-     * 
-     * @returns {String} dataURL with the canvas image
-     */
-    util.getCanvasDataURL = function(canvas) {
-        if (typeof canvas.squeeze_cached_dataURL == 'undefined') {
-            canvas.squeeze_cached_dataURL = canvas.toDataURL();
-        }
-
-        return canvas.squeeze_cached_dataURL;
-    }
-
-
-    /**
-     * Creates and returns a new canvas element
-     * 
-     * @param {Number} w width
-     * @param {Number} h height
-     * 
-     * @returns {Element} created canvas element
-     */
-    util.genCanvas = function(w,h) {
-        var canvas = util.sample.canvas.cloneNode(false);
-        canvas.width = w;
-        canvas.height = h;
-        util.setStyle(canvas, {
-            width   : w,
-            height  : h,
-            display : 'none'
-        });
-
-        return canvas;
-    }
-
-
-    /**
-     * Produces the canvas element containing the image from the given
-     * img element
-     * 
-     * @param {Element} img
-     * 
-     * @returns {Element} canvas
-     */
-    util.img2canvas = function(img) {
-        var canvas = util.genCanvas(img.width, img.height);
-        var ctx = canvas.getContext('2d');
-        ctx.drawImage(img,0,0);
-        return canvas;
-    }
-
-
-
-    /**
-     * Creates and returns a new SVG element
-     * 
-     * @param {String} name of the SVG element to create
-     * @param {Element} parent element
-     * @param {Object} attrs attributes for the new element
-     * 
-     * @returns {Element} newly created SVG element
-     */
-    util._svgNS = 'http://www.w3.org/2000/svg';
-    util._xlinkNS = 'http://www.w3.org/1999/xlink';
-    util.genSVGElement = function(name, parent, attrs) {
-        var elem = document.createElementNS(util._svgNS, name);
-
-        if (attrs) {
-            for (var key in attrs) {
-                if (attrs.hasOwnProperty(key)) {
-                    if (key.indexOf('xlink') != -1) {
-                        elem.setAttributeNS(
-                            util._xlinkNS, key, attrs[key]
-                        );
-                    } else {
-                        elem.setAttribute(key, attrs[key]);
-                    }
-                }
-            }
-        }
-
-        if (parent) {
-            parent.appendChild(elem);
-        }
-
-        return elem;
-    }
-    
-    
-    /**
-     * Generates (if not done yet) an SVG element with a <defs>
-     * section and returns the <defs> which is intended to store
-     * common SVG objects later reused along the page
-     * 
-     * @returns {Element} common defs element
-     */
-    util._commonSVGDefs = null;
-    util.getCommonSVGDefs = function() {
-        if (!util._commonSVGDefs) {
-            var svg = util.genSVGElement('svg', document.body);
-            util.setStyle(svg, {
-                position : 'absolute',
-                width    : 0,
-                height   : 0,
-                display  : 'none'
-            });
-
-            util._commonSVGDefs = util.genSVGElement('defs', svg);
-        }
-
-        return util._commonSVGDefs;
-    }
-
-
-
-    /**
-     * Generates a linearGradient SVG element in the given direction
-     * 
-     * @param {Element} paretn parent element (defs)
-     * @param {String} dir gradient direction (north, east, ...)
-     * @param {String} id of the gradient to assign
-     * 
-     * @returns {Element} generated element
-     */
-    util.genSVGLinearGradient = function(parent, dir, id) {
-        var gradientAttr = {
-            x1: '0%',
-            y1: '0%',
-            x2: '0%',
-            y2: '0%'
-        };
-
-        if (dir) {
-            var full = {
-                north : 'y2',
-                east  : 'x1',
-                south : 'y1',
-                west  : 'x2'
-            };
-
-            gradientAttr[full[dir]] = '100%';
-        }
-
-        if (id) {
-            gradientAttr.id = id;
-        }
-
-        var linearGradient = util.genSVGElement(
-            'linearGradient', parent, gradientAttr
-        );
-
-        var stop1 = util.genSVGElement(
-            'stop', linearGradient, {
-                'stop-color': 'white',
-                offset: '0%'
-            }
-        );
-
-        var stop2 = util.genSVGElement(
-            'stop', linearGradient, {
-                'stop-color': 'black',
-                offset: '100%'
-            }
-        );
-
-        return linearGradient;
-    }
-    
-    
     
 
-
-
-    var methods = {};
-
-
+    // browser-dependent implementations
+    var impl = {};
 
     // applying a transparency mask in different browsers
-
     var gradientMask = {};
 
     /**
@@ -419,7 +147,7 @@ function (exports) {
      * @return {String} mask id to reuse
      */
     var genMaskSVG = function(dir) {
-        var id = 'svg-mask-'+dir+'-'+UNIQUE;
+        var id = 'svg-mask-'+dir+'-'+UQ;
         var maskId = 'mask-'+id;
         var gradientId = 'gradient-'+id;
 
@@ -430,22 +158,18 @@ function (exports) {
             defs, dir, gradientId
         );
 
-        var mask = util.genSVGElement(
-            'mask', defs, {
-                id               : maskId,
-                maskUnits        : 'objectBoundingBox',
-                maskContentUnits : 'objectBoundingBox'
-            }
-        );
+        var mask = util.genSVGElement('mask', defs, {
+            id               : maskId,
+            maskUnits        : 'objectBoundingBox',
+            maskContentUnits : 'objectBoundingBox'
+        });
 
-        var rect = util.genSVGElement(
-            'rect', mask, {
-                y      : '0',
-                width  : '1',
-                height : '1',
-                fill   : 'url(#'+gradientId+')'
-            }
-        );
+        var rect = util.genSVGElement('rect', mask, {
+            y      : '0',
+            width  : '1',
+            height : '1',
+            fill   : 'url(#'+gradientId+')'
+        });
 
         util.setStyle(svg, {
             position : 'absolute',
@@ -464,6 +188,7 @@ function (exports) {
         south : null,
         west  : null
     };
+
 
     /**
      * Creates gradient mask on the given component
@@ -547,16 +272,16 @@ function (exports) {
 
 
     /**
-     * Applies gradient mask on the given component
+     * Applies gradient mask to the given component
      * 
      * @param {Element} elem DOM element to apply mask to
      * @param {String} dir direction of the mask
      */
-    methods.gradientMask = gradientMask[METHODS.mask]||null;
+    impl.gradientMask = gradientMask[METHODS.mask]||null;
 
 
 
-    // Using canvas as an element background in different browsers
+    // Using canvas as a background in different browsers
     var backgroundCanvas = {};
 
 
@@ -590,10 +315,7 @@ function (exports) {
     var canvasCSSCounter = 0;
     backgroundCanvas.webkit = function(elem, canvas) {
         if (typeof canvas.CSSContextId == 'undefined') {
-            var id = 'canvasCSSContext-'+
-                (canvasCSSCounter++)+'-'+
-                UNIQUE;
-
+            var id = 'canvasCSSContext-'+(canvasCSSCounter++)+'-'+UQ;
             var ctx = document.getCSSCanvasContext(
                 '2d', id, canvas.width, canvas.height
             );
@@ -620,9 +342,7 @@ function (exports) {
     var canvasMozElementCounter = 0;
     backgroundCanvas.mozElement = function(elem, canvas) {
         if (!canvas.getAttribute('id')) {
-            var id = 'MozElement-'+
-                (canvasMozElementCounter++)+'-'+
-                UNIQUE;
+            var id = 'MozElement-'+(canvasMozElementCounter++)+'-'+UQ;
 
             canvas.setAttribute('id', id);
             util.setStyle(canvas, {
@@ -639,8 +359,7 @@ function (exports) {
     }
 
 
-    methods.backgroundCanvas = backgroundCanvas[METHODS.canvas]||null;
-
+    impl.backgroundCanvas = backgroundCanvas[METHODS.canvas]||null;
 
 
 
@@ -661,7 +380,7 @@ function (exports) {
         window.postMessage(asyncMsg, '*');
     }
     var asyncs = [];
-    var asyncMsg = 'async-' + UNIQUE;
+    var asyncMsg = 'async-' + UQ;
     var invoke = function(event) {
         if (event.source == window &&
              event.data == asyncMsg) {
@@ -674,7 +393,6 @@ function (exports) {
     window.addEventListener('message', invoke, true);
 
 
-
     /**
      * Performs a method asynchronously
      * 
@@ -685,15 +403,304 @@ function (exports) {
      * @param {Array} args
      */
     async.setTimeout = function(func, obj, args) {
-       setTimeout(
-            function() {
-                func.apply(obj||null, args||[]);
-            }, 0
-       );
+       setTimeout(function() {
+           func.apply(obj||null, args||[]);
+       }, 0);
     }
 
-    methods.async = async[METHODS.async];
+    impl.async = async[METHODS.async];
     
+
+
+    var util = {};
+
+    util.dir = ['north','east','south','west'];
+
+    util.isVertical = {
+        north: true,
+        east: false,
+        south: true,
+        west: false
+    };
+
+    util.sample = {
+        div    : document.createElement('div'),
+        img    : document.createElement('img'),
+        canvas : document.createElement('canvas'),
+        object : document.createElement('object')
+    };
+
+
+    /**
+     * Checks if the given element has the given class
+     * 
+     * @param {Element} elem to check against having the class
+     * @param {String} cls class name
+     * 
+     * @returns {Boolean}
+     */
+    util.hasClass = function(elem, cls) {
+        var result = false;
+        var list = elem.classList;
+        for (var i = 0; i < list.length; i++){
+            if (list[i] == cls) {
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+
+    /**
+     * Applies the style to the element
+     * 
+     * @param {Element} elem to apply style to
+     * @param {Object} style
+     */
+    util.setStyle = function(elem, style) {
+        for (var key in style) {
+            if (style.hasOwnProperty(key)) {
+                elem.style[key] = style[key];
+            }
+        }
+    }
+    
+    
+    /**
+     * Applies the set of attributes to the element
+     * 
+     * @param {Element} elem to set attributes for
+     * @param {Object} attributes
+     */
+    util.setAttributes = function(elem, attributes) {
+        for (var key in attributes) {
+            if (attributes.hasOwnProperty(key)) {
+                elem.setAttribute(key, attributes[key]);
+            }
+        }
+    }
+    
+    
+    /**
+     * Casts the value to the string and adds 'px' to the end
+     * 
+     * @param {Number} value
+     * 
+     * @returns {String}
+     */
+    util.px = function(value) {
+        return '' + value + 'px';
+    }
+    
+    
+    /**
+     * Removes all child nodes from the given element, returns those
+     * as array
+     * 
+     * @param {Element} elem to remove nodes from
+     * 
+     * @returns {Array} nodes removed from the element
+     */
+    util.detachChildren = function(elem) {
+        var detached = [];
+        while (elem.firstChild) {
+            detached.push(elem.removeChild(elem.firstChild));
+        }
+
+        return detached;
+    }
+
+
+    /**
+     * Attaches the given set of nodes to the given element
+     * 
+     * @param {Element} elem to attach nodes to
+     * @param {Array} nodes to attach as children
+     */
+    util.attachChildren = function(elem, nodes) {
+        for (var i = 0; i < nodes.length; i++) {
+            elem.appendChild(nodes[i]);
+        }
+    }
+
+
+    /**
+     * Returns the string with the first letter capitalized
+     * 
+     * @param {String} str
+     * @returns {String}
+     */
+    util.cap1 = function(str){
+        return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+    
+    
+    /**
+     * Returns a cached copy of dataURL of the canvas, performs
+     * caching if needed
+     * 
+     * @param {Element} canvas
+     * 
+     * @returns {String} dataURL with the canvas image
+     */
+    util.getCanvasDataURL = function(canvas) {
+        if (typeof canvas.squeeze_cached_dataURL == 'undefined') {
+            canvas.squeeze_cached_dataURL = canvas.toDataURL();
+        }
+
+        return canvas.squeeze_cached_dataURL;
+    }
+
+
+    /**
+     * Creates and returns a new canvas element
+     * 
+     * @param {Number} w width
+     * @param {Number} h height
+     * 
+     * @returns {Element} created canvas element
+     */
+    util.genCanvas = function(w,h) {
+        var canvas = util.sample.canvas.cloneNode(false);
+        canvas.width = w;
+        canvas.height = h;
+        util.setStyle(canvas, {
+            width   : w,
+            height  : h,
+            display : 'none'
+        });
+
+        return canvas;
+    }
+
+
+    /**
+     * Produces the canvas element containing the image from the given
+     * img element
+     * 
+     * @param {Element} img
+     * 
+     * @returns {Element} canvas
+     */
+    util.img2canvas = function(img) {
+        var canvas = util.genCanvas(img.width, img.height);
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0);
+        return canvas;
+    }
+
+
+    /**
+     * Creates and returns a new SVG element
+     * 
+     * @param {String} name of the SVG element to create
+     * @param {Element} parent element
+     * @param {Object} attrs attributes for the new element
+     * 
+     * @returns {Element} newly created SVG element
+     */
+    util._svgNS = 'http://www.w3.org/2000/svg';
+    util._xlinkNS = 'http://www.w3.org/1999/xlink';
+    util.genSVGElement = function(name, parent, attrs) {
+        var elem = document.createElementNS(util._svgNS, name);
+        if (attrs) {
+            for (var key in attrs) {
+                if (attrs.hasOwnProperty(key)) {
+                    if (key.indexOf('xlink') != -1) {
+                        elem.setAttributeNS(
+                            util._xlinkNS, key, attrs[key]
+                        );
+                    } else {
+                        elem.setAttribute(key, attrs[key]);
+                    }
+                }
+            }
+        }
+
+        if (parent) {
+            parent.appendChild(elem);
+        }
+
+        return elem;
+    }
+    
+    
+    /**
+     * Generates (if not generated yet) an SVG element with a <defs>
+     * section and returns the <defs> which is intended to store
+     * common SVG objects to be later reused along the application
+     * 
+     * @returns {Element} common defs element
+     */
+    util._commonSVGDefs = null;
+    util.getCommonSVGDefs = function() {
+        if (!util._commonSVGDefs) {
+            var svg = util.genSVGElement('svg', document.body);
+            util.setStyle(svg, {
+                width    : 0,
+                height   : 0,
+                position : 'absolute',
+                display  : 'none'
+            });
+
+            util._commonSVGDefs = util.genSVGElement('defs', svg);
+        }
+
+        return util._commonSVGDefs;
+    }
+
+
+    /**
+     * Generates a linearGradient SVG element in the given direction
+     * 
+     * @param {Element} paretn parent element (defs)
+     * @param {String} dir gradient direction (north, east, ...)
+     * @param {String} id of the gradient to assign
+     * 
+     * @returns {Element} generated element
+     */
+    util.genSVGLinearGradient = function(parent, dir, id) {
+        var gradientAttr = {
+            x1: '0%',
+            y1: '0%',
+            x2: '0%',
+            y2: '0%'
+        };
+
+        if (dir) {
+            var full = {
+                north : 'y2',
+                east  : 'x1',
+                south : 'y1',
+                west  : 'x2'
+            };
+
+            gradientAttr[full[dir]] = '100%';
+        }
+
+        if (id) {
+            gradientAttr.id = id;
+        }
+
+        var linearGradient = util.genSVGElement(
+            'linearGradient', parent, gradientAttr
+        );
+
+        var stop1 = util.genSVGElement('stop', linearGradient, {
+            'stop-color': 'white',
+            offset: '0%'
+        });
+
+        var stop2 = util.genSVGElement('stop', linearGradient, {
+            'stop-color': 'black',
+            offset: '100%'
+        });
+
+        return linearGradient;
+    }
+
     
 
     // Whenable pattern
@@ -706,7 +713,7 @@ function (exports) {
     wl.Whenable = function() {
         this._emitted = false;  // event state, emitted or not
         this._listeners = [];
-        this._result = [];  // args transfered to the listener
+        this._result = [];      // args transfered to the listener
     }
 
       
@@ -732,7 +739,7 @@ function (exports) {
         }
     }
       
-    
+
     /**
      * @returns {Function} whenable subscriber to the event
      */
@@ -792,7 +799,7 @@ function (exports) {
      * @param {Array} args to provide to the listener
      */
     wl.Whenable.prototype._invoke = function(listener, ctx, args) {
-        methods.async(listener, ctx, args);
+        impl.async(listener, ctx, args);
     }
 
 
@@ -802,14 +809,18 @@ function (exports) {
      * 
      * @param {Function} when1
      * @param {Function} when2
+     * @param ...
      * 
      * @returns {Function}
      */
-    wl.whenAny = function(when1, when2) {
+    wl.whenAny = function() {
         var when = new wl.Whenable;
 
-        when1(function(){when.emit()});
-        when2(function(){when.emit()});
+        for (var i = 0; i < arguments.length; i++) {
+            arguments[i](function(){
+                when.emit();
+            });
+        }
 
         return when.getSubscriber();
     }
@@ -822,21 +833,28 @@ function (exports) {
      * 
      * @param {Function} when1
      * @param {Function} when2
+     * @param ...
      * 
      * @returns {Function}
      */
-    wl.whenAll = function(when1, when2) {
-        var when = new wl.Whenable;
+    wl.whenAll = function() {
+        if (arguments.length == 1) {
+            return arguments[0];
+        } else {
+            var whenAll = new wl.Whenable;
 
-        when1(function(){
-            when2(function(){
-                when.emit();
+            var whenFirst = arguments[0];
+            var rest = [].slice.call(arguments,1);
+            var whenRest = wl.whenAll.apply(null,rest);
+            whenFirst(function(){
+                whenRest(function(){
+                    whenAll.emit();
+                });
             });
-        });
 
-        return when.getSubscriber();
+            return whenAll.getSubscriber();
+        }
     }
-    
     
     
     /**
@@ -849,9 +867,9 @@ function (exports) {
 
 
     /**
-     * Represents a single cached background image
+     * Represents a single cached stretchable image
      * 
-     * Loads an image, creates stretched canvas
+     * Loads an image, creates a stretched canvas
      */
     var CachedImg = function(url) {
         if (typeof imgCache[url] != 'undefined') {
@@ -860,23 +878,19 @@ function (exports) {
             imgCache[url] = this;
 
             this._url = url;
+            this._touchTimeout = null;
             this._load = new wl.Whenable;
             this._fail = new wl.Whenable;
             this.whenLoaded = this._load.getSubscriber();
             this.whenFailed = this._fail.getSubscriber();
 
             this._download();
-
-            this._touchTimeout = null;
-
-            return this;
         }
     }
     
     
-    
     /**
-     * Loads an image
+     * Loads the image
      */
     CachedImg.prototype._download = function() {
         this._img = util.sample.img.cloneNode(false);
@@ -891,6 +905,7 @@ function (exports) {
 
         var me = this;
         this._img.addEventListener('load', function() {
+            document.body.removeChild(me._img);
             me._init();
             me._load.emit();
         }, false);
@@ -915,7 +930,7 @@ function (exports) {
     
     /**
      * Creates (if not done yet) an SVG image element containing the
-     * stretched image and stored in the common <defs> element, and
+     * stretched image and stored in the common <defs> element,
      * returns its id
      * 
      * @param {String} id of an SVG element with the stretched image
@@ -923,8 +938,7 @@ function (exports) {
     var SVGImageCounter = 0;
     CachedImg.prototype.getSVGImageId = function() {
         if (!this._SVGImage) {
-            this._SVGImageId =
-                'SVG-Image-'+(SVGImageCounter++)+'-'+UNIQUE;
+            this._SVGImageId ='SVG-Image-'+(SVGImageCounter++)+'-'+UQ;
             var canvas = this._sides.north;
             var url = util.getCanvasDataURL(canvas);
             var defs = util.getCommonSVGDefs();
@@ -932,8 +946,8 @@ function (exports) {
                 id     : this._SVGImageId,
                 x      : '0',
                 y      : '0',
-                width  : '' + canvas.width + 'px',
-                height : '' + canvas.height + 'px',
+                width  : util.px(canvas.width),
+                height : util.px(canvas.height),
                 preserveAspectRatio : 'none',
                 'xlink:href' : url
             });
@@ -964,7 +978,7 @@ function (exports) {
     
     CachedImg.prototype._doTouch = function() {
         this._SVGImage.setAttribute(
-            'height', ''+this._data.stretchedSize+'px'
+            'height', util.px(this._data.stretchedSize)
         );
     }
     
@@ -983,8 +997,6 @@ function (exports) {
      * images, and with some additional data later used for rendering
      */
     CachedImg.prototype._init = function(image) {
-        document.body.removeChild(this._img);
-
         var original = util.img2canvas(this._img);
         var stretched = this._stretch(original);
         this._data = this._genData(stretched.canvas);
@@ -993,9 +1005,9 @@ function (exports) {
             
         var rotated = this._rotate(stretched.canvas);
         this._sides.north = stretched.canvas;
-        this._sides.east = rotated.east;
+        this._sides.east  = rotated.east;
         this._sides.south = rotated.south;
-        this._sides.west = rotated.west;
+        this._sides.west  = rotated.west;
     }
     
     
@@ -1122,7 +1134,7 @@ function (exports) {
     /**
      * Rotates the given canvas in every other direction
      * 
-     * @param {Element} north canvas in original position
+     * @param {Element} north canvas in its original position
      * 
      * @returns {Object} containing rotated canvases
      */
@@ -1146,9 +1158,9 @@ function (exports) {
         ctxW.drawImage(north, -w, 0);
 
         return {
-            east: east,
-            south: south,
-            west: west
+            east  : east,
+            south : south,
+            west  : west
         };
     }
     
@@ -1157,7 +1169,7 @@ function (exports) {
      * Calculates additional data for the given stretched canvas
      * element later reused for calculations
      * 
-     * @param {Element} to generate data for
+     * @param {Element} canvas to generate data for
      * 
      * @returns {Object} data
      */
@@ -1166,21 +1178,15 @@ function (exports) {
         var h = canvas.height;
 
         // size of the side layer
-        var maxLayerSize = 0;
+        var containerMaxSize = 0;
         var curSize = h;
         for (var i = 1; i < BLOCKSNUM; i++) {
             curSize /= 4;
-            maxLayerSize += Math.floor(curSize);
+            containerMaxSize += Math.floor(curSize);
         }
 
-        // layer may be a bit smaller depending on offset
-//        maxLayerSize = Math.floor(maxLayerSize * .99);
-//        maxLayerSize = Math.floor(maxLayerSize * .5);
-        
         // how many virtual elements do we need to reach 1 px
-        var virtualNum = 1 + Math.ceil(
-            Math.log(1/h) / Math.log(1/4)
-        );
+        var virtualNum = 1 + Math.ceil(Math.log(1/h) / Math.log(1/4));
         
         // total height of all virtual elements altogether
         var virtualSize = 0;
@@ -1196,7 +1202,7 @@ function (exports) {
             // texture size along the side
             sideSize      : w,
             // maximal size of the indicator layer
-            maxLayerSize : maxLayerSize,
+            containerMaxSize : containerMaxSize,
             // values used during calculations
             virtualPow   : 1-Math.pow(1/4, virtualNum-1),
             virtualSize3 : virtualSize*3
@@ -1212,14 +1218,15 @@ function (exports) {
      */
     var Resizable = function(elem, isBody) {
         this._elem = elem;
+        this._isBody = isBody;
 
         var me = this;
-        var handler = function() {
+        this._handler = function() {
             me.onresize();
         }
 
-        if (isBody) {
-            window.addEventListener('resize', handler, false);
+        if (this._isBody) {
+            window.addEventListener('resize', this._handler, false);
         } else {
             this._detector = util.sample.object.cloneNode(false);
             util.setStyle(this._detector, {
@@ -1236,7 +1243,7 @@ function (exports) {
 
             this._detector.onload = function() {
                 this.contentDocument.defaultView.addEventListener(
-                    'resize', handler, false
+                    'resize', this._handler, false
                 );
             }
 
@@ -1264,7 +1271,13 @@ function (exports) {
      * Removes the resize detector from the element
      */
     Resizable.prototype.destroy = function() {
-        this._elem.removeChild(this._detector);
+        if (this._isBody) {
+            window.removeEventListener(
+                'resize', this._handler, false
+            );
+        } else {
+            this._elem.removeChild(this._detector);
+        }
     }
     
 
@@ -1276,13 +1289,14 @@ function (exports) {
      */
     var Squeeze = function(elem) {
         this._elem = elem;
+        this._isBody = (this._elem.nodeName.toLowerCase() == 'body');
         this._hideScrollbars();
         this._createResizable();
         this._createSides();
         this._loadImages();
     }
     
-    
+
     /**
      * Returns the element corresponding to the Squeeze
      */
@@ -1293,51 +1307,53 @@ function (exports) {
     
     /**
      * Upgrades the element with the set of additional elements one
-     * inside another so that the scrollbars are properly hidden
+     * inside another so that the scrollbars are properly hidden, but
+     * the container geometry is kept
      */
     Squeeze.prototype._hideScrollbars = function() {
         var children = util.detachChildren(this._elem);
+        var newStyle = {overflow : 'hidden'};
 
-        this._styleBackup = {
+        this._origCSS = {
             overflow : this._elem.style.overflow
         };
 
-        var newStyle = {
-            overflow : 'hidden'
-        };
-
-        var wrapper2Style = {};
+        // wrapper2 to avoid extra padding for the body element
         var createWrapper2 = false;
+        var wrapper2Style = {};
+        if (this._isBody) {
+            var margins = [
+                'margin', 'marginTop', 'marginRight',
+                'marginBottom', 'marginLeft'
+            ];
 
-        // avoid extra padding
-        if (this._elem.nodeName.toLowerCase() == 'body') {
             var cs = window.getComputedStyle(this._elem, null);
-            wrapper2Style.margin = cs.margin;
-            wrapper2Style.marginTop = cs.marginTop;
-            wrapper2Style.marginRight = cs.marginRight;
-            wrapper2Style.marginBottom = cs.marginBottom;
-            wrapper2Style.marginLeft = cs.marginLeft;
-            this._styleBackup.margin = this._elem.style.margin;
-            this._styleBackup.marginTop = this._elem.style.marginTop;
-            this._styleBackup.marginRight = this._elem.style.marginRight;
-            this._styleBackup.marginBottom = this._elem.style.marginBottom;
-            this._styleBackup.marginLeft = this._elem.style.marginLeft;
+            var i, m;
+            for (i = 0; i < margins.length; i++) {
+                m = margins[i];
+                wrapper2Style[m] = cs[m];
+                this._origCSS[m] = this._elem.style[m];
+            }
+
             newStyle.margin = 0;
             createWrapper2 = true;
         }
 
         util.setStyle(this._elem, newStyle);
 
-        this._cmp = {};
+        this._cmp = {
+            wrapper   : util.sample.div.cloneNode(false),
+            scroller  : util.sample.div.cloneNode(false),
+            container : util.sample.div.cloneNode(false)
+        };
 
-        this._cmp.wrapper = util.sample.div.cloneNode(false);
         util.setStyle(this._cmp.wrapper, {
-            position  : 'relative',
+            position : 'relative',
             overflow : 'hidden',
-            width: '100%',
-            height: '100%'
+            width    : '100%',
+            height   : '100%'
         });
-        this._cmp.scroller = util.sample.div.cloneNode(false);
+
         util.setStyle(this._cmp.scroller, {
             position  : 'absolute',
             overflowX : 'scroll',
@@ -1346,15 +1362,11 @@ function (exports) {
         
         var id = this._elem.getAttribute('id');
         if (id) {
-            this._cmp.scroller.setAttribute('id', id + '-scroller');
+            this._cmp.scroller.setAttribute('id', id+'-scroller');
         }
-
-        this._cmp.container = util.sample.div.cloneNode(false);
 
         util.attachChildren(this._cmp.container, children);
         this._cmp.scroller.appendChild(this._cmp.container);
-
-
 
         if (createWrapper2) {
             this._cmp.wrapper2 = util.sample.div.cloneNode(false);
@@ -1374,7 +1386,6 @@ function (exports) {
         }
 
         this._elem.appendChild(this._cmp.wrapper);
-
     }
 
 
@@ -1386,9 +1397,9 @@ function (exports) {
         var children = util.detachChildren(this._cmp.container);
         util.detachChildren(this._elem);
 
-        for (var prop in this._styleBackup) {
-            if (this._styleBackup.hasOwnProperty(prop)) {
-                this._elem.style[prop] = this._styleBackup[prop];
+        for (var prop in this._origCSS) {
+            if (this._origCSS.hasOwnProperty(prop)) {
+                this._elem.style[prop] = this._origCSS[prop];
             }
         }
         
@@ -1402,8 +1413,7 @@ function (exports) {
     Squeeze.prototype._createResizable = function() {
         var me = this;
         this._resizable = new Resizable(
-            this._cmp.wrapper,
-            this._elem.nodeName.toLowerCase() == 'body'
+            this._cmp.wrapper, this._isBody
         );
         this._resizable.onresize = function() {
             me._setGeometry();
@@ -1435,47 +1445,37 @@ function (exports) {
     }
 
 
-
     /**
      * Creates side components
      */
     Squeeze.prototype._createSides = function() {
         this._cmp.sides = {};
 
-        var side, style, dir;
+        // north and south are on top
         var dirs = ['east','west','north','south'];
+        var side, style, dir;
         for (var i = 0; i < dirs.length; i++) {
             dir = dirs[i];
+            var vertical = util.isVertical[dir];
+
             style = {
                 pointerEvents : 'none',
                 display  : 'inline',
                 position : 'absolute',
                 overflow : 'hidden',
-                width    : 0,
-                height   : 0,
+                width    : vertical ? '100%' : 0,
+                height   : vertical ? 0 : '100%',
                 top      : 0,
                 left     : 0
             };
 
-            switch(dir) {
-            case 'north':
-            case 'south':
-                style.width = '100%';
-                break;
-
-            case 'east':
-            case 'west':
-                style.height = '100%';
-                break;
-            }
-            
             side = util.sample.div.cloneNode(false);
             util.setStyle(side, style);
 
             this._cmp.sides[dir] = {
-                main: side,
-                blocks: [],
-                ready : false
+                main   : side,
+                blocks : [],
+                ready  : false
             };
 
             this._cmp.wrapper.appendChild(side);
@@ -1494,8 +1494,7 @@ function (exports) {
         }
     }
     
-    
-    
+
     /**
      * Initiates loading of images corresponding to each side
      */
@@ -1504,19 +1503,13 @@ function (exports) {
 
         var me = this;
         var sideInitialized = {};
-        var url = this._elem.getAttribute('squeezeImg')||'';
-        var img, dir;
+        var defaultUrl = this._elem.getAttribute('squeezeImg')||'';
+        var img, dir, url;
         for (var i = 0; i < util.dir.length; i++) {
             dir = util.dir[i];
-            img = new CachedImg(
-                this._elem.getAttribute(
-                    'squeezeImg'+util.cap1(dir)
-                )||url
-            );
-
+            url = this._elem.getAttribute('squeezeImg'+util.cap1(dir));
+            img = new CachedImg(url||defaultUrl);
             sideInitialized[dir] = new wl.Whenable;
-
-            this._images[dir] = img;
             img.whenLoaded(
                 (function(dir, img){
                      return function() {
@@ -1525,6 +1518,8 @@ function (exports) {
                      }
                  })(dir, img)
             );
+
+            this._images[dir] = img;
         }
         
         wl.whenAll(
@@ -1545,13 +1540,8 @@ function (exports) {
                 this._images.west.whenFailed
             )
         )(function(){
- var newtime = (new Date).getTime();
- console.log(newtime-time);
             me._indicate();
         });
-
- var time = (new Date).getTime();
-
 
         this._cmp.scroller.addEventListener(
             'scroll', function(){me._indicate();}, false
@@ -1560,8 +1550,6 @@ function (exports) {
     
 
     // initializes a set of blocks on each side
-
-    var createBlocks = {};
 
     if (METHODS.canvas == 'svg') {
         /**
@@ -1576,9 +1564,9 @@ function (exports) {
             );
 
             var mask = util.genSVGElement('mask', defs, {
-                x : '0',
-                y : '0',
-                width : '100%',
+                x      : '0',
+                y      : '0',
+                width  : '100%',
                 height : '100%'
             });
 
@@ -1586,9 +1574,9 @@ function (exports) {
             var rectHeight = '0';
 
             var maskRect = util.genSVGElement('rect', mask, {
-                x : '0',
-                y : '0',
-                width : '0',
+                x      : '0',
+                y      : '0',
+                width  : '0',
                 height : '0'
             });
 
@@ -1600,9 +1588,9 @@ function (exports) {
 
             for (var i = 0; i < BLOCKSNUM; i++) {
                 patterns[i] = util.genSVGElement('pattern', defs, {
-                    x : '0',
-                    y : '0',
-                    width : '0px',
+                    x      : '0',
+                    y      : '0',
+                    width  : '0px',
                     height : '0px',
                     patternUnits : 'userSpaceOnUse'
                 });
@@ -1617,10 +1605,10 @@ function (exports) {
 
             util.setStyle(svg, {
                 position: 'absolute',
-                top : 0,
-                left : 0,
-                width: 0,
-                height: 0
+                top    : 0,
+                left   : 0,
+                width  : 0,
+                height : 0
             });
 
             return svg;
@@ -1630,11 +1618,11 @@ function (exports) {
     }
     
 
-
     /**
      * Creates a set of blocks for the scrolling indication
      * 
-     * Blocks are created within a single SVG element
+     * Blocks are created within a single SVG element, reuses the
+     * template created above
      * 
      * @param {String} dir direction of indication
      * @param {Element} container to create blocks on
@@ -1643,13 +1631,12 @@ function (exports) {
      * @returns {Object} set of created elements
      */
     var svgBlockCounter = 0;
-    createBlocks.svg = function(dir, container, image) {
+    var createBlocksSVG = function(dir, container, image) {
+        var vertical = util.isVertical[dir];
         var canvas = image.getSides()[dir];
         var geom = container.getBoundingClientRect();
 
-        var blocksetId = 'svgBlock-'+
-                (svgBlockCounter++)+'-'+
-                UNIQUE;
+        var blocksetId = 'svgBlock-'+(svgBlockCounter++)+'-'+UQ;
         var gradientId = 'gradient-'+blocksetId;
         var maskId = 'mask-'+blocksetId;
 
@@ -1670,31 +1657,21 @@ function (exports) {
         var mask = defs.childNodes[1];
         mask.setAttribute('id', maskId);
 
-        var rectWidth = '100%';
-        var rectHeight = '100%';
-        if (dir == 'north' || dir == 'south') {
-            rectHeight = '0';
-        } else {
-            rectWidth = '0';
-        }
+        var rectWidth  = vertical ? '100%' : 0;
+        var rectHeight = vertical ? 0 : '100%';
         
         var maskRect = mask.childNodes[0];
-        maskRect.setAttribute('width', rectWidth);
-        maskRect.setAttribute('height', rectHeight);
-        maskRect.setAttribute('style',
-            'stroke: none; fill: url(#'+gradientId+')');
+        util.setAttributes(maskRect, {
+            width  : rectWidth,
+            height : rectHeight,
+            style  :'stroke: none; fill: url(#'+gradientId+')'
+        });
 
         var g = svg.childNodes[1];
         g.setAttribute('style', 'mask:url(#'+maskId+');');
         
-        var blockWidth = 0;
-        var blockHeight = 0;
-
-        if (dir == 'north' || dir == 'south') {
-            blockWidth = canvas.width;
-        } else {
-            blockHeight = canvas.height;
-        }
+        var blockWidth  = vertical ? canvas.width : 0;
+        var blockHeight = vertical ? 0 : canvas.height;
 
         var patternId, useId, rectId;
         var imageId = image.getSVGImageId();
@@ -1705,9 +1682,11 @@ function (exports) {
         for (var i = 0; i < BLOCKSNUM; i++) {
             patternId = 'pattern-'+i+'-'+blocksetId;
             patterns[i] = defs.childNodes[i+2];
-            patterns[i].setAttribute('id', patternId);
-            patterns[i].setAttribute('width', ''+blockWidth+'px');
-            patterns[i].setAttribute('height', ''+blockHeight+'px');
+            util.setAttributes(patterns[i], {
+                id     : patternId,
+                width  : util.px(blockWidth),
+                height : util.px(blockHeight)
+            });
 
             useId = 'use-'+i+'-'+blocksetId;
             uses[i] = patterns[i].childNodes[0];
@@ -1718,149 +1697,34 @@ function (exports) {
 
             rectId = 'rect-'+i+'-'+blocksetId;
             rects[i] = g.childNodes[i];
-            rects[i].setAttribute('id', rectId);
-            rects[i].setAttribute('width', ''+blockWidth+'px');
-            rects[i].setAttribute('height', ''+blockHeight+'px');
-            rects[i].setAttribute('style', 'fill: url(#' + patternId + ');');
+            util.setAttributes(rects[i], {
+                id     : rectId,
+                width  : util.px(blockWidth),
+                height : util.px(blockHeight),
+                style  : 'fill: url(#' + patternId + ');'
+            });
         }
 
         util.setStyle(svg, {
             position: 'absolute',
-            top : 0,
-            left : 0,
-            width: rectWidth,
-            height: rectHeight
+            top    : 0,
+            left   : 0,
+            width  : rectWidth,
+            height : rectHeight
         });
         
         container.appendChild(svg);
 
         return {
-            svg : svg,
+            svg      : svg,
             maskRect : maskRect,
             patterns : patterns,
-            uses : uses,
-            rects : rects
+            uses     : uses,
+            rects    : rects
         };
     }
     
     
-    
-    
-    // REMOVE BELOW, WORKS SLOWER
-    
-    
-    createBlocks._______svg = function(dir, container, canvas) {
-        var geom = container.getBoundingClientRect();
-
-        var blocksetId = 'svgBlock-'+
-                (svgBlockCounter++)+'-'+
-                UNIQUE;
-
-        var svg = util.genSVGElement('svg');
-        var defs = util.genSVGElement('defs', svg);
-
-        var gradientId = 'gradient-'+blocksetId;
-
-        var linearGradient = util.genSVGLinearGradient(
-            defs, dir, gradientId
-        );
-
-        var maskId = 'mask-'+blocksetId;
-        var mask = util.genSVGElement('mask', defs, {
-            id : maskId,
-            x : '0',
-            y : '0',
-            width : '100%',
-            height : '100%'
-        });
-
-        var rectWidth = '100%';
-        var rectHeight = '100%';
-        if (dir == 'north' || dir == 'south') {
-            rectHeight = '0';
-        } else {
-            rectWidth = '0';
-        }
-
-        var maskRect = util.genSVGElement('rect', mask, {
-            x : '0',
-            y : '0',
-            width : rectWidth,
-            height : rectHeight,
-            style : 'stroke: none; fill: url(#'+gradientId+')'
-        });
-
-
-        var g = util.genSVGElement('g', svg, {
-            style : 'mask:url(#'+maskId+');'
-        });
-
-        var blockWidth = 0;
-        var blockHeight = 0;
-
-        if (dir == 'north' || dir == 'south') {
-            blockWidth = canvas.width;
-        } else {
-            blockHeight = canvas.height;
-        }
-
-        var imageURL = util.getCanvasDataURL(canvas);
-        var patternId;
-        var patterns = [];
-        var images = [];
-        var rects = [];
-
-        for (var i = 0; i < BLOCKSNUM; i++) {
-            patternId = 'pattern-'+i+'-'+blocksetId;
-            patterns[i] = util.genSVGElement('pattern', defs, {
-                id : patternId,
-                x : '0',
-                y : '0',
-                width : '' + blockWidth + 'px',
-                height : '' + blockHeight + 'px',
-                patternUnits : 'userSpaceOnUse'
-            });
-
-            images[i] = util.genSVGElement('image', patterns[i], {
-                id : 'image-'+i+'-'+blocksetId,
-                x : '0',
-                y : '0',
-                width : '' + blockWidth + 'px',
-                height : '' + blockHeight + 'px',
-                preserveAspectRatio : 'none',
-                'xlink:href' : imageURL
-            });
-
-            rects[i] = util.genSVGElement('rect', g, {
-                id : 'rect-'+i+'-'+blocksetId,
-                x : '0px',
-                y : '0px',
-                width : '' + geom.width + 'px',
-                height : '' + geom.height + 'px',
-                style : 'fill: url(#' + patternId + ');'
-            });
-        }
-
-        util.setStyle(svg, {
-            position: 'absolute',
-            top : 0,
-            left : 0,
-            width: rectWidth,
-            height: rectHeight
-        });
-
-        container.appendChild(svg);
-
-        return {
-            svg : svg,
-            maskRect : maskRect,
-            patterns : patterns,
-            images : images,
-            rects : rects
-        };
-    }
-    
-
 
     /**
      * Creates a set of blocks for the scrolling indication
@@ -1873,13 +1737,13 @@ function (exports) {
      * 
      * @returns {Object} set of created elements
      */
-    createBlocks.div = function(dir, container, image) {
+    var createBlocksDIV = function(dir, container, image) {
         var canvas = image.getSides()[dir];
         var style = {
             position: 'absolute'
         };
 
-        if (dir == 'north' || dir == 'south') {
+        if (util.isVertical[dir]) {
             style.width = '100%';
         } else {
             style.height = '100%';
@@ -1889,21 +1753,21 @@ function (exports) {
         for (var i = 0; i < BLOCKSNUM; i++) {
             block = util.sample.div.cloneNode(false);
             util.setStyle(block, style);
-            methods.backgroundCanvas(block, canvas);
+            impl.backgroundCanvas(block, canvas);
             container.appendChild(block);
             blocks.push(block);
         }
 
-        methods.gradientMask(container, dir);
+        impl.gradientMask(container, dir);
 
         return blocks;
     }
 
 
     if (METHODS.canvas == 'svg') {
-        Squeeze.prototype._createBlocks = createBlocks.svg;
+        Squeeze.prototype._createBlocks = createBlocksSVG;
     } else {
-        Squeeze.prototype._createBlocks = createBlocks.div;
+        Squeeze.prototype._createBlocks = createBlocksDIV;
     }
     
     
@@ -1925,59 +1789,51 @@ function (exports) {
     }
     
     
-    // updates a set of indicator blocks
-
-    var updateBlocks = {};
-    
     /**
      * Updates a set of blocks for the scrolling indication
      * 
      * Blocks are updated within an SVG element
      * 
      * @param {String} dir direction of the block indicator
+     * @param {Element} container to apply geometry to
      * @param {Array} blocks elements to update
-     * @param {Array} coordinates to apply to blocks
-     * @param {Element} container to apply intensity to
-     * @param {Number} containerSize in px
-     * @param {Number} sideOffset
-     * @param {Number} sideSize
-     * @param {Number} stretchedSize
-     * @param {Number} areaSize
-     * @param {Number} areaSidSize
-     * @param {CachedImg} image
+     * @param {Array} coordinates to apply to the blocks
+     * @param {Number} containerSize (px) size of the indication
+     *                   blocks container across the side (=indication
+     *                   intensity), depends on the scroll amount
+     * @param {Number} sideOffset of the texture, depends on the
+     *                   scroll amount in the direction across the
+     *                   side
+     * @param {Number} sideSize size of the stretched (and original)
+     *                   texture along the side
+     * @param {Number} stretchedSize size of the stratched texture
+     *                   across the side
+     * @param {Number} areaSize size of the whole scrollable area
+     *                   along the side
+     * @param {Number} areaSidSize size of the whole scrollable area
+     *                   across the side
      */
-    updateBlocks.svg = function(
-        dir, blocks, coordinates, container, containerSize,
-        sideOffset,
-        sideSize, stretchedSize,
-        areaSize, areaSideSize, image
+    var updateBlocksSVG = function(
+        dir, container, blocks, coordinates, containerSize,
+        sideOffset, sideSize, stretchedSize,
+        areaSize, areaSideSize
     ) {
-        image.touchSVGImage();
-
-        var w = 0, h = 0;
-        if (dir == 'north'||dir == 'south') {
-            w = areaSideSize;
-            h = containerSize;
-        } else {
-            w = containerSize;
-            h = areaSideSize;
-        }
+        var vertical = util.isVertical[dir];
+        var w = vertical ? areaSideSize : containerSize;
+        var h = vertical ? containerSize : areaSideSize;
 
         var style = {
-            width: w,
-            height: h
+            width  : w,
+            height : h
         };
 
         util.setStyle(blocks.svg, style);
+        util.setAttributes(blocks.svg, style);
+        util.setAttributes(blocks.maskRect, style);
 
         var coord = areaSize - containerSize;
 
-        // ??? ORLY?
-        // should always be int?
-        // do the same in updateBlocks.div?
-        // what if the container is itself float height?
-
-        // may not meet the border in some browsers / zoom-levels
+        // may not meet the border in some zoom-levels
         // adding 1px to cover the border for sure
         switch (dir) {
         case 'north':
@@ -1996,13 +1852,9 @@ function (exports) {
 
         util.setStyle(container, style);
 
-        blocks.svg.setAttribute('width', w);
-        blocks.svg.setAttribute('height', h);
-        blocks.maskRect.setAttribute('width', w);
-        blocks.maskRect.setAttribute('height', h);
-        
         var rotate = '';
         var translate = '';
+
         switch(dir) {
         case 'north':
             break;
@@ -2020,47 +1872,54 @@ function (exports) {
             break;
         }
 
-
-	var i, size, scale, transform;
-        var offset = '' + (-sideOffset%sideSize) + 'px';
+	var i, sizePx, scale, scaleSize, transform, coordPx;
+        var offsetPx = util.px(-sideOffset%sideSize);
         for (i = 0; i < BLOCKSNUM; i++) {
             if (dir == 'north'||dir =='west') {
-                coord = ''+coordinates[i].offset+'px';
+                coordPx = util.px(coordinates[i].offset);
             } else {
-                coord = ''+containerSize -
-                           coordinates[i].size -
-                           coordinates[i].offset + 'px';
+                coordPx = util.px(
+                    containerSize
+                  - coordinates[i].size
+                  - coordinates[i].offset
+                );
             }
 
-            size = ''+coordinates[i].size+'px';
+            sizePx = util.px(coordinates[i].size);
+            scaleSize = coordinates[i].size/stretchedSize;
 
+            var rectAttr, patternAttr;
+            if (vertical) {
+                scale = 'scale(1,'+scaleSize+')';
+                rectAttr = {
+                    y      : coordPx,
+                    height : sizePx,
+                    width  : util.px(areaSideSize)
+                };
 
-            if (dir =='north'||dir =='south') {
-                scale = 'scale(1,'+(coordinates[i].size/stretchedSize)+')';
-//                blocks.images[i].setAttribute('height',size);
-                blocks.rects[i].setAttribute('y',coord);
-                blocks.rects[i].setAttribute('height',size);
-                blocks.rects[i].setAttribute(
-                    'width',''+areaSideSize+'px'
-                );
-                blocks.patterns[i].setAttribute('y',coord);
-                blocks.patterns[i].setAttribute('x',offset);
-                blocks.patterns[i].setAttribute('height',size);
+                patternAttr = {
+                    x      : offsetPx,
+                    y      : coordPx,
+                    height : sizePx
+                };
             } else {
-                scale = 'scale('+(coordinates[i].size/stretchedSize)+',1)';
-//                blocks.images[i].setAttribute('width',size);
-                blocks.rects[i].setAttribute('x',coord);
-                blocks.rects[i].setAttribute('width',size);
-                blocks.rects[i].setAttribute(
-                    'height',''+areaSideSize+'px'
-                );
-                blocks.patterns[i].setAttribute('y',offset);
-                blocks.patterns[i].setAttribute('x',coord);
-                blocks.patterns[i].setAttribute('width',size);
+                scale = 'scale('+scaleSize+',1)';
+                rectAttr = {
+                    x      : coordPx,
+                    width  : sizePx,
+                    height : util.px(areaSideSize)
+                };
+
+                patternAttr = {
+                    x     : coordPx,
+                    y     : offsetPx,
+                    width : sizePx
+                };
             }
 
+            util.setAttributes(blocks.rects[i], rectAttr);
+            util.setAttributes(blocks.patterns[i], patternAttr);
             transform = [scale, translate, rotate].join(' ');
-
             blocks.uses[i].setAttribute('transform', transform);
         }
     }
@@ -2070,107 +1929,90 @@ function (exports) {
     /**
      * Updates a set of blocks for the scrolling indication
      * 
-     * Blocks are updated within an ordinary element
+     * Blocks are updated within a DIV element
      * 
      * @param {String} dir direction of the block indicator
+     * @param {Element} container to apply geometry to
      * @param {Array} blocks elements to update
-     * @param {Array} coordinates to apply to blocks
-     * @param {Element} container to apply intensity to
-     * @param {Number} containerSize in px
-     * @param {Number} sideOffset
-     * @param {Number} sideSize
-     * @param {Number} stretchedSize
-     * @param {Number} areaSize
-     * @param {Number} areaSidSize
-     * @param {CachedImg} image
+     * @param {Array} coordinates to apply to the blocks
+     * @param {Number} containerSize (px) size of the indication
+     *                   blocks container across the side (=indication
+     *                   intensity), depends on the scroll amount
+     * @param {Number} sideOffset of the texture, depends on the
+     *                   scroll amount in the direction across the
+     *                   side
+     * @param {Number} sideSize size of the stretched (and original)
+     *                   texture along the side
+     * @param {Number} stretchedSize size of the stratched texture
+     *                   across the side
+     * @param {Number} areaSize size of the whole scrollable area
+     *                   along the side
+     * @param {Number} areaSidSize size of the whole scrollable area
+     *                   across the side
      */
-    updateBlocks.div = function(
-        dir, blocks, coordinates, container, containerSize,
+    var updateBlocksDIV = function(
+        dir, container, blocks, coordinates, containerSize,
         sideOffset, sideSize, stretchedSize,
-        areaSize, areaSideSize, image
+        areaSize, areaSideSize
     ) {
+        var vertical = util.isVertical[dir];
+
         var style = {};
+        if (vertical) {
+            style.height = containerSize;
+        } else {
+            style.width = containerSize;
+        }
 
         switch (dir) {
-        case 'north':
-            style.height = containerSize;
+        case 'east':
+            style.left = areaSize - containerSize;
             break;
         case 'south':
             style.top = areaSize - containerSize;
-            style.height = containerSize;
-            break;
-        case 'east':
-            style.left = areaSize - containerSize;
-            style.width = containerSize;
-            break;
-        case 'west':
-            style.width = containerSize;
             break;
         }
         
         util.setStyle(container, style);
 
-        var i;
-        switch (dir) {
-        case 'north':
-            for (i = 0; i < blocks.length; i++) {
+        var bgOffset = util.px(-sideOffset);
+        for (var i = 0; i < BLOCKSNUM; i++) {
+            var coord;
+            if (dir == 'north'||dir =='west') {
+                coord = coordinates[i].offset;
+            } else {
+                coord = containerSize
+                      - coordinates[i].size
+                      - coordinates[i].offset;
+            }
+
+            if (vertical) {
                 util.setStyle(blocks[i], {
-                    top : coordinates[i].offset,
+                    top : coord,
                     height: coordinates[i].size,
                     backgroundSize:
-                        sideSize + 'px '+coordinates[i].size+'px',
-                    backgroundPosition: '-'+sideOffset + 'px 0px'
+                        util.px(sideSize) + ' ' +
+                        util.px(coordinates[i].size),
+                    backgroundPosition: bgOffset + ' 0px'
                 });
-            }
-            break;
-
-        case 'east':
-            for (i = 0; i < blocks.length; i++) {
+            } else {
                 util.setStyle(blocks[i], {
-                    left : containerSize -
-                          coordinates[i].size -
-                          coordinates[i].offset,
+                    left : coord,
                     width : coordinates[i].size,
                     backgroundSize:
-                        coordinates[i].size + 'px '+sideSize+'px',
-                    backgroundPosition: '0px -'+sideOffset + 'px'
+                        util.px(coordinates[i].size) + ' ' +
+                        util.px(sideSize),
+                    backgroundPosition: '0px '+bgOffset
                 });
             }
-            break;
-
-        case 'south':
-            for (i = 0; i < blocks.length; i++) {
-                util.setStyle(blocks[i], {
-                    top : containerSize -
-                          coordinates[i].size -
-                          coordinates[i].offset,
-                    height: coordinates[i].size,
-                    backgroundSize:
-                        sideSize + 'px '+coordinates[i].size+'px',
-                    backgroundPosition: '-'+sideOffset + 'px 0px'
-                });
-            }
-            break;
-        case 'west':
-            for (i = 0; i < blocks.length; i++) {
-                util.setStyle(blocks[i], {
-                    left : coordinates[i].offset,
-                    width : coordinates[i].size,
-                    backgroundSize:
-                        coordinates[i].size + 'px '+sideSize+'px',
-                    backgroundPosition: '0px -'+sideOffset + 'px'
-                });
-            }
-            break;
         }
-
     }
 
 
     if (METHODS.canvas == 'svg') {
-        Squeeze.prototype._updateBlocks = updateBlocks.svg;
+        Squeeze.prototype._updateBlocks = updateBlocksSVG;
     } else {
-        Squeeze.prototype._updateBlocks = updateBlocks.div;
+        Squeeze.prototype._updateBlocks = updateBlocksDIV;
     }
     
     
@@ -2179,12 +2021,79 @@ function (exports) {
      * Updates the scrolling indicators on each side according to the
      * current scroll state of the element
      */
-     Squeeze.prototype._indicate = function() {
+    Squeeze.prototype._indicate = function() {
+        var geom = this._cmp.wrapper.getBoundingClientRect();
+        var beyond = this._getBeyond();
+
+        for (var i = 0; i < util.dir.length; i++) {
+            var dir = util.dir[i];
+            if (this._cmp.sides[dir].ready) {
+                var data = this._images[dir].getData();
+                var origCoord = this._getOrigCoord(
+                    dir, beyond, data.origSize
+                );
+
+                var coordinates = this._getBlockCoordinates(
+                    data.points[origCoord],
+                    data.stretchedSize,
+                    data.virtualSize3,
+                    data.virtualPow,
+                    data.containerMaxSize
+                );
+
+                var containerSize = this._getContainerSize(
+                    beyond[dir],  data.containerMaxSize
+                );
+
+                var sideOffset = this._getSideOffset(beyond, dir);
+                
+                var areaSize     = geom.height;
+                var areaSideSize = geom.width;
+                if (!util.isVertical[dir]) {
+                    areaSize     = geom.width;
+                    areaSideSize = geom.height;
+                }
+
+                var sideSize = data.sideSize;
+                var stretchedSize = data.stretchedSize;
+
+                this._images[dir].touchSVGImage();
+
+                this._updateBlocks(
+                    dir,
+                    this._cmp.sides[dir].main,
+                    this._cmp.sides[dir].blocks,
+                    coordinates,
+                    containerSize,
+                    sideOffset,
+                    sideSize,
+                    stretchedSize,
+                    areaSize,
+                    areaSideSize
+                );
+            }
+        }
+    }
+    
+
+
+    /**
+     * For the scrollable area returns the amount of pixels scrollable
+     * beyond each side
+     * 
+     * For Opera and zoomed page the distances may be non-integer and
+     * it might not be possible to scroll to the end, so the method
+     * rounds-up the values
+     * 
+     * @returns {Object}
+     */
+    Squeeze.prototype._getBeyond = function() {
         var geom = this._cmp.wrapper.getBoundingClientRect();
         var el = this._cmp.scroller;
 
-        // amount of pixels beyond the displayed area
-        var beyond = {
+        // values might be negative or non-integer
+        // (in some browsers / zoom-levels)
+        return {
             north : Math.max(0, Math.floor(el.scrollTop)),
             south : Math.max(
                 0, Math.floor(
@@ -2198,93 +2107,117 @@ function (exports) {
                 )
             )
         };
-        
-        var i, j;
-        for (i = 0; i < util.dir.length; i++) {
-            var dir = util.dir[i];
-            if (this._cmp.sides[dir].ready) {
-                var data = this._images[dir].getData();
-
-                var origCoord = beyond[dir] % data.origSize;
-
-                if (dir == 'south') {
-                    origCoord = data.origSize
-                        - beyond.north % data.origSize;
-                } else if (dir == 'east') {
-                    origCoord = data.origSize
-                        - beyond.west % data.origSize;
-                }
-
-                if (origCoord == data.origSize) {
-                    origCoord = 0;
-                }
-
-                
-                var offset = data.points[origCoord];
-                // percentage of visible area of the first entry
-                var F = offset / data.stretchedSize;
-
-                // actual size of the image
-                var size = data.virtualSize3 / (data.virtualPow + 3*F);
-                var realOffset = size * (offset / data.stretchedSize);
-
-                var total = 0;
-                var sizes = [];
-                var firstSize = size;
-                for (j = 0; j < BLOCKSNUM; j++) {
-                    sizes.push(size);
-                    total += size;
-                    size /= 4;
-                }
-
-                var blockOffset = Math.round(
-                    data.maxLayerSize - total + firstSize - realOffset
-                );
-
-                var blockSize;
-                var coordinates = [];
-                for (j = 0; j < BLOCKSNUM; j++) {
-                    blockSize = sizes[BLOCKSNUM-1-j];
-                    coordinates.push({
-                        offset : Math.round(blockOffset),
-                        size : Math.round(blockSize)
-                    });
-
-                    blockOffset += Math.round(blockSize);
-                }
-
-                var intensity = 1 - 1 / (beyond[dir]/MASK_SLOWNESS + 1);
-                var containerSize = Math.ceil(
-                    intensity * data.maxLayerSize
-                );
-
-                var sideOffsets = {
-                    north : 'west',
-                    east  : 'north',
-                    south : 'west',
-                    west  : 'north'
-                };
-
-                var areaSize = geom.height;
-                var areaSideSize = geom.width;
-                if (dir == 'west' || dir == 'east') {
-                    areaSize = geom.width;
-                    areaSideSize = geom.height;
-                }
-
-                this._updateBlocks(
-                    dir, this._cmp.sides[dir].blocks, coordinates,
-                    this._cmp.sides[dir].main, containerSize,
-                    beyond[sideOffsets[dir]],
-                    data.sideSize, data.stretchedSize,
-                    areaSize, areaSideSize,
-                    this._images[dir]
-                );
-
-            }
-        }
     }
+    
+    
+    /**
+     * Returns the coordinate of the original (unsqueezed) texture
+     * which is synced with the scrolling amount
+     * 
+     * @param {String} dir direction
+     * @param {Object} beyond set of scrolling amounts
+     * @param {Number} size of the original texture
+     * 
+     * @returns {Number} original coordinate
+     */
+    Squeeze.prototype._getOrigCoord = function(dir, beyond, size) {
+        var result = beyond[dir] % size;
 
+        if (dir == 'south') {
+            result = size - beyond.north % size;
+        } else if (dir == 'east') {
+            result = size - beyond.west % size;
+        }
+
+        if (result == size) {
+            result = 0;
+        }
+
+        return result;
+    }
+    
+    
+    
+    /**
+     * Calculates the sizes and offsets of each block entry
+     * 
+     * @param {Number} offset of the stretched texture
+     * @param {Number} stretched image size
+     * @param {Number} virtualSize3 returned by CachedImg._genData
+     * @param {Number} virtualPow returned by CachedImg._genData
+     * @param {Number} containerMaxSize
+     * 
+     * @returns {Array} list of coordinates for each block
+     */
+    Squeeze.prototype._getBlockCoordinates = function(
+        offset, stretched, virtualSize3, virtualPow, containerMaxSize
+    ) {
+        var i;
+
+        // first block visible area rate
+        var F = offset / stretched;
+
+        // actual size of the image
+        var size = virtualSize3 / (virtualPow + 3*F);
+        var realOffset = size * F;
+
+        var total = 0;
+        var sizes = [];
+        var firstSize = size;
+        for (i = 0; i < BLOCKSNUM; i++) {
+            sizes.push(size);
+            total += size;
+            size /= 4;
+        }
+
+        var blockOffset = Math.round(
+            containerMaxSize - total + firstSize - realOffset
+        );
+
+        var blockSize;
+        var coordinates = [];
+        for (i = 0; i < BLOCKSNUM; i++) {
+            blockSize = sizes[BLOCKSNUM-1-i];
+            coordinates.push({
+                offset : Math.round(blockOffset),
+                size : Math.round(blockSize)
+            });
+
+            blockOffset += Math.round(blockSize);
+        }
+
+        return coordinates;
+    }
+    
+    
+    /**
+     * Returns the size of the blocks container which depends on the
+     * scroll amount beyond the border
+     * 
+     * @param {Number} beyondDir number of px beyond the border
+     * @param {Number} maxSize of the container
+     * 
+     * @returns {Number} current size of the container
+     */
+    Squeeze.prototype._getContainerSize = function(beyondDir, maxSize) {
+        var intensity = 1 - 1 / (beyondDir/GAIN_SLOWNESS + 1);
+        return Math.ceil(intensity * maxSize);
+    }
+    
+    
+    /**
+     * Returns the side offset of a texture which depends on the
+     * scrolling in the right angle direction
+     * 
+     * @param {Object} beyond set of scrolling amounts
+     * @param {String} dir side direction
+     * 
+     * @returns {Number} offset amount in the given direction
+     */
+    Squeeze.prototype._getSideOffset = function(beyond, dir) {
+        return beyond[util.isVertical[dir] ? 'west':'north'];
+    }
+    
     
     /**
      * Removes the additional indicator elements, thus restores the
@@ -2297,7 +2230,6 @@ function (exports) {
     }
     
     
-
 
     var squeezes = [];
     
