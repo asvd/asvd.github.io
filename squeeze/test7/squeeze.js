@@ -129,8 +129,8 @@ function (exports) {
     }
 
 
-// METHODS.canvas = 'svg';
-// METHODS.mask = 'svg';
+ METHODS.canvas = 'svg';
+ METHODS.mask = 'svg';
     
 
     // browser-dependent implementations
@@ -1207,7 +1207,7 @@ function (exports) {
             virtualPow   : 1-Math.pow(1/4, virtualNum-1),
             virtualSize3 : virtualSize*3
         };
-    }
+    };
     
     
     /**
@@ -1223,7 +1223,7 @@ function (exports) {
         var me = this;
         this._handler = function() {
             me.onresize();
-        }
+        };
 
         if (this._isBody) {
             window.addEventListener('resize', this._handler, false);
@@ -1243,7 +1243,7 @@ function (exports) {
 
             this._detector.onload = function() {
                 this.contentDocument.defaultView.addEventListener(
-                    'resize', this._handler, false
+                    'resize', me._handler, false
                 );
             }
 
@@ -1257,14 +1257,14 @@ function (exports) {
                 this._elem.appendChild(this._detector);
             }
         }
-    }
+    };
 
 
     
     /**
      * Handler for the resize event, to be defined for an instance
      */
-    Resizable.prototype.onresize = function() {}
+    Resizable.prototype.onresize = function(){};
     
 
     /**
@@ -1795,7 +1795,6 @@ function (exports) {
      * Blocks are updated within an SVG element
      * 
      * @param {String} dir direction of the block indicator
-     * @param {Element} container to apply geometry to
      * @param {Array} blocks elements to update
      * @param {Array} coordinates to apply to the blocks
      * @param {Number} containerSize (px) size of the indication
@@ -1808,49 +1807,23 @@ function (exports) {
      *                   texture along the side
      * @param {Number} stretchedSize size of the stratched texture
      *                   across the side
-     * @param {Number} areaSize size of the whole scrollable area
-     *                   along the side
-     * @param {Number} areaSidSize size of the whole scrollable area
+     * @param {Number} areaSideSize size of the whole scrollable area
      *                   across the side
      */
     var updateBlocksSVG = function(
-        dir, container, blocks, coordinates, containerSize,
+        dir, blocks, coordinates, containerSize,
         sideOffset, sideSize, stretchedSize,
-        areaSize, areaSideSize
+        areaSideSize
     ) {
         var vertical = util.isVertical[dir];
-        var w = vertical ? areaSideSize : containerSize;
-        var h = vertical ? containerSize : areaSideSize;
-
-        var style = {
-            width  : w,
-            height : h
+        var wh = {
+            width  : vertical ? areaSideSize : containerSize,
+            height : vertical ? containerSize : areaSideSize
         };
 
-        util.setStyle(blocks.svg, style);
-        util.setAttributes(blocks.svg, style);
-        util.setAttributes(blocks.maskRect, style);
-
-        var coord = areaSize - containerSize;
-
-        // may not meet the border in some zoom-levels
-        // adding 1px to cover the border for sure
-        switch (dir) {
-        case 'north':
-            style.top = -1;
-            break;
-        case 'east':
-            style.left = coord+1;
-            break;
-        case 'south':
-            style.top = coord+1;
-            break;
-        case 'west':
-            style.left = -1;
-            break;
-        }
-
-        util.setStyle(container, style);
+        util.setStyle(blocks.svg, wh);
+        util.setAttributes(blocks.svg, wh);
+        util.setAttributes(blocks.maskRect, wh);
 
         var rotate = '';
         var translate = '';
@@ -1932,7 +1905,6 @@ function (exports) {
      * Blocks are updated within a DIV element
      * 
      * @param {String} dir direction of the block indicator
-     * @param {Element} container to apply geometry to
      * @param {Array} blocks elements to update
      * @param {Array} coordinates to apply to the blocks
      * @param {Number} containerSize (px) size of the indication
@@ -1945,46 +1917,14 @@ function (exports) {
      *                   texture along the side
      * @param {Number} stretchedSize size of the stratched texture
      *                   across the side
-     * @param {Number} areaSize size of the whole scrollable area
-     *                   along the side
-     * @param {Number} areaSidSize size of the whole scrollable area
+     * @param {Number} areaSideSize size of the whole scrollable area
      *                   across the side
      */
     var updateBlocksDIV = function(
-        dir, container, blocks, coordinates, containerSize,
+        dir, blocks, coordinates, containerSize,
         sideOffset, sideSize, stretchedSize,
-        areaSize, areaSideSize
+        areaSideSize
     ) {
-        var vertical = util.isVertical[dir];
-
-        var style = {};
-        if (vertical) {
-            style.height = containerSize;
-        } else {
-            style.width = containerSize;
-        }
-
-        var coord = areaSize - containerSize;
-
-        // may not meet the border in some zoom-levels
-        // adding 1px to cover the border for sure
-        switch (dir) {
-        case 'north':
-            style.top = -1;
-            break;
-        case 'east':
-            style.left = coord+1;
-            break;
-        case 'south':
-            style.top = coord+1;
-            break;
-        case 'west':
-            style.left = -1;
-            break;
-        }
-        
-        util.setStyle(container, style);
-
         var bgOffset = util.px(-sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
             var coord;
@@ -1996,7 +1936,7 @@ function (exports) {
                       - coordinates[i].offset;
             }
 
-            if (vertical) {
+            if (util.isVertical[dir]) {
                 util.setStyle(blocks[i], {
                     top : coord,
                     height: coordinates[i].size,
@@ -2069,20 +2009,74 @@ function (exports) {
 
                 this._images[dir].touchSVGImage();
 
-                this._updateBlocks(
+                this._updateContainer(
                     dir,
                     this._cmp.sides[dir].main,
+                    containerSize,
+                    areaSize,
+                    areaSideSize
+                );
+
+                this._updateBlocks(
+                    dir,
                     this._cmp.sides[dir].blocks,
                     coordinates,
                     containerSize,
                     sideOffset,
                     sideSize,
                     stretchedSize,
-                    areaSize,
                     areaSideSize
                 );
             }
         }
+    }
+    
+    
+    /**
+     * Updates the indicator blocks container geometry
+     * 
+     * @param {String} dir direction of the block indicator
+     * @param {Element} container to apply geometry to
+     * @param {Number} containerSize (px) size of the indication
+     *                   blocks container across the side (=indication
+     *                   intensity), depends on the scroll amount
+     * @param {Number} areaSize size of the whole scrollable area
+     *                   along the side
+     * @param {Number} areaSidSize size of the whole scrollable area
+     *                   across the side
+     */
+    Squeeze.prototype._updateContainer = function(
+        dir, container, containerSize, areaSize, areaSideSize
+    ) {
+        var vertical = util.isVertical[dir];
+        var w = vertical ? areaSideSize : containerSize;
+        var h = vertical ? containerSize : areaSideSize;
+
+        var style = {
+            width  : w,
+            height : h
+        };
+
+        var coord = areaSize - containerSize;
+
+        // may not meet the border in some zoom-levels
+        // adding 1px to cover the border for sure
+        switch (dir) {
+        case 'north':
+            style.top = -1;
+            break;
+        case 'east':
+            style.left = coord+1;
+            break;
+        case 'south':
+            style.top = coord+1;
+            break;
+        case 'west':
+            style.left = -1;
+            break;
+        }
+        
+        util.setStyle(container, style);
     }
     
 
