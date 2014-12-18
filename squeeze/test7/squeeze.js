@@ -129,8 +129,8 @@ function (exports) {
     }
 
 
- METHODS.canvas = 'svg';
- METHODS.mask = 'svg';
+// METHODS.canvas = 'svg';
+// METHODS.mask = 'svg';
     
 
     // browser-dependent implementations
