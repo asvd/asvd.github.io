@@ -106,8 +106,10 @@ function (exports) {
     if (features.canvas) {
         if (features.gradientMask.webkit) {
             METHODS.mask = 'webkit';
-            METHODS.canvas = features.backgroundCanvas.webkit ?
-                'webkit' : 'dataURL';
+            
+//            METHODS.canvas = features.backgroundCanvas.webkit ?
+//                'webkit' : 'dataURL';
+            METHODS.canvas = 'dataURL';
         } else if (features.gradientMask.svgReuse) {
             if (features.backgroundCanvas.mozElement) {
                 METHODS.canvas = 'mozElement';
