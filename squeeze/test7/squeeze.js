@@ -1964,12 +1964,22 @@ function (exports) {
             style.width = containerSize;
         }
 
+        var coord = areaSize - containerSize;
+
+        // may not meet the border in some zoom-levels
+        // adding 1px to cover the border for sure
         switch (dir) {
+        case 'north':
+            style.top = -1;
+            break;
         case 'east':
-            style.left = areaSize - containerSize;
+            style.left = coord+1;
             break;
         case 'south':
-            style.top = areaSize - containerSize;
+            style.top = coord+1;
+            break;
+        case 'west':
+            style.left = -1;
             break;
         }
         
