@@ -1935,18 +1935,23 @@ function (exports) {
                       - coordinates[i].size
                       - coordinates[i].offset;
             }
+            
+            
+            var bgOffset = '0px';
 
+            /*
             var intCoord = Math.floor(coord);
             var rest = coord-intCoord
             var bgOffset = util.px(rest);
 
             var intSize = Math.ceil(coordinates[i].size + rest)
+             */
 
 
             if (util.isVertical[dir]) {
                 util.setStyle(blocks[i], {
-                    top : intCoord,
-                    height: intSize,
+                    top : coord,
+                    height: coordinates[i].size,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
@@ -1954,8 +1959,8 @@ function (exports) {
                 });
             } else {
                 util.setStyle(blocks[i], {
-                    left : intCoord,
-                    width : intSize,
+                    left : coord,
+                    width : coordinates[i].size,
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
