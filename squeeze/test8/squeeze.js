@@ -1949,8 +1949,7 @@ function (exports) {
                     height: intSize,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
-//                        util.px(coordinates[i].size),
-                        util.px(intSize),
+                        util.px(coordinates[i].size),
                     backgroundPosition: bgSideOffset + ' ' + bgOffset
                 });
             } else {
@@ -1958,8 +1957,7 @@ function (exports) {
                     left : intCoord,
                     width : intSize,
                     backgroundSize:
-//                        util.px(coordinates[i].size) + ' ' +
-                        util.px(intSize) + ' ' +
+                        util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
                     backgroundPosition: bgOffset + ' '+bgSideOffset
                 });
