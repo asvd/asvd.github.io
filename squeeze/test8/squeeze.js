@@ -1925,7 +1925,7 @@ function (exports) {
         sideOffset, sideSize, stretchedSize,
         areaSideSize
     ) {
-        var bgOffset = util.px(-sideOffset);
+        var bgSideOffset = util.px(-sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
             var coord;
             if (dir == 'north'||dir =='west') {
@@ -1936,27 +1936,30 @@ function (exports) {
                       - coordinates[i].offset;
             }
 
+            var intCoord = Math.floor(coord);
+            var rest = coord-intCoord
+            var bgOffset = util.px(rest);
+
+            var intSize = Math.ceil(coordinates[i].size + rest)
+
+
             if (util.isVertical[dir]) {
                 util.setStyle(blocks[i], {
-                    top : coord,
-                    height: coordinates[i].size,
-    // TODO rounded by chrome
+                    top : intCoord,
+                    height: intSize,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-    // TODO rounded by chrome
-                    backgroundPosition: bgOffset + ' 0px'
+                    backgroundPosition: bgSideOffset + ' ' + bgOffset
                 });
             } else {
                 util.setStyle(blocks[i], {
-                    left : coord,
-                    width : coordinates[i].size,
-    // TODO rounded by chrome
+                    left : intCoord,
+                    width : intSize,
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
-    // TODO rounded by chrome
-                    backgroundPosition: '0px '+bgOffset
+                    backgroundPosition: bgOffset + ' '+bgSideOffset
                 });
             }
         }
