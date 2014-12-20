@@ -1961,7 +1961,7 @@ function (exports) {
                  */
 
 
-            var pad = 100;
+            var pad = 0;
             
 
             switch(dir) {
@@ -1972,7 +1972,7 @@ function (exports) {
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-                        backgroundPosition: bgSideOffset + ' 0px'
+                    backgroundPosition: bgSideOffset + ' 0px'
                 });
                 break;
             case 'east':
