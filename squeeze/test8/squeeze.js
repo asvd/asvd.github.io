@@ -1961,7 +1961,8 @@ function (exports) {
                  */
 
 
-            var pad = 1;
+            // best bg rounding in chrome
+            var pad = 10;
             
 
             switch(dir) {
