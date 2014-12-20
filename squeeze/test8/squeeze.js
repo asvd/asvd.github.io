@@ -1930,8 +1930,8 @@ function (exports) {
             switch(dir) {
             case 'north':
                 util.setStyle(blocks[i], {
-                    top    : coordinates[i].offset,
-                    height : coordinates[i].size+1,
+                    top    : Math.floor(coordinates[i].offset),
+                    height : Math.floor(coordinates[i].size+1),
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
@@ -1940,8 +1940,8 @@ function (exports) {
                 break;
             case 'east':
                 util.setStyle(blocks[i], {
-                    right : coordinates[i].offset,
-                    width : coordinates[i].size+1,
+                    right : Math.floor(coordinates[i].offset),
+                    width : Math.floor(coordinates[i].size+1),
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
@@ -1950,8 +1950,8 @@ function (exports) {
                 break;
             case 'south':
                 util.setStyle(blocks[i], {
-                    bottom    : coordinates[i].offset,
-                    height : coordinates[i].size+1,
+                    bottom : Math.floor(coordinates[i].offset),
+                    height : Math.floor(coordinates[i].size+1),
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
@@ -1960,8 +1960,8 @@ function (exports) {
                 break;
             case 'west':
                 util.setStyle(blocks[i], {
-                    left  : coordinates[i].offset,
-                    width : coordinates[i].size+1,
+                    left  : Math.floor(coordinates[i].offset),
+                    width : Math.floor(coordinates[i].size+1),
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
