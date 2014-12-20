@@ -1961,7 +1961,7 @@ function (exports) {
                  */
 
 
-            var pad = 1;
+            var pad = 10;
             
 
             switch(dir) {
