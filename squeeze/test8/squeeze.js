@@ -1754,9 +1754,20 @@ function (exports) {
             block = util.sample.div.cloneNode(false);
             util.setStyle(block, style);
             impl.backgroundCanvas(block, canvas);
-            container.appendChild(block);
             blocks.push(block);
         }
+
+        if (dir == 'north' || dir == 'west') {
+            for (i = 0; i < BLOCKSNUM; i++) {
+                container.appendChild(block);
+            }
+        } else {
+            for (i = BLOCKSNUM-1; i >= 0; i--) {
+                container.appendChild(block);
+            }
+        }
+
+
 
         impl.gradientMask(container, dir);
 
