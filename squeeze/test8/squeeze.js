@@ -1961,7 +1961,7 @@ function (exports) {
                  */
 
 
-            // best bg rounding in chrome
+            // best bg rounding in chrome (for north)
             var pad = 10;
             
 
@@ -1993,7 +1993,8 @@ function (exports) {
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' ' + (pad) +'px'
+//                    backgroundPosition: bgSideOffset + ' ' + (pad) +'px'
+                    backgroundPosition: 'left bottom'
                 });
                 break;
             case 'west':
