@@ -1928,44 +1928,8 @@ function (exports) {
         var bgSideOffset = util.px(-sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
 
-            /*
-            var coord;
-            if (dir == 'north'||dir =='west') {
-                coord = coordinates[i].offset;
-            } else {
-                coord = containerSize
-                      - coordinates[i].size
-                      - coordinates[i].offset;
-            }
-            
-            
-            var floorCoord = Math.floor(coord);
-            var rest = coord-floorCoord;
-            var bgOffset = util.px(rest);
-            var intSize = Math.ceil(coordinates[i].size+rest);
-            
-            if (util.isVertical[dir]) {
-                util.setStyle(blocks[i], {
-                    top : floorCoord,
-                    height: intSize,
-                    backgroundSize:
-                        util.px(sideSize) + ' ' +
-                        util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' ' + bgOffset
-                });
-            } else {
-                util.setStyle(blocks[i], {
-                    left : floorCoord,
-                    width : intSize,
-                    backgroundSize:
-                        util.px(coordinates[i].size) + ' ' +
-                        util.px(sideSize),
-                    backgroundPosition: bgOffset + ' '+bgSideOffset
-                });
-            }
-             */
 
-            
+                /*
             var coord;
             if (dir == 'north'||dir =='west') {
                 coord = coordinates[i].offset;
@@ -1994,15 +1958,16 @@ function (exports) {
                     backgroundPosition: '0px '+bgSideOffset
                 });
             }
+                 */
 
             
             
-            /*
+
             switch(dir) {
             case 'north':
                 util.setStyle(blocks[i], {
-                    top    : Math.floor(coordinates[i].offset),
-                    height : Math.floor(coordinates[i].size+1),
+                    top    : coordinates[i].offset,
+                    height : coordinates[i].size+1,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
@@ -2011,8 +1976,8 @@ function (exports) {
                 break;
             case 'east':
                 util.setStyle(blocks[i], {
-                    right : Math.floor(coordinates[i].offset),
-                    width : Math.floor(coordinates[i].size+1),
+                    right : coordinates[i].offset,
+                    width : coordinates[i].size+1,
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
@@ -2021,8 +1986,8 @@ function (exports) {
                 break;
             case 'south':
                 util.setStyle(blocks[i], {
-                    bottom : Math.floor(coordinates[i].offset),
-                    height : Math.floor(coordinates[i].size+1),
+                    bottom : coordinates[i].offset,
+                    height : coordinates[i].size+1,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
@@ -2031,8 +1996,8 @@ function (exports) {
                 break;
             case 'west':
                 util.setStyle(blocks[i], {
-                    left  : Math.floor(coordinates[i].offset),
-                    width : Math.floor(coordinates[i].size+1),
+                    left  : coordinates[i].offset,
+                    width : coordinates[i].size+1,
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
@@ -2041,7 +2006,6 @@ function (exports) {
                 break;
             }
 
-            */
 
 
         }
