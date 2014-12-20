@@ -1938,20 +1938,26 @@ function (exports) {
             
             
             var bgOffset = '0px';
+            var intSize = coordinates[i].size;
+            var intCoord = coord;
 
-            /*
+
+            
+
+                    /*
             var intCoord = Math.floor(coord);
             var rest = coord-intCoord
             var bgOffset = util.px(rest);
 
             var intSize = Math.ceil(coordinates[i].size + rest)
-             */
+                     */
+
 
 
             if (util.isVertical[dir]) {
                 util.setStyle(blocks[i], {
-                    top : coord,
-                    height: coordinates[i].size,
+                    top : intCoord,
+                    height: intSize,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
@@ -1959,8 +1965,8 @@ function (exports) {
                 });
             } else {
                 util.setStyle(blocks[i], {
-                    left : coord,
-                    width : coordinates[i].size,
+                    left : intCoord,
+                    width : intSize,
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
