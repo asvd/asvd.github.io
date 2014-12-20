@@ -1972,7 +1972,7 @@ function (exports) {
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-                        backgroundPosition: bgSideOffset + ' ' + pad +'px'
+                        backgroundPosition: bgSideOffset + ' ' + (-pad) +'px'
                 });
                 break;
             case 'east':
