@@ -1927,6 +1927,53 @@ function (exports) {
     ) {
         var bgSideOffset = util.px(-sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
+            switch(dir) {
+            case 'north':
+                util.setStyle(blocks[i], {
+                    top    : coordinates[i].offset,
+                    height : coordinates[i].size,
+                    backgroundSize:
+                        util.px(sideSize) + ' ' +
+                        util.px(coordinates[i].size),
+                    backgroundPosition: bgSideOffset + ' 0px'
+                });
+                break;
+            case 'east':
+                util.setStyle(blocks[i], {
+                    right : coordinates[i].offset,
+                    width : coordinates[i].size,
+                    backgroundSize:
+                        util.px(coordinates[i].size) + ' ' +
+                        util.px(sideSize),
+                    backgroundPosition: '0px ' + bgSideOffset
+                });
+                break;
+            case 'south':
+                util.setStyle(blocks[i], {
+                    bottom    : coordinates[i].offset,
+                    height : coordinates[i].size,
+                    backgroundSize:
+                        util.px(sideSize) + ' ' +
+                        util.px(coordinates[i].size),
+                    backgroundPosition: bgSideOffset + ' 0px'
+                });
+                break;
+            case 'west':
+                util.setStyle(blocks[i], {
+                    left  : coordinates[i].offset,
+                    width : coordinates[i].size,
+                    backgroundSize:
+                        util.px(coordinates[i].size) + ' ' +
+                        util.px(sideSize),
+                    backgroundPosition: '0px ' + bgSideOffset
+                });
+                break;
+            }
+
+            
+
+
+            /*
             var coord;
             if (dir == 'north'||dir =='west') {
                 coord = coordinates[i].offset;
@@ -1936,43 +1983,26 @@ function (exports) {
                       - coordinates[i].offset;
             }
             
-            
-            var bgOffset = '0px';
-            var intSize = coordinates[i].size;
-            var intCoord = coord;
-
-
-            
-
-                    /*
-            var intCoord = Math.floor(coord);
-            var rest = coord-intCoord
-            var bgOffset = util.px(rest);
-
-            var intSize = Math.ceil(coordinates[i].size + rest)
-                     */
-
-
-
             if (util.isVertical[dir]) {
                 util.setStyle(blocks[i], {
-                    top : intCoord,
-                    height: intSize,
+                    top : coord,
+                    height: coordinates[i].size,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' ' + bgOffset
+                    backgroundPosition: bgSideOffset + ' 0px'
                 });
             } else {
                 util.setStyle(blocks[i], {
-                    left : intCoord,
-                    width : intSize,
+                    left : coord,
+                    width : coordinates[i].size,
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
-                    backgroundPosition: bgOffset + ' '+bgSideOffset
+                    backgroundPosition: '0px '+bgSideOffset
                 });
             }
+             */
         }
     }
 
