@@ -1961,6 +1961,46 @@ function (exports) {
                  */
 
 
+
+
+
+             var pad = 10;
+
+            
+            
+            var coord;
+            if (dir == 'north'||dir =='west') {
+                coord = coordinates[i].offset;
+            } else {
+                coord = containerSize
+                      - coordinates[i].size
+                      - coordinates[i].offset;
+            }
+            
+            if (util.isVertical[dir]) {
+                util.setStyle(blocks[i], {
+                    top : coord,
+                    height: coordinates[i].size+pad,
+                    backgroundSize:
+                        util.px(sideSize) + ' ' +
+                        util.px(coordinates[i].size),
+                    backgroundPosition: bgSideOffset + ' 0px'
+                });
+            } else {
+                util.setStyle(blocks[i], {
+                    left : coord,
+                    width : coordinates[i].size,
+                    backgroundSize:
+                        util.px(coordinates[i].size) + ' ' +
+                        util.px(sideSize),
+                    backgroundPosition: '0px '+bgSideOffset
+                });
+            }
+            
+            
+            
+/*            
+
             // best bg rounding in chrome (for north)
             var pad = 10;
             
