@@ -1931,7 +1931,7 @@ function (exports) {
             case 'north':
                 util.setStyle(blocks[i], {
                     top    : coordinates[i].offset,
-                    height : coordinates[i].size,
+                    height : coordinates[i].size+1,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
@@ -1941,7 +1941,7 @@ function (exports) {
             case 'east':
                 util.setStyle(blocks[i], {
                     right : coordinates[i].offset,
-                    width : coordinates[i].size,
+                    width : coordinates[i].size+1,
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
@@ -1951,7 +1951,7 @@ function (exports) {
             case 'south':
                 util.setStyle(blocks[i], {
                     bottom    : coordinates[i].offset,
-                    height : coordinates[i].size,
+                    height : coordinates[i].size+1,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
@@ -1961,7 +1961,7 @@ function (exports) {
             case 'west':
                 util.setStyle(blocks[i], {
                     left  : coordinates[i].offset,
-                    width : coordinates[i].size,
+                    width : coordinates[i].size+1,
                     backgroundSize:
                         util.px(coordinates[i].size) + ' ' +
                         util.px(sideSize),
