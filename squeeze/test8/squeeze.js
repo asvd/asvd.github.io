@@ -1927,6 +1927,77 @@ function (exports) {
     ) {
         var bgSideOffset = util.px(-sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
+
+            var coord;
+            if (dir == 'north'||dir =='west') {
+                coord = coordinates[i].offset;
+            } else {
+                coord = containerSize
+                      - coordinates[i].size
+                      - coordinates[i].offset;
+            }
+            
+            
+            var floorCoord = Math.floor(coord);
+            var rest = coord-floorCoord;
+            var bgOffset = util.px(rest);
+            var intSize = Math.ceil(coordinates[i].size+rest);
+            
+            if (util.isVertical[dir]) {
+                util.setStyle(blocks[i], {
+                    top : floorCoord,
+                    height: intSize,
+                    backgroundSize:
+                        util.px(sideSize) + ' ' +
+                        util.px(coordinates[i].size),
+                    backgroundPosition: bgSideOffset + ' ' + bgOffset
+                });
+            } else {
+                util.setStyle(blocks[i], {
+                    left : floorCoord,
+                    width : intSize,
+                    backgroundSize:
+                        util.px(coordinates[i].size) + ' ' +
+                        util.px(sideSize),
+                    backgroundPosition: bgOffset + ' '+bgSideOffset
+                });
+            }
+
+
+            
+            /*
+            var coord;
+            if (dir == 'north'||dir =='west') {
+                coord = coordinates[i].offset;
+            } else {
+                coord = containerSize
+                      - coordinates[i].size
+                      - coordinates[i].offset;
+            }
+            
+            if (util.isVertical[dir]) {
+                util.setStyle(blocks[i], {
+                    top : coord,
+                    height: coordinates[i].size,
+                    backgroundSize:
+                        util.px(sideSize) + ' ' +
+                        util.px(coordinates[i].size),
+                    backgroundPosition: bgSideOffset + ' 0px'
+                });
+            } else {
+                util.setStyle(blocks[i], {
+                    left : coord,
+                    width : coordinates[i].size,
+                    backgroundSize:
+                        util.px(coordinates[i].size) + ' ' +
+                        util.px(sideSize),
+                    backgroundPosition: '0px '+bgSideOffset
+                });
+            }
+             */
+            
+            
+            /*
             switch(dir) {
             case 'north':
                 util.setStyle(blocks[i], {
@@ -1970,39 +2041,9 @@ function (exports) {
                 break;
             }
 
-            
+            */
 
 
-            /*
-            var coord;
-            if (dir == 'north'||dir =='west') {
-                coord = coordinates[i].offset;
-            } else {
-                coord = containerSize
-                      - coordinates[i].size
-                      - coordinates[i].offset;
-            }
-            
-            if (util.isVertical[dir]) {
-                util.setStyle(blocks[i], {
-                    top : coord,
-                    height: coordinates[i].size,
-                    backgroundSize:
-                        util.px(sideSize) + ' ' +
-                        util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' 0px'
-                });
-            } else {
-                util.setStyle(blocks[i], {
-                    left : coord,
-                    width : coordinates[i].size,
-                    backgroundSize:
-                        util.px(coordinates[i].size) + ' ' +
-                        util.px(sideSize),
-                    backgroundPosition: '0px '+bgSideOffset
-                });
-            }
-             */
         }
     }
 
