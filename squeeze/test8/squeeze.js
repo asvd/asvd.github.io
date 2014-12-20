@@ -1941,7 +1941,6 @@ function (exports) {
             var floorCoord = Math.floor(coord);
             var rest = coord-floorCoord;
             var bgOffset = util.px(rest);
-            bgOffset = '0px';
             var intSize = Math.ceil(coordinates[i].size+rest);
             
             if (util.isVertical[dir]) {
