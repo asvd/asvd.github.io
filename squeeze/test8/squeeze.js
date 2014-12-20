@@ -1993,8 +1993,7 @@ function (exports) {
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-//                    backgroundPosition: bgSideOffset + ' ' + (pad) +'px'
-                    backgroundPosition: 'left bottom'
+                    backgroundPosition: 'left ' + bgSideOffset + ' bottom 0px'
                 });
                 break;
             case 'west':
