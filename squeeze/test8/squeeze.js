@@ -1759,11 +1759,11 @@ function (exports) {
 
         if (dir == 'north' || dir == 'west') {
             for (i = 0; i < BLOCKSNUM; i++) {
-                container.appendChild(block);
+                container.appendChild(blocks[i]);
             }
         } else {
             for (i = BLOCKSNUM-1; i >= 0; i--) {
-                container.appendChild(block);
+                container.appendChild(blocks[i]);
             }
         }
 
