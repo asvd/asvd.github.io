@@ -1960,18 +1960,19 @@ function (exports) {
             }
                  */
 
-            
+
+            var pad = 100;
             
 
             switch(dir) {
             case 'north':
                 util.setStyle(blocks[i], {
                     top    : coordinates[i].offset,
-                    height : coordinates[i].size+100,
+                    height : coordinates[i].size+pad,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' 0px'
+                        backgroundPosition: bgSideOffset + ' ' + pad +'px'
                 });
                 break;
             case 'east':
@@ -1987,11 +1988,11 @@ function (exports) {
             case 'south':
                 util.setStyle(blocks[i], {
                     bottom : coordinates[i].offset,
-                    height : coordinates[i].size+100,
+                    height : coordinates[i].size+pad,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' 0px'
+                    backgroundPosition: bgSideOffset + ' ' + pad +'px'
                 });
                 break;
             case 'west':
