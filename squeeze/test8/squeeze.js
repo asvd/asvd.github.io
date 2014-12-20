@@ -1973,7 +1973,7 @@ function (exports) {
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' 0px'
+                    backgroundPosition: 'top ' + bgSideOffset + ' 0px'
                 });
                 break;
             case 'east':
@@ -1989,7 +1989,7 @@ function (exports) {
             case 'south':
                 util.setStyle(blocks[i], {
                     bottom : coordinates[i].offset,
-                    height : coordinates[i].size ,
+                    height : coordinates[i].size,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
