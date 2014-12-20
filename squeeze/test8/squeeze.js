@@ -1987,7 +1987,7 @@ function (exports) {
             case 'south':
                 util.setStyle(blocks[i], {
                     bottom : coordinates[i].offset,
-                    height : coordinates[i].size,
+                    height : coordinates[i].size+100,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
