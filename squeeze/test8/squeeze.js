@@ -1757,7 +1757,8 @@ function (exports) {
             blocks.push(block);
         }
 
-        for (var i = BLOCKSNUM - 1; i >= 0; i--) {
+        for (var i = 0; i < BLOCKSNUM; i++) {
+//        for (var i = BLOCKSNUM - 1; i >= 0; i--) {
             container.appendChild(blocks[i]);
         }
 
