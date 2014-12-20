@@ -1754,12 +1754,8 @@ function (exports) {
             block = util.sample.div.cloneNode(false);
             util.setStyle(block, style);
             impl.backgroundCanvas(block, canvas);
+            container.appendChild(block);
             blocks.push(block);
-        }
-
-        for (var i = 0; i < BLOCKSNUM; i++) {
-//        for (var i = BLOCKSNUM - 1; i >= 0; i--) {
-            container.appendChild(blocks[i]);
         }
 
         impl.gradientMask(container, dir);
