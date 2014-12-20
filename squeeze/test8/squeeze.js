@@ -1987,14 +1987,13 @@ function (exports) {
                 });
                 break;
             case 'south':
-                var rest = Math.floor(coordinates[i].size) - coordinates[i].size;
                 util.setStyle(blocks[i], {
                     bottom : coordinates[i].offset,
-                    height : coordinates[i].size+pad+rest,
+                    height : coordinates[i].size+pad,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' ' + (pad+rest) +'px'
+                    backgroundPosition: bgSideOffset + ' ' + (pad) +'px'
                 });
                 break;
             case 'west':
