@@ -1928,6 +1928,7 @@ function (exports) {
         var bgSideOffset = util.px(-sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
 
+            /*
             var coord;
             if (dir == 'north'||dir =='west') {
                 coord = coordinates[i].offset;
@@ -1962,10 +1963,9 @@ function (exports) {
                     backgroundPosition: bgOffset + ' '+bgSideOffset
                 });
             }
-
+             */
 
             
-            /*
             var coord;
             if (dir == 'north'||dir =='west') {
                 coord = coordinates[i].offset;
@@ -1994,7 +1994,7 @@ function (exports) {
                     backgroundPosition: '0px '+bgSideOffset
                 });
             }
-             */
+
             
             
             /*
