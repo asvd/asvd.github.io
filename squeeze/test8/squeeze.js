@@ -1991,7 +1991,7 @@ function (exports) {
             if (util.isVertical[dir]) {
                 util.setStyle(blocks[i], {
                     top : coord,
-                    height: coordinates[i].size+pad,
+                    height: Math.ceil(coordinates[i].size+pad),
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
