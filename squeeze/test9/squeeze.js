@@ -1771,6 +1771,20 @@ function (exports) {
 
         impl.gradientMask(container, dir);
 
+        
+        
+        
+        if (dir == 'north') {
+            util.setStyle(container, {
+                WebkitTransform :  'rotate(-180deg)'
+            });
+        }
+            
+            
+
+
+        
+
         return blocks;
     }
 
@@ -1975,7 +1989,8 @@ function (exports) {
 
 
 
-             var pad = 2;
+            // makes coordinate rounding smoother in chrome somehow
+            var pad = 2;
 
             
             
@@ -2007,8 +2022,7 @@ function (exports) {
                     backgroundPosition: '0px '+bgSideOffset
                 });
             }
-            
-            
+
             
 /*            
 
