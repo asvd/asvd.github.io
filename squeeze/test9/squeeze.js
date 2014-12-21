@@ -1788,7 +1788,9 @@ function (exports) {
         
         if (dir == 'south') {
             util.setStyle(container, {
-                WebkitTransform :  'rotate(-180deg)'
+                WebkitTransform :  'rotate(-180deg)',
+                OTransform :  'rotate(-180deg)',
+                MozTransform :  'rotate(-180deg)'
             });
         }
             
