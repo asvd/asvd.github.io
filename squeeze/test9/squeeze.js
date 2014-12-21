@@ -2003,7 +2003,7 @@ function (exports) {
 
 
             // makes coordinate rounding smoother in chrome somehow
-            var pad = 2;
+            var pad = 20;
 
             
             
