@@ -1739,6 +1739,14 @@ function (exports) {
      */
     var createBlocksDIV = function(dir, container, image) {
         var canvas = image.getSides()[dir];
+        
+        
+        if (dir == 'south') {
+            canvas = image.getSides().north;
+        }
+        
+        
+        
         var style = {
             position: 'absolute'
         };
@@ -1767,14 +1775,20 @@ function (exports) {
             }
         }
 
+        
+        
+        
 
-
-        impl.gradientMask(container, dir);
+        if (dir == 'south') {
+            impl.gradientMask(container, 'north');
+        } else {
+            impl.gradientMask(container, dir);
+        }
 
         
         
         
-        if (dir == 'north') {
+        if (dir == 'south') {
             util.setStyle(container, {
                 WebkitTransform :  'rotate(-180deg)'
             });
@@ -1995,7 +2009,7 @@ function (exports) {
             
             
             var coord;
-            if (dir == 'north'||dir =='west') {
+            if (dir == 'north'||dir =='west'||dir == 'south') {
                 coord = coordinates[i].offset;
             } else {
                 coord = containerSize
