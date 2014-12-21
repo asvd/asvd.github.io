@@ -1765,7 +1765,7 @@ function (exports) {
             blocks.push(block);
         }
 
-        if (dir == 'north' || dir == 'west') {
+        if (dir == 'north' || dir == 'west'||dir == 'south') {
             for (i = 0; i < BLOCKSNUM; i++) {
                 container.appendChild(blocks[i]);
             }
@@ -1786,14 +1786,13 @@ function (exports) {
         }
 
         
-        
-        
+/*        
         if (dir == 'south') {
             util.setStyle(container, {
                 WebkitTransform :  'rotate(-180deg)'
             });
         }
-            
+  */          
             
 
 
