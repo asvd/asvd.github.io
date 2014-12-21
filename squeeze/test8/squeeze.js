@@ -1975,7 +1975,7 @@ function (exports) {
 
 
 
-             var pad = 50;
+             var pad = 5;
 
             
             
@@ -1991,7 +1991,7 @@ function (exports) {
             if (util.isVertical[dir]) {
                 util.setStyle(blocks[i], {
                     top : coord,
-                    height: coordinates[i].size,
+                    height: coordinates[i].size+pad,
                     backgroundSize:
                         util.px(sideSize) + ' ' +
                         util.px(coordinates[i].size),
