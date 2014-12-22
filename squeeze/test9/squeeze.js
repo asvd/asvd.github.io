@@ -1788,9 +1788,9 @@ function (exports) {
         
         if (dir == 'south') {
             util.setStyle(container, {
-                WebkitTransform :  'rotate(-180deg)',
-                OTransform :  'rotate(-180deg)',
-                MozTransform :  'rotate(-180deg)'
+//                WebkitTransform :  'rotate(-180deg)',
+//                OTransform :  'rotate(-180deg)',
+//                MozTransform :  'rotate(-180deg)'
             });
         }
             
@@ -2003,7 +2003,7 @@ function (exports) {
 
 
             // makes coordinate rounding smoother in chrome somehow
-            var pad = 20;
+            var pad = 2;
 
             
             
