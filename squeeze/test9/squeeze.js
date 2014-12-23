@@ -40,7 +40,7 @@ function (exports) {
      * 
      * @returns {Boolean}
      */
-    var checkCssProperty = function(name, func, params) {
+    var checkCSSProperty = function(name, func, params) {
         var idx, camel = name;
         while ((idx = camel.indexOf('-')) != -1) {
             camel = camel.slice(0, idx) +
@@ -64,27 +64,31 @@ function (exports) {
 
         canvas : !!document.createElement("canvas").getContext,
 
+        webkitTransform : checkCSSProperty(
+            'WebkitTransform', 'rotate', '-180deg'
+        ),
+
         backgroundCanvas : {
             webkit :
               !!document.getCSSCanvasContext &&
-              checkCssProperty(
+              checkCSSProperty(
                   'background', '-webkit-canvas', 'a'
               ),
 
-            mozElement : checkCssProperty(
+            mozElement : checkCSSProperty(
                 'background', '-moz-element', '#a'
             )
         },
 
         gradientMask : {
-            alphaFilter : checkCssProperty(
+            alphaFilter : checkCSSProperty(
                 'filter',
                 'progid:DXImageTransform.Microsoft.Alpha',
                 'opacity=100,finishOpacity=0,style=1,'+
                     'startX=0,finishX=1,startY=0,finishY=1'
             ),
 
-            webkit : checkCssProperty(
+            webkit : checkCSSProperty(
                 '-webkit-mask-image',
                 '-webkit-linear-gradient',
                 'top, rgba(0,0,0,1), rgba(0,0,0,0) 100%'
@@ -98,6 +102,7 @@ function (exports) {
     // implementations to use according to the available features
     var METHODS = {
         async  : features.event ? 'event' : 'setTimeout',
+        blocks : features.webkitTransform ?  'transform': 'div',
         mask   : null,
         canvas : null
     };
@@ -113,15 +118,13 @@ function (exports) {
                 METHODS.canvas = 'mozElement';
                 METHODS.mask = 'svgReuse';
             } else {
-                METHODS.canvas = 'svg';
-                METHODS.mask = 'svg';
+                METHODS.blocks = 'svg';
             }
         } else if (features.gradientMask.alphaFilter) {
             METHODS.canvas = 'dataURL';
             METHODS.mask = 'alphaFilter';
         } else {
-            METHODS.canvas = 'svg';
-            METHODS.mask = 'svg';
+            METHODS.blocks = 'svg';
         }
     } else {
         // cannot do anything without canvas
@@ -131,6 +134,7 @@ function (exports) {
 
 // METHODS.canvas = 'svg';
 // METHODS.mask = 'svg';
+ METHODS.blocks = 'div';
     
 
     // browser-dependent implementations
@@ -1549,71 +1553,70 @@ function (exports) {
     }
     
 
-    // initializes a set of blocks on each side
 
-    if (METHODS.canvas == 'svg') {
-        /**
-         * @returns {Element} template of the SVG blocks
-         */
-        var createSVGTemplate = function() {
-            var svg = util.genSVGElement('svg');
-            var defs = util.genSVGElement('defs', svg);
+    /**
+     * @returns {Element} template of the SVG blocks
+     */
+    var createSVGTemplate = function() {
+        var svg = util.genSVGElement('svg');
+        var defs = util.genSVGElement('defs', svg);
 
-            var linearGradient = util.genSVGLinearGradient(
-                defs, null, null
-            );
+        var linearGradient = util.genSVGLinearGradient(
+            defs, null, null
+        );
 
-            var mask = util.genSVGElement('mask', defs, {
+        var mask = util.genSVGElement('mask', defs, {
+            x      : '0',
+            y      : '0',
+            width  : '100%',
+            height : '100%'
+        });
+
+        var rectWidth = '0';
+        var rectHeight = '0';
+
+        var maskRect = util.genSVGElement('rect', mask, {
+            x      : '0',
+            y      : '0',
+            width  : '0',
+            height : '0'
+        });
+
+        var g = util.genSVGElement('g', svg);
+
+        var patterns = [];
+        var uses = [];
+        var rects = [];
+
+        for (var i = 0; i < BLOCKSNUM; i++) {
+            patterns[i] = util.genSVGElement('pattern', defs, {
                 x      : '0',
                 y      : '0',
-                width  : '100%',
-                height : '100%'
+                width  : '0px',
+                height : '0px',
+                patternUnits : 'userSpaceOnUse'
             });
 
-            var rectWidth = '0';
-            var rectHeight = '0';
+            uses[i] = util.genSVGElement('use', patterns[i]);
 
-            var maskRect = util.genSVGElement('rect', mask, {
-                x      : '0',
-                y      : '0',
-                width  : '0',
-                height : '0'
+            rects[i] = util.genSVGElement('rect', g, {
+                x : '0px',
+                y : '0px'
             });
-
-            var g = util.genSVGElement('g', svg);
-
-            var patterns = [];
-            var uses = [];
-            var rects = [];
-
-            for (var i = 0; i < BLOCKSNUM; i++) {
-                patterns[i] = util.genSVGElement('pattern', defs, {
-                    x      : '0',
-                    y      : '0',
-                    width  : '0px',
-                    height : '0px',
-                    patternUnits : 'userSpaceOnUse'
-                });
-
-                uses[i] = util.genSVGElement('use', patterns[i]);
-
-                rects[i] = util.genSVGElement('rect', g, {
-                    x : '0px',
-                    y : '0px'
-                });
-            }
-
-            util.setStyle(svg, {
-                position: 'absolute',
-                top    : 0,
-                left   : 0,
-                width  : 0,
-                height : 0
-            });
-
-            return svg;
         }
 
+        util.setStyle(svg, {
+            position: 'absolute',
+            top    : 0,
+            left   : 0,
+            width  : 0,
+            height : 0
+        });
+
+        return svg;
+    }
+
+    if (METHODS.blocks == 'svg') {
         var svgBlocksTemplate = createSVGTemplate();
     }
     
@@ -1729,7 +1732,8 @@ function (exports) {
     /**
      * Creates a set of blocks for the scrolling indication
      * 
-     * Blocks are created as a separate DOM elements
+     * Blocks are created as a separate DOM elements and use the
+     * images from the rotated canvases
      * 
      * @param {String} dir direction of indication
      * @param {Element} container to create blocks on
@@ -1738,6 +1742,48 @@ function (exports) {
      * @returns {Object} set of created elements
      */
     var createBlocksDIV = function(dir, container, image) {
+        var canvas = image.getSides()[dir];
+        
+        var style = {
+            position: 'absolute'
+        };
+
+        if (util.isVertical[dir]) {
+            style.width = '100%';
+        } else {
+            style.height = '100%';
+        }
+
+        var block, blocks = [];
+        for (var i = 0; i < BLOCKSNUM; i++) {
+            block = util.sample.div.cloneNode(false);
+            util.setStyle(block, style);
+            impl.backgroundCanvas(block, canvas);
+            blocks.push(block);
+            container.appendChild(blocks[i]);
+        }
+
+        impl.gradientMask(container, dir);
+
+        return blocks;
+    }
+
+
+    /**
+     * Creates a set of blocks for the scrolling indication
+     * 
+     * Blocks are created as a separate DOM elements and use the
+     * canvas image rotated using webkit-transform
+     * 
+     * (smoother scrolling for webkit)
+     * 
+     * @param {String} dir direction of indication
+     * @param {Element} container to create blocks on
+     * @param {CachedImg} image to use data from
+     * 
+     * @returns {Object} set of created elements
+     */
+    var createBlocksTransform = function(dir, container, image) {
         var canvas = image.getSides()[dir];
         
         
@@ -1802,13 +1848,18 @@ function (exports) {
     }
 
 
-    if (METHODS.canvas == 'svg') {
+    switch (METHODS.blocks) {
+    case 'svg':
         Squeeze.prototype._createBlocks = createBlocksSVG;
-    } else {
+        break;
+    case 'div':
         Squeeze.prototype._createBlocks = createBlocksDIV;
+        break;
+    case 'transform':
+        Squeeze.prototype._createBlocks = createBlocksTransform;
+        break;
     }
-    
-    
+
 
     /**
      * Initializes the scrolling indicator for the given side with the
@@ -1965,6 +2016,69 @@ function (exports) {
     ) {
         var bgSideOffset = util.px(-sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
+            var coord;
+            if (dir == 'north'||dir =='west') {
+                coord = coordinates[i].offset;
+            } else {
+                coord = containerSize
+                      - coordinates[i].size
+                      - coordinates[i].offset;
+            }
+            
+            if (util.isVertical[dir]) {
+                util.setStyle(blocks[i], {
+                    top : coord,
+                    height: coordinates[i].size,
+                    backgroundSize:
+                        util.px(sideSize) + ' ' +
+                        util.px(coordinates[i].size),
+                    backgroundPosition: bgSideOffset + ' 0px'
+                });
+            } else {
+                util.setStyle(blocks[i], {
+                    left : coord,
+                    width : coordinates[i].size,
+                    backgroundSize:
+                        util.px(coordinates[i].size) + ' ' +
+                        util.px(sideSize),
+                    backgroundPosition: '0px '+bgSideOffset
+                });
+            }
+        }
+    }
+
+
+    /**
+     * Updates a set of blocks for the scrolling indication
+     * 
+     * Blocks are updated within a DIV element and use the canvas
+     * image rotated using webkit-transform
+     * 
+     * (smoother scrolling for webkit)
+     * 
+     * @param {String} dir direction of the block indicator
+     * @param {Array} blocks elements to update
+     * @param {Array} coordinates to apply to the blocks
+     * @param {Number} containerSize (px) size of the indication
+     *                   blocks container across the side (=indication
+     *                   intensity), depends on the scroll amount
+     * @param {Number} sideOffset of the texture, depends on the
+     *                   scroll amount in the direction across the
+     *                   side
+     * @param {Number} sideSize size of the stretched (and original)
+     *                   texture along the side
+     * @param {Number} stretchedSize size of the stratched texture
+     *                   across the side
+     * @param {Number} areaSideSize size of the whole scrollable area
+     *                   across the side
+     */
+    var updateBlocksTransform = function(
+        dir, blocks, coordinates, containerSize,
+        sideOffset, sideSize, stretchedSize,
+        areaSideSize
+    ) {
+        var bgSideOffset = util.px(-sideOffset);
+        for (var i = 0; i < BLOCKSNUM; i++) {
 
 
                 /*
@@ -2096,12 +2210,18 @@ function (exports) {
     }
 
 
-    if (METHODS.canvas == 'svg') {
+    switch (METHODS.blocks) {
+    case 'svg':
         Squeeze.prototype._updateBlocks = updateBlocksSVG;
-    } else {
+        break;
+    case 'div':
         Squeeze.prototype._updateBlocks = updateBlocksDIV;
+        break;
+    case 'transform':
+        Squeeze.prototype._updateBlocks = updateBlocksTransform;
+        break;
     }
-    
+
     
 
     /**
