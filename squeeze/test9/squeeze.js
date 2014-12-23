@@ -2379,7 +2379,9 @@ function (exports) {
      */
     Squeeze.prototype._getContainerSize = function(beyondDir, maxSize) {
         var intensity = 1 - 1 / (beyondDir/GAIN_SLOWNESS + 1);
-        return Math.ceil(intensity * maxSize);
+        var px = 1; // one px beyond the border
+        var size =  px + Math.ceil(intensity * (maxSize-px))
+        return size;
     }
     
     
