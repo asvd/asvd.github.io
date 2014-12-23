@@ -28,8 +28,6 @@ function (exports) {
     var UQ = 'squeeze-unique-' + (new Date().getTime());
 
 
-    // Duck-typing feature detection
-
     /**
      * Checks if the CSS property can have the CSS function with the
      * given string as a value
@@ -65,7 +63,7 @@ function (exports) {
         canvas : !!document.createElement("canvas").getContext,
 
         webkitTransform : checkCSSProperty(
-            'WebkitTransform', 'rotate', '-180deg'
+            '-webkit-transform', 'rotate', '-180deg'
         ),
 
         backgroundCanvas : {
@@ -134,7 +132,8 @@ function (exports) {
 
 // METHODS.canvas = 'svg';
 // METHODS.mask = 'svg';
- METHODS.blocks = 'div';
+    
+// METHODS.blocks = 'div';
     
 
     // browser-dependent implementations
@@ -1784,24 +1783,11 @@ function (exports) {
      * @returns {Object} set of created elements
      */
     var createBlocksTransform = function(dir, container, image) {
-        var canvas = image.getSides()[dir];
-        
-        
-        if (dir == 'south') {
-            canvas = image.getSides().north;
-        }
-        
-        
-        
+        var canvas = image.getSides().north;
         var style = {
-            position: 'absolute'
+            position: 'absolute',
+            width : '100%'
         };
-
-        if (util.isVertical[dir]) {
-            style.width = '100%';
-        } else {
-            style.height = '100%';
-        }
 
         var block, blocks = [];
         for (var i = 0; i < BLOCKSNUM; i++) {
@@ -1809,41 +1795,10 @@ function (exports) {
             util.setStyle(block, style);
             impl.backgroundCanvas(block, canvas);
             blocks.push(block);
+            container.appendChild(blocks[i]);
         }
-
-        if (dir == 'north' || dir == 'west'||dir == 'south') {
-            for (i = 0; i < BLOCKSNUM; i++) {
-                container.appendChild(blocks[i]);
-            }
-        } else {
-            for (i = BLOCKSNUM-1; i >= 0; i--) {
-                container.appendChild(blocks[i]);
-            }
-        }
-
         
-        
-        
-
-        if (dir == 'south') {
-            impl.gradientMask(container, 'north');
-        } else {
-            impl.gradientMask(container, dir);
-        }
-
-        
-        if (dir == 'south') {
-            util.setStyle(container, {
-                WebkitTransform :  'rotate(-180deg)',
-                OTransform :  'rotate(-180deg)',
-                MozTransform :  'rotate(-180deg)'
-            });
-        }
-            
-
-
-        
-
+        impl.gradientMask(container, 'north');
         return blocks;
     }
 
@@ -1894,10 +1849,10 @@ function (exports) {
      *                   side
      * @param {Number} sideSize size of the stretched (and original)
      *                   texture along the side
-     * @param {Number} stretchedSize size of the stratched texture
+     * @param {Number} stretchedSize size of the stretched texture
      *                   across the side
      * @param {Number} areaSideSize size of the whole scrollable area
-     *                   across the side
+     *                   along the side
      */
     var updateBlocksSVG = function(
         dir, blocks, coordinates, containerSize,
@@ -2004,10 +1959,10 @@ function (exports) {
      *                   side
      * @param {Number} sideSize size of the stretched (and original)
      *                   texture along the side
-     * @param {Number} stretchedSize size of the stratched texture
+     * @param {Number} stretchedSize size of the stretched texture
      *                   across the side
      * @param {Number} areaSideSize size of the whole scrollable area
-     *                   across the side
+     *                   along the side
      */
     var updateBlocksDIV = function(
         dir, blocks, coordinates, containerSize,
@@ -2067,10 +2022,10 @@ function (exports) {
      *                   side
      * @param {Number} sideSize size of the stretched (and original)
      *                   texture along the side
-     * @param {Number} stretchedSize size of the stratched texture
+     * @param {Number} stretchedSize size of the stretched texture
      *                   across the side
      * @param {Number} areaSideSize size of the whole scrollable area
-     *                   across the side
+     *                   along the side
      */
     var updateBlocksTransform = function(
         dir, blocks, coordinates, containerSize,
@@ -2079,133 +2034,16 @@ function (exports) {
     ) {
         var bgSideOffset = util.px(-sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
-
-
-                /*
-            var coord;
-            if (dir == 'north'||dir =='west') {
-                coord = coordinates[i].offset;
-            } else {
-                coord = containerSize
-                      - coordinates[i].size
-                      - coordinates[i].offset;
-            }
-            
-            if (util.isVertical[dir]) {
-                util.setStyle(blocks[i], {
-                    top : coord,
-                    height: coordinates[i].size,
-                    backgroundSize:
-                        util.px(sideSize) + ' ' +
-                        util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' 0px'
-                });
-            } else {
-                util.setStyle(blocks[i], {
-                    left : coord,
-                    width : coordinates[i].size,
-                    backgroundSize:
-                        util.px(coordinates[i].size) + ' ' +
-                        util.px(sideSize),
-                    backgroundPosition: '0px '+bgSideOffset
-                });
-            }
-                 */
-
-
-
-
-
-            // makes coordinate rounding smoother in chrome somehow
-            var pad = 2;
-
-            
-            
-            var coord;
-            if (dir == 'north'||dir =='west'||dir == 'south') {
-                coord = coordinates[i].offset;
-            } else {
-                coord = containerSize
-                      - coordinates[i].size
-                      - coordinates[i].offset;
-            }
-            
-            if (util.isVertical[dir]) {
-                util.setStyle(blocks[i], {
-                    top : coord,
-                    height: coordinates[i].size+pad,
-                    backgroundSize:
-                        util.px(sideSize) + ' ' +
-                        util.px(coordinates[i].size),
-                    backgroundPosition: bgSideOffset + ' 0px'
-                });
-            } else {
-                util.setStyle(blocks[i], {
-                    left : coord,
-                    width : coordinates[i].size,
-                    backgroundSize:
-                        util.px(coordinates[i].size) + ' ' +
-                        util.px(sideSize),
-                    backgroundPosition: '0px '+bgSideOffset
-                });
-            }
-
-            
-/*            
-
-            // best bg rounding in chrome (for north)
-            var pad = 10;
-            
-
-            switch(dir) {
-            case 'north':
-                util.setStyle(blocks[i], {
-                    top    : coordinates[i].offset,
-                    height : coordinates[i].size+pad,
-                    backgroundSize:
-                        util.px(sideSize) + ' ' +
-                        util.px(coordinates[i].size),
-                    backgroundPosition: 'left ' + bgSideOffset + ' top 0px'
-                });
-                break;
-            case 'east':
-                util.setStyle(blocks[i], {
-                    right : coordinates[i].offset,
-                    width : coordinates[i].size,
-                    backgroundSize:
-                        util.px(coordinates[i].size) + ' ' +
-                        util.px(sideSize),
-                    backgroundPosition: '0px ' + bgSideOffset
-                });
-                break;
-            case 'south':
-                util.setStyle(blocks[i], {
-                    bottom : coordinates[i].offset,
-                    height : coordinates[i].size,
-                    backgroundSize:
-                        util.px(sideSize) + ' ' +
-                        util.px(coordinates[i].size),
-                    backgroundPosition: 'left ' + bgSideOffset + ' bottom 0px'
-                });
-                break;
-            case 'west':
-                util.setStyle(blocks[i], {
-                    left  : coordinates[i].offset,
-                    width : coordinates[i].size,
-                    backgroundSize:
-                        util.px(coordinates[i].size) + ' ' +
-                        util.px(sideSize),
-                    backgroundPosition: '0px ' + bgSideOffset
-                });
-                break;
-            }
-
-
-*/
-
-
-
-
+            var pad = 2;  // scrolls smoother for some reason
+            var coord = coordinates[i].offset;
+            util.setStyle(blocks[i], {
+                top : coord,
+                height: coordinates[i].size+pad,
+                backgroundSize:
+                    util.px(sideSize) + ' ' +
+                    util.px(coordinates[i].size),
+                backgroundPosition: bgSideOffset + ' 0px'
+            });
         }
     }
 
@@ -2292,6 +2130,8 @@ function (exports) {
     /**
      * Updates the indicator blocks container geometry
      * 
+     * (also used for svg variant)
+     * 
      * @param {String} dir direction of the block indicator
      * @param {Element} container to apply geometry to
      * @param {Number} containerSize (px) size of the indication
@@ -2302,7 +2142,7 @@ function (exports) {
      * @param {Number} areaSidSize size of the whole scrollable area
      *                   across the side
      */
-    Squeeze.prototype._updateContainer = function(
+    var updateContainerDiv = function(
         dir, container, containerSize, areaSize, areaSideSize
     ) {
         var vertical = util.isVertical[dir];
@@ -2334,6 +2174,63 @@ function (exports) {
         }
         
         util.setStyle(container, style);
+    }
+    
+
+
+    /**
+     * Updates the indicator blocks container geometry, rotates and
+     * translates the container for the transform variant
+     * 
+     * @param {String} dir direction of the block indicator
+     * @param {Element} container to apply geometry to
+     * @param {Number} containerSize (px) size of the indication
+     *                   blocks container across the side (=indication
+     *                   intensity), depends on the scroll amount
+     * @param {Number} areaSize size of the whole scrollable area
+     *                   across the side
+     * @param {Number} areaSideSize size of the whole scrollable area
+     *                   along the side
+     */
+    var updateContainerTransform = function(
+        dir, container, containerSize, areaSize, areaSideSize
+    ) {
+        var rotate = '';
+        var translate = '';
+
+        switch(dir) {
+        case 'north':
+            break;
+        case 'east':
+            rotate = 'rotate(90deg)';
+            translate = 'translate('+areaSize+'px,0px)';
+            break;
+        case 'south':
+            rotate = 'rotate(180deg)';
+            translate = 'translate('+areaSideSize+'px,'+areaSize+'px)';
+            break;
+        case 'west':
+            rotate = 'rotate(270deg)';
+            translate = 'translate(0px,'+areaSideSize+'px)';
+            break;
+        }
+
+        var style = {
+            top : -1, // may not meet the border in some zoom-levels
+            width : areaSideSize,
+            height : containerSize,
+            WebkitTransform :  [translate, rotate].join(' '),
+            WebkitTransformOrigin :  '0 0'
+        }
+
+        util.setStyle(container, style);
+    }
+
+
+    if (METHODS.blocks == 'transform') {
+        Squeeze.prototype._updateContainer = updateContainerTransform;
+    } else {
+        Squeeze.prototype._updateContainer = updateContainerDiv;
     }
     
 
