@@ -2033,7 +2033,10 @@ function (exports) {
         areaSideSize
     ) {
         if (dir == 'north' || dir == 'east') {
-            sideOffset = -sideOffset
+            sideOffset = -sideOffset;
+        } else {
+            // always start background from top/left side
+            sideOffset += areaSideSize;
         }
 
         var bgSideOffset = util.px(sideOffset);
