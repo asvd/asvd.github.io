@@ -2220,13 +2220,29 @@ function (exports) {
         }
 
         var style = {
-            top : 0, // may not meet the border in some zoom-levels
             width : areaSideSize,
             height : containerSize,
             WebkitTransform :  [translate, rotate].join(' '),
             WebkitTransformOrigin :  '0 0'
         }
 
+        // may not meet the border in some zoom-levels
+        // adding 1px to cover the border for sure
+        switch (dir) {
+        case 'north':
+            style.top = -1;
+            break;
+        case 'east':
+            style.left = 1;
+            break;
+        case 'south':
+            style.top = 1;
+            break;
+        case 'west':
+            style.left = -1;
+            break;
+        }
+        
         util.setStyle(container, style);
     }
 
