@@ -2032,7 +2032,11 @@ function (exports) {
         sideOffset, sideSize, stretchedSize,
         areaSideSize
     ) {
-        var bgSideOffset = util.px(-sideOffset);
+        if (dir == 'north' || dir == 'east') {
+            sideOffset = -sideOffset
+        }
+
+        var bgSideOffset = util.px(sideOffset);
         for (var i = 0; i < BLOCKSNUM; i++) {
             var pad = 2;  // scrolls smoother for some reason
             var coord = coordinates[i].offset;
@@ -2216,7 +2220,7 @@ function (exports) {
         }
 
         var style = {
-            top : -1, // may not meet the border in some zoom-levels
+            top : 0, // may not meet the border in some zoom-levels
             width : areaSideSize,
             height : containerSize,
             WebkitTransform :  [translate, rotate].join(' '),
