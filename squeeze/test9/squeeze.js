@@ -2598,7 +2598,7 @@ function (exports) {
 
 //    SQUEEZE_ENABLED = false;
 
-
+    console.log('WTF');
     exports.resqueeze = resqueeze;
     exports.enabled = SQUEEZE_ENABLED;
 }));
