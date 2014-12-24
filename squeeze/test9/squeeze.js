@@ -876,8 +876,8 @@ function (exports) {
         this._animate = null;
     }
     
-    Animator.prototype._animTime = 200;
-    Animator.prototype._delay = 30;
+    Animator.prototype._animTime = 160;
+    Animator.prototype._delay = 20;
     
     /**
      * Changes the value smoothly
