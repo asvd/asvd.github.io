@@ -861,6 +861,87 @@ function (exports) {
     
     
     /**
+     * Smoothly animates anythinng by wrapping the setter method
+     * 
+     * @param {Function} setter actually updating the value
+     * @param {Object} ctx to apply setter to
+     */
+    var Animator = function(setter, ctx) {
+        this._setter = setter;
+        this._ctx = ctx;
+        this._current = 0;
+        this._args = [];
+        this._timeout = null;
+    }
+
+    Animator.prototype._maxStep = 10;
+    Animator.prototype._delay = 10;
+    
+    /**
+     * Smoothly performs animation
+     * 
+     * @param {Number} val to set
+     * @param ... (other arguments forwarded to setter unchanged)
+     */
+    Animator.prototype.update = function(val) {
+        this._target = val;
+        this._storeArgs.apply(this, arguments);
+        this._tick();
+    }
+    
+    
+    /**
+     * Stores all the provided arguments
+     */
+    Animator.prototype._storeArgs = function() {
+        this._args = [];
+        for (var i = 0; i < arguments.length; i++) {
+            this._args.push(arguments[i]);
+        }
+    }
+    
+    
+    /**
+     * Performs a single animation frame
+     * 
+     * @param {Boolean} timeouted true if called by timeout
+     */
+    Animator.prototype._tick = function(timeouted) {
+        if (Math.abs(this._target - this._current) <= this._maxStep) {
+            if (this._timeout) {
+                clearTimeout(this._timeout);
+                this._timeout = null;
+            }
+
+            this._applyValue(this._target);
+        } else {
+            if (timeouted || !this._timeout) {
+                var me = this;
+                this._timeout = setTimeout(
+                    function(){me._tick(true);}, this._delay
+                );
+            }
+            
+            var sign = this._current < this._target ? 1 : -1;
+            var delta = sign * this._maxStep;
+            this._applyValue(this._current + delta);
+        }
+    }
+
+
+    /**
+     * Applies the current animation frame
+     * 
+     * @param {Number} val to apply
+     */
+    Animator.prototype._applyValue = function(val) {
+        this._current = val;
+        this._args[0] = val;
+        this._setter.apply(this._ctx, this._args);
+    }
+    
+    
+    /**
      * Images cache
      * 
      * Loads and stores the images by the given url, along with the
@@ -1829,8 +1910,54 @@ function (exports) {
             dir, side.main, image
         );
 
+        side.animator = this._genAnimator(dir);
+
         side.ready = true;
     }
+    
+    
+    /**
+     * Generates an Animator object for the given direction
+     * 
+     * @param {String} dir to generate animator for
+     * 
+     * @returns {Animator}
+     */
+    Squeeze.prototype._genAnimator = function(dir) {
+        var setter = function(
+            containerSize, // animation value
+            areaSize,
+            areaSideSize,
+            coordinates,
+            sideOffset,
+            sideSize,
+            stretchedSize
+        ) {
+            this._images[dir].touchSVGImage();
+
+            this._updateContainer(
+                dir,
+                this._cmp.sides[dir].main,
+                containerSize,
+                areaSize,
+                areaSideSize
+            );
+
+            this._updateBlocks(
+                dir,
+                this._cmp.sides[dir].blocks,
+                coordinates,
+                containerSize,
+                sideOffset,
+                sideSize,
+                stretchedSize,
+                areaSideSize
+            );
+        }
+
+        return new Animator(setter, this);
+    }
+    
     
     
     /**
@@ -2070,71 +2197,6 @@ function (exports) {
     
 
     /**
-     * Updates the scrolling indicators on each side according to the
-     * current scroll state of the element
-     */
-    Squeeze.prototype._indicate = function() {
-        var geom = this._cmp.wrapper.getBoundingClientRect();
-        var beyond = this._getBeyond();
-
-        for (var i = 0; i < util.dir.length; i++) {
-            var dir = util.dir[i];
-            if (this._cmp.sides[dir].ready) {
-                var data = this._images[dir].getData();
-                var origCoord = this._getOrigCoord(
-                    dir, beyond, data.origSize
-                );
-
-                var coordinates = this._getBlockCoordinates(
-                    data.points[origCoord],
-                    data.stretchedSize,
-                    data.virtualSize3,
-                    data.virtualPow,
-                    data.containerMaxSize
-                );
-
-                var containerSize = this._getContainerSize(
-                    beyond[dir],  data.containerMaxSize
-                );
-
-                var sideOffset = this._getSideOffset(beyond, dir);
-                
-                var areaSize     = geom.height;
-                var areaSideSize = geom.width;
-                if (!util.isVertical[dir]) {
-                    areaSize     = geom.width;
-                    areaSideSize = geom.height;
-                }
-
-                var sideSize = data.sideSize;
-                var stretchedSize = data.stretchedSize;
-
-                this._images[dir].touchSVGImage();
-
-                this._updateContainer(
-                    dir,
-                    this._cmp.sides[dir].main,
-                    containerSize,
-                    areaSize,
-                    areaSideSize
-                );
-
-                this._updateBlocks(
-                    dir,
-                    this._cmp.sides[dir].blocks,
-                    coordinates,
-                    containerSize,
-                    sideOffset,
-                    sideSize,
-                    stretchedSize,
-                    areaSideSize
-                );
-            }
-        }
-    }
-    
-    
-    /**
      * Updates the indicator blocks container geometry
      * 
      * (also used for svg variant)
@@ -2187,7 +2249,11 @@ function (exports) {
 
     /**
      * Updates the indicator blocks container geometry, rotates and
-     * translates the container for the transform variant
+     * translates the container for the transform variant. In Webkit
+     * the scrolling is animated better for the top border (due to
+     * coordinates rounding), so we always perform the animation as if
+     * it was the north border, and then rotate the image using
+     * transform
      * 
      * @param {String} dir direction of the block indicator
      * @param {Element} container to apply geometry to
@@ -2257,7 +2323,61 @@ function (exports) {
     }
     
 
+    /**
+     * Updates the scrolling indicators on each side according to the
+     * current scroll state of the element
+     */
+    Squeeze.prototype._indicate = function() {
+        var geom = this._cmp.wrapper.getBoundingClientRect();
+        var beyond = this._getBeyond();
 
+        for (var i = 0; i < util.dir.length; i++) {
+            var dir = util.dir[i];
+            if (this._cmp.sides[dir].ready) {
+                var data = this._images[dir].getData();
+                var origCoord = this._getOrigCoord(
+                    dir, beyond, data.origSize
+                );
+
+                var coordinates = this._getBlockCoordinates(
+                    data.points[origCoord],
+                    data.stretchedSize,
+                    data.virtualSize3,
+                    data.virtualPow,
+                    data.containerMaxSize
+                );
+
+                var containerSize = this._getContainerSize(
+                    beyond[dir],  data.containerMaxSize
+                );
+
+                var sideOffset = this._getSideOffset(beyond, dir);
+                
+                var areaSize     = geom.height;
+                var areaSideSize = geom.width;
+                if (!util.isVertical[dir]) {
+                    areaSize     = geom.width;
+                    areaSideSize = geom.height;
+                }
+
+                var sideSize = data.sideSize;
+                var stretchedSize = data.stretchedSize;
+
+                this._cmp.sides[dir].animator.update(
+                    containerSize,
+                    areaSize,
+                    areaSideSize,
+                    coordinates,
+                    sideOffset,
+                    sideSize,
+                    stretchedSize
+                );
+            }
+        }
+    }
+
+
+    
     /**
      * For the scrollable area returns the amount of pixels scrollable
      * beyond each side
@@ -2339,7 +2459,7 @@ function (exports) {
         var F = offset / stretched;
 
         // actual size of the image
-        var size = virtualSize3 / (virtualPow + 3*F);
+        var size = virtualSize3 / (virtualPow + 3 * F);
         var realOffset = size * F;
 
         var total = 0;
