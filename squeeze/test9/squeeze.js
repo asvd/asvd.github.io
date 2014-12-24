@@ -870,54 +870,113 @@ function (exports) {
         this._setter = setter;
         this._ctx = ctx;
         this._current = 0;
+        this._target = null;
+        this._delta = null;
         this._args = [];
-        this._timeout = null;
+        this._animate = null;
     }
-
-    Animator.prototype._maxStep = 10;
-    Animator.prototype._delay = 10;
+    
+    Animator.prototype._animTime = 200;
+    Animator.prototype._delay = 30;
     
     /**
-     * Smoothly performs animation
+     * Changes the value smoothly
      * 
      * @param {Number} val to set
      * @param ... (other arguments forwarded to setter unchanged)
      */
-    Animator.prototype.update = function(val) {
-        this._target = val;
+    Animator.prototype.slide = function(val) {
         this._storeArgs.apply(this, arguments);
-        this._tick();
+
+        if (this._animate) {
+            // animation already performed
+            // updating parameters
+            var c = this._current,
+                t = this._target, // old target
+                v = val;          // new target
+
+            if ((t > c && v > t) ||
+                (t < c && v < t)) {
+                // value beyond the target
+                // animation speedup
+                this._delta *= (v-c)/(t-c);
+            } else if ((t > c && v < c) ||
+                       (t < c && v > c)) {
+                // value on the opposite side,
+                // jumping to the value
+                clearTimeout(this._animate);
+                this._applyValue(val);
+            } // else value between target and current
+              // only updating the target
+
+            this._target = val;
+        } else {
+            // starting the animation
+            this._target = val;
+            this._delta = (this._target-this._current)*
+                this._delay/this._animTime;
+
+            this._tick();
+        }
+
     }
     
     
     /**
-     * Stores all the provided arguments
+     * Changes the value instantly
+     * 
+     * @param {Number} val to set
+     * @param ... (other arguments forwarded to setter unchanged)
      */
-    Animator.prototype._storeArgs = function() {
-        this._args = [];
-        for (var i = 0; i < arguments.length; i++) {
-            this._args.push(arguments[i]);
+    Animator.prototype.jump = function(val) {
+        this._storeArgs.apply(this, arguments);
+        if (this._animate) {
+            clearTimeout(this._animate);
         }
+
+        this._applyValue(val);
     }
     
     
     /**
      * Performs a single animation frame
+     */
+    Animator.prototype._tick = function() {
+        if (Math.abs(this._target - this._current) <
+            Math.abs(this._delta)) {
+            if (this._animate) {
+                clearTimeout(this._animate);
+            }
+
+            this._applyValue(val);
+        } else {
+            this._applyValue(this._current+this._delta);
+
+            var me = this;
+            this._animate = setTimeout(
+                function(){me._tick();}, this._delay
+            );
+        }
+    }
+        
+        
+    /**
+     * Performs a single animation frame
      * 
      * @param {Boolean} timeouted true if called by timeout
      */
-    Animator.prototype._tick = function(timeouted) {
+    Animator.prototype.________________tick = function(timeouted) {
         if (Math.abs(this._target - this._current) <= this._maxStep) {
-            if (this._timeout) {
-                clearTimeout(this._timeout);
-                this._timeout = null;
+            if (this._animate) {
+                clearTimeout(this._animate);
+                this._animate = null;
             }
 
             this._applyValue(this._target);
         } else {
-            if (timeouted || !this._timeout) {
+            if (timeouted || !this._animate) {
                 var me = this;
-                this._timeout = setTimeout(
+                this._animate = setTimeout(
                     function(){me._tick(true);}, this._delay
                 );
             }
@@ -929,6 +988,17 @@ function (exports) {
     }
 
 
+    /**
+     * Stores all the provided arguments
+     */
+    Animator.prototype._storeArgs = function() {
+        this._args = [];
+        for (var i = 0; i < arguments.length; i++) {
+            this._args.push(arguments[i]);
+        }
+    }
+    
+    
     /**
      * Applies the current animation frame
      * 
@@ -1624,7 +1694,7 @@ function (exports) {
                 this._images.west.whenFailed
             )
         )(function(){
-            me._indicate();
+            me._indicate(true);
         });
 
         this._cmp.scroller.addEventListener(
@@ -2326,8 +2396,10 @@ function (exports) {
     /**
      * Updates the scrolling indicators on each side according to the
      * current scroll state of the element
+     * 
+     * @param {Boolean} smooth true to indicate mask smoothly
      */
-    Squeeze.prototype._indicate = function() {
+    Squeeze.prototype._indicate = function(smooth) {
         var geom = this._cmp.wrapper.getBoundingClientRect();
         var beyond = this._getBeyond();
 
@@ -2363,15 +2435,28 @@ function (exports) {
                 var sideSize = data.sideSize;
                 var stretchedSize = data.stretchedSize;
 
-                this._cmp.sides[dir].animator.update(
-                    containerSize,
-                    areaSize,
-                    areaSideSize,
-                    coordinates,
-                    sideOffset,
-                    sideSize,
-                    stretchedSize
-                );
+                if (smooth) {
+                    this._cmp.sides[dir].animator.slide(
+                        containerSize,
+                        areaSize,
+                        areaSideSize,
+                        coordinates,
+                        sideOffset,
+                        sideSize,
+                        stretchedSize
+                    );
+                } else {
+                    this._cmp.sides[dir].animator.jump(
+                        containerSize,
+                        areaSize,
+                        areaSideSize,
+                        coordinates,
+                        sideOffset,
+                        sideSize,
+                        stretchedSize
+                    );
+                }
+
             }
         }
     }
@@ -2598,7 +2683,6 @@ function (exports) {
 
 //    SQUEEZE_ENABLED = false;
 
-    console.log('WTF');
     exports.resqueeze = resqueeze;
     exports.enabled = SQUEEZE_ENABLED;
 }));
