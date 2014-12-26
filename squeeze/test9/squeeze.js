@@ -372,6 +372,21 @@ function (exports) {
     /**
      * Performs a method asynchronously
      * 
+     * setTimeout() version
+     * 
+     * @param {Function} func method to invoke
+     * @param {Object} obj context object
+     * @param {Array} args
+     */
+    async.setTimeout = function(func, obj, args) {
+       setTimeout(function() {
+           func.apply(obj||null, args||[]);
+       }, 0);
+    }
+
+    /**
+     * Performs a method asynchronously
+     * 
      * Event emission version
      * 
      * @param {Function} func method to invoke
@@ -393,26 +408,15 @@ function (exports) {
             }
         }
     };
-    window.addEventListener('message', invoke, true);
 
 
-    /**
-     * Performs a method asynchronously
-     * 
-     * setTimeout() version
-     * 
-     * @param {Function} func method to invoke
-     * @param {Object} obj context object
-     * @param {Array} args
-     */
-    async.setTimeout = function(func, obj, args) {
-       setTimeout(function() {
-           func.apply(obj||null, args||[]);
-       }, 0);
+    if (METHODS.async == 'event') {
+        window.addEventListener('message', invoke, true);
+        impl.async = async.event;
+    } else {
+        impl.async = async.setTimeout;
     }
 
-    impl.async = async[METHODS.async];
-    
 
 
     var util = {};
@@ -864,74 +868,30 @@ function (exports) {
      * Smoothly animates anythinng by wrapping the setter method
      * 
      * @param {Function} setter actually updating the value
-     * @param {Object} ctx to apply setter to
      */
-    var Animator = function(setter, ctx) {
+    var Animator = function(setter) {
         this._setter = setter;
-        this._ctx = ctx;
+        this._options = [];
         this._current = 0;
         this._target = null;
         this._delta = null;
-        this._args = [];
-        this._animate = null;
+        this._animTimeout = null;
     }
     
     Animator.prototype._animTime = 160;
     Animator.prototype._delay = 20;
     
-    /**
-     * Changes the value smoothly
-     * 
-     * @param {Number} val to set
-     * @param ... (other arguments forwarded to setter unchanged)
-     */
-    Animator.prototype.slide = function(val) {
-        this._storeArgs.apply(this, arguments);
 
-        if (this._animate) {
-            // animation already performed
-            // updating parameters
-            var c = this._current,
-                t = this._target, // old target
-                v = val;          // new target
-
-            if ((t > c && v > t) ||
-                (t < c && v < t)) {
-                // value beyond the target
-                // animation speedup
-                this._delta *= (v-c)/(t-c);
-            } else if ((t > c && v < c) ||
-                       (t < c && v > c)) {
-                // value on the opposite side,
-                // jumping to the value
-                clearTimeout(this._animate);
-                this._applyValue(val);
-            } // else value between target and current
-              // only updating the target
-
-            this._target = val;
-        } else {
-            // starting the animation
-            this._target = val;
-            this._delta = (this._target-this._current)*
-                this._delay/this._animTime;
-
-            this._tick();
-        }
-
-    }
-    
-    
     /**
      * Changes the value instantly
      * 
      * @param {Number} val to set
-     * @param ... (other arguments forwarded to setter unchanged)
+     * @param {Object} options forwarded to the setter
      */
-    Animator.prototype.jump = function(val) {
-        this._storeArgs.apply(this, arguments);
-        if (this._animate) {
-            clearTimeout(this._animate);
+    Animator.prototype.jump = function(val, options) {
+        this._options = options;
+        if (this._animTimeout) {
+            clearTimeout(this._animTimeout);
         }
 
         this._applyValue(val);
@@ -939,65 +899,66 @@ function (exports) {
     
     
     /**
-     * Performs a single animation frame
+     * Changes the value smoothly
+     * 
+     * @param {Number} val to set
+     * @param {Object} options forwarded to the setter
+     */
+    Animator.prototype.slide = function(val, options) {
+        this._options = options;
+
+        if (!this._animTimeout) {
+            this._target = val;
+            this._delta = (this._target-this._current)*
+                this._delay/this._animTime;
+
+            this._tick();
+        } else {
+            var c = this._current,
+                t = this._target, // old target
+                v = val;          // new target
+
+            if ((t > c && v > t) ||
+                (t < c && v < t)) {
+                // value beyond the target, speeding up
+                this._delta *= (v-c)/(t-c);
+                this._target = val;
+            } else if ((t > c && v < c) ||
+                       (t < c && v > c)) {
+                // value in the opposite direction, jumping
+                clearTimeout(this._animTimeout);
+                this._applyValue(val);
+            } else {
+                // value before the target, but direction is same
+                // simply updating the target
+                this._target = val;
+            }
+        }
+
+    }
+    
+    
+    /**
+     * Performs a single animation step
      */
     Animator.prototype._tick = function() {
         if (Math.abs(this._target - this._current) <
             Math.abs(this._delta)) {
-            if (this._animate) {
-                clearTimeout(this._animate);
+            if (this._animTimeout) {
+                clearTimeout(this._animTimeout);
             }
 
-            this._applyValue(val);
+            this._applyValue(this._traget);
         } else {
             this._applyValue(this._current+this._delta);
 
             var me = this;
-            this._animate = setTimeout(
+            this._animTimeout = setTimeout(
                 function(){me._tick();}, this._delay
             );
         }
     }
         
-        
-    /**
-     * Performs a single animation frame
-     * 
-     * @param {Boolean} timeouted true if called by timeout
-     */
-    Animator.prototype.________________tick = function(timeouted) {
-        if (Math.abs(this._target - this._current) <= this._maxStep) {
-            if (this._animate) {
-                clearTimeout(this._animate);
-                this._animate = null;
-            }
-
-            this._applyValue(this._target);
-        } else {
-            if (timeouted || !this._animate) {
-                var me = this;
-                this._animate = setTimeout(
-                    function(){me._tick(true);}, this._delay
-                );
-            }
-            
-            var sign = this._current < this._target ? 1 : -1;
-            var delta = sign * this._maxStep;
-            this._applyValue(this._current + delta);
-        }
-    }
-
-
-    /**
-     * Stores all the provided arguments
-     */
-    Animator.prototype._storeArgs = function() {
-        this._args = [];
-        for (var i = 0; i < arguments.length; i++) {
-            this._args.push(arguments[i]);
-        }
-    }
-    
     
     /**
      * Applies the current animation frame
@@ -1006,8 +967,7 @@ function (exports) {
      */
     Animator.prototype._applyValue = function(val) {
         this._current = val;
-        this._args[0] = val;
-        this._setter.apply(this._ctx, this._args);
+        this._setter(val, this._options);
     }
     
     
@@ -1987,45 +1947,48 @@ function (exports) {
     
     
     /**
-     * Generates an Animator object for the given direction
+     * Generates an Animator object for the given direction. It
+     * applies the animation to the gradient mask intensity change in
+     * the following cases:
      * 
-     * @param {String} dir to generate animator for
+     * - to initially display the indicator on the given side when the
+     *   image is loaded; 
+     * - when the mask intensity changed due to scrolling distance
+     *   change because of dynamically updating the scrollable content
+     * 
+     * In other cases the intensity is updated instantly without the
+     * animation
+     * 
+     * @param {String} dir direction to generate Animator for
      * 
      * @returns {Animator}
      */
     Squeeze.prototype._genAnimator = function(dir) {
-        var setter = function(
-            containerSize, // animation value
-            areaSize,
-            areaSideSize,
-            coordinates,
-            sideOffset,
-            sideSize,
-            stretchedSize
-        ) {
-            this._images[dir].touchSVGImage();
+        var me = this;
+        var setter = function(val, options) {
+            me._images[dir].touchSVGImage();
 
-            this._updateContainer(
+            me._updateContainer(
                 dir,
-                this._cmp.sides[dir].main,
-                containerSize,
-                areaSize,
-                areaSideSize
+                me._cmp.sides[dir].main,
+                val,
+                options.areaSize,
+                options.areaSideSize
             );
 
-            this._updateBlocks(
+            me._updateBlocks(
                 dir,
-                this._cmp.sides[dir].blocks,
-                coordinates,
-                containerSize,
-                sideOffset,
-                sideSize,
-                stretchedSize,
-                areaSideSize
+                me._cmp.sides[dir].blocks,
+                options.coordinates,
+                val,
+                options.sideOffset,
+                options.sideSize,
+                options.stretchedSize,
+                options.areaSideSize
             );
         }
 
-        return new Animator(setter, this);
+        return new Animator(setter);
     }
     
     
@@ -2397,9 +2360,9 @@ function (exports) {
      * Updates the scrolling indicators on each side according to the
      * current scroll state of the element
      * 
-     * @param {Boolean} smooth true to indicate mask smoothly
+     * @param {Boolean} init true to perform initial indicate
      */
-    Squeeze.prototype._indicate = function(smooth) {
+    Squeeze.prototype._indicate = function(init) {
         var geom = this._cmp.wrapper.getBoundingClientRect();
         var beyond = this._getBeyond();
 
@@ -2420,7 +2383,7 @@ function (exports) {
                 );
 
                 var containerSize = this._getContainerSize(
-                    beyond[dir],  data.containerMaxSize
+                    beyond[dir], data.containerMaxSize
                 );
 
                 var sideOffset = this._getSideOffset(beyond, dir);
@@ -2432,28 +2395,23 @@ function (exports) {
                     areaSideSize = geom.height;
                 }
 
-                var sideSize = data.sideSize;
-                var stretchedSize = data.stretchedSize;
+                var options = {
+                    areaSize      : areaSize,
+                    areaSideSize  : areaSideSize,
+                    coordinates   : coordinates,
+                    sideOffset    : sideOffset,
+                    sideSize      : data.sideSize,
+                    stretchedSize : data.stretchedSize
+                };
 
-                if (smooth) {
+                if (init) {
+                    this._cmp.sides[dir].animator.jump(0, options);
                     this._cmp.sides[dir].animator.slide(
-                        containerSize,
-                        areaSize,
-                        areaSideSize,
-                        coordinates,
-                        sideOffset,
-                        sideSize,
-                        stretchedSize
+                        containerSize, options
                     );
                 } else {
                     this._cmp.sides[dir].animator.jump(
-                        containerSize,
-                        areaSize,
-                        areaSideSize,
-                        coordinates,
-                        sideOffset,
-                        sideSize,
-                        stretchedSize
+                        containerSize, options
                     );
                 }
 
@@ -2586,8 +2544,9 @@ function (exports) {
      * @returns {Number} current size of the container
      */
     Squeeze.prototype._getContainerSize = function(beyondDir, maxSize) {
-        var intensity = 1 - 1 / (beyondDir/GAIN_SLOWNESS + 1);
-        var size =  Math.ceil(intensity * maxSize)
+        var intensity = 1 - 1 / (beyondDir/GAIN_SLOWNESS + 1)
+        var pad = 1;
+        var size =   pad + Math.ceil(intensity * (maxSize-pad))
         return size;
     }
     
