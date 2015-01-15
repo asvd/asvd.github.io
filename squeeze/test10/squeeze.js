@@ -142,6 +142,11 @@ function (exports) {
         // svg variant only works reasonably fast in IE
         SQUEEZE_ENABLED = false;
     }
+    
+    var report = document.getElementById('report');
+    
+    report.innerHTML += '<br/>';
+    report.innerHTML += 'test';
 
 
     // browser-dependent implementations
