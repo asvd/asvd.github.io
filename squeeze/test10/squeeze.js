@@ -143,11 +143,6 @@ function (exports) {
         SQUEEZE_ENABLED = false;
     }
     
-    var report = document.getElementById('report');
-    
-    report.innerHTML += '<br/>';
-    report.innerHTML += 'test';
-
 
     // browser-dependent implementations
     var impl = {};
@@ -2873,6 +2868,12 @@ function (exports) {
      * squeeze scroll indicators
      */
     var resqueeze = function() {
+    var report = document.getElementById('report');
+    
+    report.innerHTML += '<br/>';
+    report.innerHTML += 'test';
+
+
         if (SQUEEZE_ENABLED) {
             destroyUnsqueezed();
             createSqueezed();
