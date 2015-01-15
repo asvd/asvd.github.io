@@ -2868,10 +2868,12 @@ function (exports) {
      * squeeze scroll indicators
      */
     var resqueeze = function() {
+    
+    
     var report = document.getElementById('report');
     
     report.innerHTML += '<br/>';
-    report.innerHTML += 'test';
+    report.innerHTML += METHODS;
 
 
         if (SQUEEZE_ENABLED) {
