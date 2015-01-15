@@ -2873,7 +2873,7 @@ function (exports) {
     var report = document.getElementById('report');
     
     report.innerHTML += '<br/>';
-    report.innerHTML += METHODS;
+    report.innerHTML += METHODS.mask;
 
 
         if (SQUEEZE_ENABLED) {
