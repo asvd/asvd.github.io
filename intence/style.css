@@ -693,3 +693,11 @@ img.w {
 }
 
 
+.waterface {
+    cursor : default;
+    font-size : 12px;
+    text-align: center;
+    padding-top : 8px;
+    padding-bottom : 26px;
+}
+
