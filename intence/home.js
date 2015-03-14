@@ -1,10 +1,24 @@
 
+    
+
 function start() {
     DlHighlight.HELPERS.highlightByName('code', 'pre');
     init_intro();
     init_dynamic();
     init_river();
+    init_analytics();
 }
+
+function init_analytics() {
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-60744255-1', 'auto');
+  ga('send', 'pageview');
+}
+
 var _el = function(id) {
     return document.getElementById(id);
 }
@@ -147,6 +161,64 @@ var init_river = function() {
         }
     }
     river.addEventListener("wheel", scroll);
+}
+
+
+var share = function(type) {
+    var url = null;
+
+    switch (type) {
+    case 'fb':
+        url = 'https://www.facebook.com/sharer/sharer.php?u=http://asvd.github.io/intence/';
+        break;
+    case 'vk':
+        url = 'https://vk.com/share.php?url=http://asvd.github.io/intence/&title=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication&description=You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%2E&image=http://asvd.github.io/intence/intence_preview.png&noparse=true';
+        break;
+    case 'twitter':
+        url = 'https://twitter.com/intent/tweet?text=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication%2E%20You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%3A&url=http://asvd.github.io/intence/';
+        break;
+    case 'pinterest':
+        url = 'https://www.pinterest.com/pin/create/button/?url=http://asvd.github.io/intence/&description=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication%2E%20You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%2E&media=http://asvd.github.io/intence/intence_preview.png';
+        break;
+    case 'googleplus':
+        url = 'https://plus.google.com/share?url=http://asvd.github.io/intence/';
+        break;
+    }
+
+    popup(url);
+}
+
+var popup = function(url) {
+    var w = 600, h = 400;
+    var dualScreenLeft =
+        window.screenLeft !== undefined ?
+        window.screenLeft : screen.left;
+    var dualScreenTop =
+        window.screenTop !== undefined ?
+        window.screenTop : screen.top;
+
+    var width = window.innerWidth ?
+        window.innerWidth :
+        document.documentElement.clientWidth ?
+        document.documentElement.clientWidth :
+        screen.width;
+    var height = window.innerHeight ?
+        window.innerHeight :
+        document.documentElement.clientHeight ?
+        document.documentElement.clientHeight :
+        screen.height;
+            
+    var left = ((width / 2) - (w / 2)) + dualScreenLeft;
+    var top = ((height / 3) - (h / 3)) + dualScreenTop;
+
+    var newWindow = window.open(
+        url, 'Intence',
+        'scrollbars=yes, width=' + w + ', height=' + h + ', top=' + top + ', left=' + left
+    );
+
+    if (window.focus) {
+        newWindow.focus();
+    }
 }
 
 
