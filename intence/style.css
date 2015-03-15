@@ -102,15 +102,25 @@ body {
 }
 
 
-
-._700_302 {
-    width: 700px;
-    height: 302px;
+._2700_1350 {
+    width: 2700px;
+    height: 1350px;
 }
+
 
 ._700_360 {
     width: 700px;
     height: 360px;
+}
+
+._700_400 {
+    width: 700px;
+    height: 400px;
+}
+
+._700_302 {
+    width: 700px;
+    height: 302px;
 }
 
 ._700_263 {
@@ -137,6 +147,21 @@ body {
 ._700_40 {
     width: 700px;
     height: 40px;
+}
+
+._700_50 {
+    width: 700px;
+    height: 50px;
+}
+
+._700_1 {
+    width: 700px;
+    height: 1px;
+}
+
+._600_410 {
+    width: 600px;
+    height: 410px;
 }
 
 ._500_360 {
@@ -184,9 +209,19 @@ body {
     height: 120px;
 }
 
+._340_360 {
+    width: 340px;
+    height: 360px;
+}
+
 ._340_80 {
     width: 340px;
     height: 80px;
+}
+
+._290_410 {
+    width: 290px;
+    height: 410px;
 }
 
 ._278_260 {
@@ -259,6 +294,11 @@ body {
     height: 320px;
 }
 
+._91_25 {
+    width : 91px;
+    height: 25px;
+}
+
 ._65_263 {
     width : 65px;
     height: 263px;
@@ -309,8 +349,16 @@ body {
     margin-bottom: -243px;
 }
 
+.minus_b50 {
+    margin-bottom: -50px;
+}
+
 .minus_b30 {
     margin-bottom: -32px;
+}
+
+.minus_b20 {
+    margin-bottom: -20px;
 }
 
 .minus_t50 {
@@ -319,6 +367,10 @@ body {
 
 .minus_t40 {
     margin-top: -40px;
+}
+
+.minus_t10 {
+    margin-top: -10px;
 }
 
 .minus_l183 {
@@ -479,10 +531,8 @@ body {
     color: #334455;
 }
 
-
-.section_hacker {
-    width : 100%;
-    background-color : #334455;
+.section_concept a:hover {
+    color: #778899;
 }
 
 
@@ -591,6 +641,7 @@ img.w {
 
 
 
+
 .candy {
     background-color : #FDC500;
     text-align: left;
@@ -601,7 +652,7 @@ img.w {
 .candy_title {
     font-family: 'Amatic SC', cursive;
     text-align: center;
-    font-size: 46px;
+    font-size: 59px;
     color : #503300;
 }
 
@@ -643,7 +694,7 @@ img.w {
 }
 
 .example2_code {
-    width : 240px;
+    width : 290px;
     overflow-x : hidden;
     font-size: 7px;
 }
@@ -658,6 +709,75 @@ img.w {
     color : #ddeeff;
 }
 
+
+
+
+.nasa_wrap {
+    z-index: 10;
+}
+
+.nasa {
+    margin-top: 10px;
+    margin-right: 5px;
+}
+
+
+.nasa a {
+    opacity: .1;
+}
+
+.nasa a:hover {
+    opacity: .4;
+}
+
+
+img.nasa_img {
+    border: none;
+}
+
+
+
+.earth {
+    width: 2700px;
+    height: 1350px;
+    background-color: #112233;
+    cursor : crosshair;
+}
+
+.earth {
+    cursor : -webkit-grab;
+    cursor : -moz-grab;
+    cursor : -o-grab;
+    cursor : grab;
+}
+
+.earth:active {
+    cursor : -webkit-grabbing;
+    cursor : -moz-grabbing;
+    cursor : -o-grabbing;
+    cursor : grabbing;
+}
+
+#earth_left, #earth_right {
+    width : 1350px;
+    height: 1350px;
+    float: left;
+}
+
+
+.river_frame {
+    cursor : -webkit-grab;
+    cursor : -moz-grab;
+    cursor : -o-grab;
+    cursor : grab;
+}
+
+.river_frame:active {
+    cursor : -webkit-grabbing;
+    cursor : -moz-grabbing;
+    cursor : -o-grabbing;
+    cursor : grabbing;
+}
 
 .river_wrap {
     height: 230px;
@@ -675,7 +795,7 @@ img.w {
 
 
 .share {
-    font-size : 20px;
+    font-size : 12px;
     font-family: 'PT Sans Caption', sans-serif;
     text-shadow: 0px 0px 2px rgba(26, 79, 85, 0.64);
     padding-top: 16px;
@@ -693,11 +813,119 @@ img.w {
 }
 
 
+#hacker_sizer {
+    width : 100%;
+    height: 60px;
+    margin-top: -55px;
+    /*
+    background-color : #334455;
+    box-shadow: 0px -4px 26px rgba(35, 30, 36, 0.56);
+    border-top: 1.4px solid rgba(187, 195, 204, 0.78);
+    */
+    box-shadow: 0px 4px 50px rgba(0, 0, 0, 0.4);
+    background-color: #F6FFFB;
+}
+
+#hacker_sizer2 {
+    width : 100%;
+    height: 60px;
+    margin-top: -100px;
+    margin-bottom : 100px;
+    background-color: #F6FFFB;
+}
+
+
+.section_hacker {
+    width : 100%;
+    background-color : #334455;
+    color : #A4C7DF;
+}
+
+
+.section_hacker a {
+    color: #B6E3F3;
+    text-shadow: 0px 0px 3px rgba(100, 187, 214, 0.31);
+}
+
+.section_hacker a:hover {
+    color: #D2F3FF;
+    text-shadow: 0px 0px 4px rgba(180, 237, 255, 0.31);
+}
+
+.inline_code {
+    font: 14px Bitstream Vera Sans Mono, monospace;
+    color: #6CCBFF;
+    text-shadow: 0px 0px 5px rgba(125, 184, 231, 0.13);
+}
+
+
+
+.section_hacker .code {
+    background-image : none;
+    background-color: #2D3D4D;
+}
+
+.section_hacker .code pre {
+    padding-top: 7px;
+    padding-bottom: 7px;
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top : 10px;
+    margin-bottom : 10px;
+    font: 14px Bitstream Vera Sans Mono, monospace;
+}
+
+.section_hacker ul {
+    margin-top : 7px;
+    margin-bottom : 7px;
+}
+
+
+
+.geek_area_title {
+    font-size: 42px;
+    margin-top: 20px;
+    margin-bottom: 30px;
+    text-align: center;
+    color: #CBDBEA;
+    text-shadow: 0px 0px 5px rgba(99, 133, 137, 0.9);
+    font-family: 'PT Sans', sans-serif;
+    font-variant: small-caps;
+    letter-spacing: 1px;
+}
+
+.section_hacker .mid {
+    margin-left: auto;
+    margin-right: auto;
+    width: 500px;
+    text-align: left;
+}
+
+
+.section_hacker p {
+}
+
+.section_hacker ul {
+    margin-left: -40px;;
+}
+
+.section_hacker .intenceName {
+    color: #B5CCE4;
+    letter-spacing: 1px;
+    text-shadow: 0px 0px 3px rgba(174, 200, 203, 0.51);
+}
+
+
+
+
+
 .waterface {
     cursor : default;
     font-size : 12px;
     text-align: center;
     padding-top : 8px;
     padding-bottom : 26px;
+    height: 40px;
 }
+
 

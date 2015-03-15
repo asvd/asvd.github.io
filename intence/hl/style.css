@@ -3,9 +3,7 @@
 .DlHighlight {
     color: #48AFFF;
     text-shadow: 0px 0px 5px rgba(125, 184, 231, 0.13);
-
 /*
-    font: 8pt Bitstream Vera Sans Mono, monospace;
     border-left: 1px solid rgba(54, 143, 213, 0.38);
     background-color: rgba(103, 165, 214, 0.04);
     margin-left: -20px;
@@ -26,8 +24,8 @@ text-shadow: 0px 0px 8px rgba(160, 198, 228, 0.34);
 }
 
 .DlHighlight .builtin {
-    font-weight : bold;
-color : #59AAE9;
+    text-shadow: 0px 0px 5px rgba(125, 184, 231, 0.28);
+    color: #55AAED;
  }
 
 .DlHighlight .string {
@@ -101,11 +99,32 @@ color : #27618F;
 
 /* CSS */
 
-.DlHighlight .css-class { color: #000; font-family: Bitstream Vera Sans Mono Italics; }
-.DlHighlight .css-pseudo-class { color: #777; }
-.DlHighlight .css-id { font-family: Bitstream Vera Sans Mono Bold; }
+.DlHighlight .css-class {
+    color: #000;
+    font-style: italic;
+}
+
+.DlHighlight .css-pseudo-class {
+    color: #777;
+}
+
+.DlHighlight .css-id {
+    color: #A6D8FF;
+    text-shadow: 0px 0px 5px rgba(125, 184, 231, 0.66);
+}
+
 .DlHighlight .css-color-spec { color: #a51; }
-.DlHighlight .css-length { color: #a19; }
-.DlHighlight .css-length .after { font-family: Bitstream Vera Sans Mono Bold; }
-.DlHighlight .css-declaration-kw { font-family: Bitstream Vera Sans Mono Bold; }
-.DlHighlight .css-comma { color: red; }
+.DlHighlight .css-length {
+    color: #48AFFF;
+}
+
+.DlHighlight .css-length .after {
+    font-weight: bold;
+}
+
+.DlHighlight .css-declaration-kw {
+}
+
+.DlHighlight .css-comma {
+    color: red;
+}

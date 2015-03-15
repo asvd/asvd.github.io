@@ -6,6 +6,10 @@ function start() {
     init_intro();
     init_dynamic();
     init_river();
+    init_river_drag();
+    init_earth();
+    init_earth_drag();
+    
     init_analytics();
 }
 
@@ -132,14 +136,14 @@ function init_dynamic() {
             _el('goethe'+shown+'_intence').style.display = 'block';
             _el('goethe'+shown+'_bar').style.display = 'block';
             if (shown == 4) {
-                gIntRoot.removeAttribute('intenceinfinitesouth');
+                gIntRoot.removeAttribute('scrollInfiniteSouth');
             }
         } else if (pos < points[shown-1]) {
             _el('goethe'+shown+'_intence').style.display = 'none';
             _el('goethe'+shown+'_bar').style.display = 'none';
             shown--;
             if (shown == 3) {
-                gIntRoot.setAttribute('intenceinfinitesouth', null);
+                gIntRoot.setAttribute('scrollInfiniteSouth', null);
             }
         }
     }
@@ -164,6 +168,123 @@ var init_river = function() {
 }
 
 
+var init_river_drag = function() {
+    var river = _el('river_scroll');
+    var river_scroller = _el('river_scroll-scroller');
+
+    var lastPageX;
+    var pushed = false;
+    var down = function(e) {
+        pushed = true;
+        lastPageX = e.pageX;
+
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    var up = function() {
+        if (pushed) {
+            pushed = false;
+        }
+    }
+
+    var move = function(e) {
+        if (pushed) {
+            river_scroller.scrollLeft -= (e.pageX - lastPageX);
+            lastPageX = e.pageX;
+        }
+    }
+
+    river.addEventListener('mousedown', down, false);
+    window.addEventListener('mouseup', up, false);
+    window.addEventListener('mousemove', move, false);
+}
+
+
+var init_earth = function() {
+    var wheel = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    var earth_scroller = _el('earth-scroller');
+    earth_scroller.addEventListener("wheel", wheel);
+    earth_scroller.addEventListener('scroll', earth_onscroll, false);
+    earth_scroller.scrollTop = 300;
+    earth_scroller.scrollLeft = 1300;
+}
+
+
+var earth_onscroll = function() {
+    var earth = _el('earth');
+    var earth_scroller = _el('earth-scroller');
+    var earth_inner = _el('earth_inner');
+
+    var width = earth.getBoundingClientRect().width;
+    var full = earth_inner.getBoundingClientRect().width;
+    var pos = earth_scroller.scrollLeft;
+    var lim = 300;
+    var offset = 1350;
+
+    if (pos < lim) {
+        earth_switch();
+        earth_scroller.scrollLeft += offset;
+    } else if (full-width-pos < lim) {
+        earth_switch();
+        earth_scroller.scrollLeft -= offset;
+    }
+
+}
+
+
+var earth_switch = function() {
+    var left = _el('earth_left');
+    var right = _el('earth_right');
+
+    var leftbg = left.style.backgroundImage;
+    var rightbg = right.style.backgroundImage;
+
+    left.style.backgroundImage = rightbg;
+    right.style.backgroundImage = leftbg;
+}
+
+
+var init_earth_drag = function() {
+    var earth = _el('earth');
+    var earth_scroller = _el('earth-scroller');
+
+    var lastPageX, lastPageY;
+    var pushed = false;
+    var down = function(e) {
+        pushed = true;
+        lastPageX = e.pageX;
+        lastPageY = e.pageY;
+
+        e.preventDefault();
+        e.stopPropagation();
+    }
+    
+    var up = function() {
+        if (pushed) {
+            pushed = false;
+        }
+    }
+
+    var move = function(e) {
+        if (pushed) {
+            earth_scroller.scrollLeft -= (e.pageX - lastPageX);
+            earth_scroller.scrollTop -= (e.pageY - lastPageY);
+            lastPageX = e.pageX;
+            lastPageY = e.pageY;
+        }
+    }
+
+    earth.addEventListener('mousedown', down, false);
+    window.addEventListener('mouseup', up, false);
+    window.addEventListener('mousemove', move, false);
+}
+
+
 var share = function(type) {
     var url = null;
 
@@ -182,6 +303,12 @@ var share = function(type) {
         break;
     case 'googleplus':
         url = 'https://plus.google.com/share?url=http://asvd.github.io/intence/';
+        break;
+    case 'linkedin':
+        url = 'https://www.linkedin.com/shareArticle?mini=true&url=http://asvd.github.io/intence/&title=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication&summary=You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again&source=http://asvd.github.io/intence/';
+        break;
+    case 'xing':
+        url = 'https://www.xing-share.com/app/user?op=share;sc_p=xing-share;url=http://asvd.github.io/intence/';
         break;
     }
 

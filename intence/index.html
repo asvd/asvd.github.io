@@ -2,7 +2,7 @@
 <html>
   <head>
 <meta charset="UTF-8" />
-    <title>Intence, a new scrolling indicator</title>
+    <title>Intence, the scrolling indicator</title>
 
     <meta property="og:title" content="Intence, a brand new way of scrolling indication" />
     <meta property="og:type" content="website" />
@@ -115,7 +115,7 @@
           <div class="_240_320 float_right">
             <div class=_240_300>
               <div class=frame>
-                <div class="scrollable intence" intenceImg="scroll_area2.png"
+                <div class="scrollable intence" scrollImg="scroll_area2.png"
                      id="example_intro_area">
                   <div class=example_text>
 
@@ -583,7 +583,7 @@
 
           <div class="_210_100 float_right align_right">
             Scrollbar is located on a side and it is not always clear,
-            what is it related to:
+            what exactly is it related to:
           </div>
 
         </div>
@@ -682,7 +682,7 @@
           <div class="_230_320 float_left">
             <div class=_230_300>
               <div class=frame>
-                <div class="scrollable_y intence goethe" intenceinfinitesouth id=goethe_intence  intenceImg="scroll_area2.png">
+                <div class="scrollable_y intence goethe" scrollInfiniteSouth id=goethe_intence  scrollImg="scroll_area2.png">
                   <div class="w210 example_text">
 
             <div class=env>Augsburg. Ein Garten.</div>
@@ -1415,7 +1415,7 @@
 </div>
 
                     <div class="goethe_copy align_left">
-                      <a href="http://en.wikipedia.org/wiki/G%C3%B6tz_von_Berlichingen_(Goethe)">Götz von Berlichingen mit der eisernen Hand</a>
+                      <a href="http://en.wikipedia.org/wiki/G%C3%B6tz_von_Berlichingen_(Goethe)" target=_blank>Götz von Berlichingen mit der eisernen Hand</a>
                     </div>
 
                   </div>
@@ -1471,13 +1471,13 @@
       </div>
 
 
-      <div class="_500_360 outer">
-        <div class="_500_360 inner">
+      <div class="_600_410 outer">
+        <div class="_600_410 inner">
 
-          <div class="_240_360 float_left">
-            <div class=_240_360>
+          <div class="_290_410 float_left">
+            <div class=_290_410>
               <div class=simple_frame>
-                <div class="scrollable_y intence candy" intenceimg="candy_scroll.png">
+                <div class="scrollable_y intence candy" scrollImg="candy_scroll.png">
                   <div class="candy_title">List of candies</div>
                   <div class="candy_list">
 
@@ -2261,7 +2261,7 @@
                     </div>
 
                     <div class="candy_copy">
-                      from <a href="https://en.wikipedia.org/wiki/List_of_candies">Wikipeda</a>
+                      from <a href="https://en.wikipedia.org/wiki/List_of_candies" target=_blank>Wikipeda</a>
                     </div>
 
                   </div>
@@ -2270,10 +2270,10 @@
             </div>
           </div>
 
-          <div class="_240_360 float_left plus_l20">
-            <div class=_240_360>
+          <div class="_290_410 float_left plus_l20">
+            <div class=_290_410>
               <div class=simple_frame>
-                <div class="scrollable_y intence example2_code_wrap" intenceimg="scroll_code.png">
+                <div class="scrollable_y intence example2_code_wrap" scrollImg="scroll_code2.png">
                   <div class="example2_code code">
     <pre name="code" class="js">
 /**
@@ -2775,7 +2775,7 @@ CachedImg.prototype._genData = function(canvas) {
  * @param {Element} elem to upgarde
  * @param {Boolean} isBody true if element is body
  */
-var Resizable = function(elem, isBody) {
+var Resizer = function(elem, isBody) {
     this._elem = elem;
     this._isBody = isBody;
 
@@ -2797,7 +2797,7 @@ var Resizable = function(elem, isBody) {
             width         : '100%',
             overflow      : 'hidden',
             pointerEvents : 'none',
-            zIndex        : -2048
+            zIndex        : -2048   // specially for IE
         });
 
         this._detector.onload = function() {
@@ -2823,13 +2823,13 @@ var Resizable = function(elem, isBody) {
 /**
  * Handler for the resize event, to be defined for an instance
  */
-Resizable.prototype.onresize = function(){};
+Resizer.prototype.onresize = function(){};
 
 
 /**
  * Removes the resize detector from the element
  */
-Resizable.prototype.destroy = function() {
+Resizer.prototype.destroy = function() {
     if (this._isBody) {
         window.removeEventListener(
             'resize', this._handler, false
@@ -2862,7 +2862,7 @@ var Intence = function(elem) {
     this._addendum = {};  // added to the scroll to prevent jump
     this._lastOrigCoord = {};
 
-    this._hideScrollbars();
+    this._createElemStructure();
 
     var rect = this._cmp.scroller.getBoundingClientRect();
     var scrollWidth = this._cmp.scroller.scrollWidth;
@@ -2882,7 +2882,6 @@ var Intence = function(elem) {
             util.isVertical[dir] ? rect.height : rect.width;
     }
 
-    this._createResizable();
     this._loadImages();
 }
 
@@ -2896,23 +2895,90 @@ Intence.prototype.getElem = function() {
 
 
 /**
- * Upgrades the element with the set of additional elements one
+ * Upgrades the element with a set of additional elements one
  * inside another so that the scrollbars are properly hidden, but
  * the container geometry is preserved
+ * 
+ * The resulting structure consists of the following elements:
+ * 
+ * elem  - initial scrollable element, its original content is
+ *  │      taken over, and moves into the container (see below)
+ *  │
+ *  └─ wrapper  - fits into the elem, has position: relative, so
+ *      │         that hosted elements with absolutie position can
+ *      │         also fit into the element
+ *      │
+ *      ├─ resizer  - html object, detects elem resize
+ *      │
+ *      └─ contextor  - initiates a new stacking context, so that
+ *          │          internal z-indices do not mess with the
+ *          │          external content (additionally prevents
+ *          │          extra padding for the body element)
+ *          │
+ *          ├─ scroller    - the new scrollable element with
+ *          │   │            scrollbars (outside of the bounds and
+ *          │   │            thus not visible), has z-index: 0 and
+ *          │   │            absolute position, which initializes
+ *          │   │            another stacking context for the
+ *          │   │            hosted content
+ *          │   │
+ *          │   └─ container  - has explicit dimensions updated by
+ *          │       │           the resizer event handler, pushes
+ *          │       │           the scrollabrs of the scroller out
+ *          │       │           of the bounds
+ *          │       ├─ ...
+ *          │       ├─ ...    - original content taken over from
+ *          │       ├─ ...      the root elem
+ *          │       :
+ *          │
+ *          │
+ *          ├─ west side      - indicator sides, ordered to put
+ *          ├─ east side        north and south on top (z-index
+ *          ├─ south side       is not used since it messes-up
+ *          └─ north side       in IE9)
  */
-Intence.prototype._hideScrollbars = function() {
-    var children = util.detachChildren(this._elem);
+Intence.prototype._createElemStructure = function() {
+    this._createElements();
+    this._createResizer();
+    this._createSides();
+}
 
-    var newStyle = {
-        overflow : 'hidden',
-        padding : '0px'
+
+/**
+ * Creates a set of elements
+ */
+Intence.prototype._createElements = function() {
+    this._cmp.wrapper   = elemSample.div.cloneNode(false);
+    this._cmp.contextor = elemSample.div.cloneNode(false);
+    this._cmp.scroller  = elemSample.div.cloneNode(false);
+    this._cmp.container = elemSample.div.cloneNode(false);
+
+    var style = {
+        elem : {
+            overflow : 'hidden',
+            padding : '0px'
+        },
+        wrapper : {
+            position : 'relative',
+            overflow : 'hidden',
+            width    : '100%',
+            height   : '100%'
+        },
+        contextor : {
+            position : 'absolute',
+            overflow : 'hidden',
+            width    : '100%',
+            height   : '100%'
+        },
+        scroller : {
+            position  : 'absolute',
+            overflow  : 'scroll',
+            zIndex   : 0
+        },
+        container : {}
     };
 
-    this._origStyle = {overflow : this._elem.style.overflow,};
-
-    // wrapper2 prevents extra padding for the body element
-    var createWrapper2 = false;
-    var wrapper2Style = {};
+    this._origStyle = {overflow : this._elem.style.overflow};
     if (this._isBody) {
         var margins = [
             'margin', 'marginTop', 'marginRight',
@@ -2923,70 +2989,78 @@ Intence.prototype._hideScrollbars = function() {
         var i, m;
         for (i = 0; i < margins.length; i++) {
             m = margins[i];
-            wrapper2Style[m] = cs[m];
+            style.container[m] = cs[m];
             this._origStyle[m] = this._elem.style[m];
         }
 
-        newStyle.margin = 0;
-        
-        createWrapper2 = true;
+        style.elem.margin = 0;
     }
 
+    util.setStyle(this._elem, style.elem);
+    util.setStyle(this._cmp.wrapper, style.wrapper);
+    util.setStyle(this._cmp.contextor, style.contextor);
+    util.setStyle(this._cmp.scroller, style.scroller);
+    util.setStyle(this._cmp.container, style.container);
 
-    util.setStyle(this._elem, newStyle);
-
-    this._cmp.wrapper = elemSample.div.cloneNode(false);
-    this._cmp.scroller = elemSample.div.cloneNode(false);
-    this._cmp.container = elemSample.div.cloneNode(false);
-
-    util.setStyle(this._cmp.wrapper, {
-        position : createWrapper2 ? 'absolute' : 'relative',
-        overflow : 'hidden',
-        width    : '100%',
-        height   : '100%'
-    });
-
-    util.setStyle(this._cmp.scroller, {
-        position  : 'absolute',
-        overflowX : 'scroll',
-        overflowY : 'scroll'
-    });
+    impl.stackingContext(this._cmp.contextor);
     
     var id = this._elem.getAttribute('id');
-
     if (id) {
         this._cmp.scroller.setAttribute('id', id+'-scroller');
     }
 
-    util.attachChildren(this._cmp.container, children);
+    util.attachChildren(
+        this._cmp.container, util.detachChildren(this._elem)
+    );
+
     this._cmp.scroller.appendChild(this._cmp.container);
-
-    if (createWrapper2) {
-        this._cmp.wrapper2 = elemSample.div.cloneNode(false);
-
-        util.setStyle(this._cmp.wrapper2, {
-            position : 'relative',
-            overflow : 'hidden',
-            width    : '100%',
-            height   : '100%'
-        });
-
-        util.setStyle(this._cmp.wrapper2, wrapper2Style);
-        this._cmp.wrapper2.appendChild(this._cmp.scroller);
-        this._cmp.wrapper.appendChild(this._cmp.wrapper2);
-    } else {
-        this._cmp.wrapper.appendChild(this._cmp.scroller);
-    }
-
+    this._cmp.contextor.appendChild(this._cmp.scroller);
+    this._cmp.wrapper.appendChild(this._cmp.contextor);
     this._elem.appendChild(this._cmp.wrapper);
 }
 
 
 /**
- * Removes additional elements created in order to hide the
- * scrollbars thus restoring the element into its original state
+ * Creates the resizer and subscribes to resize event
  */
-Intence.prototype._revealScrollbars = function() {
+Intence.prototype._createResizer = function() {
+    var me = this;
+    this._resizer = new Resizer(this._cmp.wrapper, this._isBody);
+    this._resizer.onresize = function() {
+        me._setGeometry();
+        me._indicate();
+    }
+
+    this._setGeometry();
+}
+
+
+/**
+ * Creates sides to later host the indicators. Sides created in an
+ * order so that north and south are on top. Z-index is not used,
+ * since then sides would mess-up with external content in IE9
+ * (where stacking context is not appled to contextor)
+ */
+Intence.prototype._createSides = function() {
+    this._sides = {};
+    var order = ['west','east','south','north'];
+
+    var dir;
+    for (var i = 0; i < order.length; i++) {
+        dir = order[i];
+        this._sides[dir] = createSideElement(dir);
+        this._cmp.contextor.appendChild(this._sides[dir]);
+    }
+}
+
+
+/**
+ * Removes additional elements created by _createElemStructure
+ * thus restoring the element into its original state
+ */
+Intence.prototype._restoreElemStructure = function() {
+    this._resizer.destroy();
+    
     var children = util.detachChildren(this._cmp.container);
     util.detachChildren(this._elem);
 
@@ -2997,31 +3071,6 @@ Intence.prototype._revealScrollbars = function() {
     }
     
     util.attachChildren(this._elem, children);
-}
-
-
-/**
- * Adds Resizable detector on the element
- */
-Intence.prototype._createResizable = function() {
-    var me = this;
-    this._resizable = new Resizable(
-        this._cmp.wrapper, this._isBody
-    );
-    this._resizable.onresize = function() {
-        me._setGeometry();
-        me._indicate();
-    }
-
-    this._setGeometry();
-}
-
-
-/**
- * Removes the Resizable
- */
-Intence.prototype._destroyResizable = function() {
-    this._resizable.destroy();
 }
 
 
@@ -3039,31 +3088,17 @@ Intence.prototype._setGeometry = function() {
 
 
 /**
- * Destroys the side components
- */
-Intence.prototype._destroySides = function() {
-    var i, indicator;
-    for (i = 0; i < util.dir.length; i++) {
-        indicator = this._indicators[util.dir[i]];
-        if (indicator) {
-            this._indicators[util.dir[i]].destroy();
-        }
-    }
-}
-
-
-/**
  * Initiates loading of images corresponding to each side
  */
 Intence.prototype._loadImages = function() {
     var me = this;
     var sideInitialized = {};
-    var defaultUrl = this._elem.getAttribute('intenceimg')||'';
+    var defaultUrl = this._elem.getAttribute('scrollImg')||'';
     var img, dir, url;
     for (var i = 0; i < util.dir.length; i++) {
         dir = util.dir[i];
         url = this._elem.getAttribute(
-            'intenceimg'+dir
+            'scrollImg'+dir
         );
 
         img = new CachedImg(url||defaultUrl);
@@ -3073,7 +3108,10 @@ Intence.prototype._loadImages = function() {
                  return function() {
                      if (!me._destroyed) {
                          me._indicators[dir] = new Indicator(
-                             dir, me._cmp.wrapper, img
+                             dir,
+                             me._cmp.contextor,
+                             me._sides[dir],
+                             img
                          );
 
                          me._sideReady[dir] = true;
@@ -3221,7 +3259,9 @@ Intence.prototype._fixCoord = function(val) {
  * 
  * @returns {Number} original coordinate
  */
-Intence.prototype._getOrigCoord = function(dir, beyond, size, keep) {
+Intence.prototype._getOrigCoord = function(
+    dir, beyond, size, keep
+) {
     var origPoint = beyond[dir];
 
     var result = this._mod(origPoint, size);
@@ -3242,7 +3282,7 @@ Intence.prototype._getOrigCoord = function(dir, beyond, size, keep) {
 
 /**
  * Returns the information about which sides are set as being
- * infinitely scrollable with intenceInfinite.. attributes
+ * infinitely scrollable with scrollInfinite.. attributes
  * 
  * @returns {Object}
  */
@@ -3251,7 +3291,7 @@ Intence.prototype._getInfinite = function() {
     for (i = 0; i < util.dir.length; i++) {
         dir = util.dir[i];
         result[dir] = this._elem.getAttribute(
-            'intenceinfinite'+dir
+            scrollinfinite'+dir
         ) !== null;
     }
 
@@ -3356,9 +3396,7 @@ Intence.prototype._getIntensity = function(
  * element in its original state
  */
 Intence.prototype.destroy = function() {
-    this._destroySides();
-    this._destroyResizable();
-    this._revealScrollbars();
+    this._restoreElemStructure();
     this._destroyed = true;
 }
     </pre>
@@ -3374,23 +3412,32 @@ Intence.prototype.destroy = function() {
 
 
 
+
+<div class=vsizer30></div>
+
+
+  <div class=line></div>
+
 <div class=vsizer20></div>
 
 
+      <div class="_700_80 outer">
+        <div class="_700_80 inner">
 
-
-
-      <div class="_700_40 outer minus_b30">
-        <div class="_700_40 inner">
-
-          <div class="_700_40 float_left align_center advice">
-            <span class=intenceName>intence</span> can work
-            horizontally (and also in both dimensions at the same
-            time)
+          <div class="_700_80 float_left align_center">
+            Of course, <span class=intenceName>intence</span> can work
+            horizontally, or in both dimensions at the same time:
           </div>
 
         </div>
       </div>
+
+
+
+
+
+
+
 
       <div class="_700_263 outer minus_b243 z1">
         <div class="_700_263 inner relative">
@@ -3409,9 +3456,9 @@ Intence.prototype.destroy = function() {
 
           <div class="scrollable_y intence river_frame"
                id="river_scroll"
-               intenceimg="river_scroll.jpg"
-               intenceinfiniteeast
-               intenceinfinitewest>
+               scrollImg="river_scroll.jpg"
+               scrollInfiniteEast
+               scrollInfiniteWest>
             <div class="river_wrap">
               <img src="along_the_river.jpg">
             </div>
@@ -3426,7 +3473,7 @@ Intence.prototype.destroy = function() {
 
           <div class="_700_80 float_left align_center advice">
             this is the Chinese
-            scroll <a href="http://en.wikipedia.org/wiki/Along_the_River_During_the_Qingming_Festival">Along
+            scroll <a href="http://en.wikipedia.org/wiki/Along_the_River_During_the_Qingming_Festival" target=_blank>Along
             the River</a>, in case you're wondering
           </div>
 
@@ -3438,45 +3485,201 @@ Intence.prototype.destroy = function() {
 
 
 
+      <div class="_700_1 outer nasa_wrap">
+        <div class="_700_1 inner">
+
+          <div class="_91_25 float_right nasa minus_b50">
+            <a href="http://visibleearth.nasa.gov/view.php?id=73934" target=_blank>
+              <img src="nasa.png" height=25 class="nasa_img"/>
+            </a>
+          </div>
+
+        </div>
+      </div>
+
+
+      <div class="_700_400 outer">
+        <div class="_700_400 inner">
+          <div class=simple_frame>
+            <div class="scrollable intence"
+                 id="earth"
+                 scrollImgNorth="scroll_earth_north.png"
+                 scrollImgSouth="scroll_earth_south.png"
+                 scrollImgEast="scroll_earth_east.png"
+                 scrollImgWest="scroll_earth_west.png"
+                 scrollInfiniteEast scrollInfiniteWest>
+              <div class=earth id=earth_inner>
+                <div class="_2700_1350 outer">
+                  <div class="_2700_1350 inner">
+                <div id=earth_left style="background-image: url('world_west.png')"></div>
+                <div id=earth_right style="background-image: url('world_east.png')"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
+<div class=vsizer30></div>
+
+
+
+
 
 
 <div class=line></div>
 
 
-<div class=waterface>
-release by <u>waterface group</u>
-</div>
 
-<!--
-      <div class="_700_80 outer">
-        <div class="_700_80 inner">
+      <div class="_700_50 outer">
+        <div class="_700_50 inner">
 
-          <div class="_340_80 float_left align_right share">
-            keep your friends informed:
+          <div class="_700_50 float_left align_center">
+            keep your friends informed
           </div>
 
-          <div class="_340_80 float_right align_left share_icons">
+        </div>
+      </div>
+
+
+      <div class="_700_80 outer">
+        <div class="_700_80 inner align_center">
+
+
+          <div class="share_icons">
             <img src="social/twitter.png" onclick="javascript:share('twitter');"/>
             <img src="social/fb.png" onclick="javascript:share('fb');"/>
-            <img src="social/googleplus.png" onclick="javascript:share('googleplus');"/>
             <img src="social/pinterest.png" onclick="javascript:share('pinterest');"/>
+            <img src="social/googleplus.png" onclick="javascript:share('googleplus');"/>
+            <img src="social/xing.png" onclick="javascript:share('xing');"/>
+            <img src="social/linkedin.png" onclick="javascript:share('linkedin');"/>
             <img src="social/vk.png" onclick="javascript:share('vk');"/>
           </div>
 
         </div>
       </div>
--->
 
+
+
+<div class=vsizer30></div>
+<div class=vsizer30></div>
 
 
     </div>
 
-<!--
+
     <div class=section_hacker>
-      intence is shipped as an open-source javascript library &mdash;
-      so you can easily install it on your site or a web-application:
+
+      <div id=hacker_sizer></div>
+      <div id=hacker_sizer2></div>
+
+
+
+      <div class=geek_area_title>
+        Some info for geeks
+      </div>
+
+
+      <div class=mid>
+        <p>
+          <span class=intenceName>intence</span> is shipped as an
+          open-source javascript library
+          (<a href="https://github.com/asvd/intence/">github</a>)
+          &mdash; so you can easily install it on your site or a
+          web-application.
+        </p>
+
+        <p>
+          Download and unpack the library:
+            <a href="https://github.com/asvd/intence/releases/download/v1.0.0/intence-1.0.0.tar.gz">intence-1.0.0.tar.gz</a>
+            (9.7 KB), and
+            include <span class=inline_code>intence.js</span> into
+            your project (that is the UMD module):
+        </p>
+
+        <div class=code>
+          <pre name="code" class="html">&lt;script src="intence.js"&gt;&lt;/script&gt;</pre>
+        </div>
+        
+        <p>
+            Create a scrollable element with the content in the usual
+            way so that it is equipped with the scrollbars by the
+            browser:
+        </p>
+
+
+        <div class=code>
+          <pre name="code" class="html">&lt;div id=myElem&gt;
+    Long text goes here...
+&lt;/div&gt;</pre>
+        </div>
+        
+        <div class=code>
+          <pre name="code" class="css">#myElem {
+    width : 200px;
+    height : 400px;
+    overflow: auto;
+}</pre>
+        </div>
+
+
+        <p>
+            Add the <span class=inline_code>intence</span> class to
+            the element, and specify an image to be used for
+            indication as a value of
+            the <span class=inline_code>scrollImg</span> attribute:
+        </p>
+
+        <div class=code>
+          <pre name="code" class="html">&lt;div id=myElem class=intence scrollImg="texture.png"&gt;
+    Long text goes here...
+&lt;/div&gt;</pre>
+        </div>
+        
+
+        <p>
+          This is it! Now the scrollbars are replaced with
+          the <span class=intenceName>intence</span> indicator
+          composed out of
+          the <span class=inline_code>texture.png</span>. You can also
+          apply the <span class=inline_code>intence</span> class to
+          the whole <span class=inline_code>&lt;body&gt;</span>
+          element and get the whole page indicated.
+        </p>
+
+
+
+
+
+        
+      </div>
+
+
+
+
+
+
+
+
+<div class=vsizer30></div>
+<div class=vsizer30></div>
+
+
+
+<div class=waterface>
+release by <u>waterface group</u>
+<br/>
+end of March 2015, Munich
+</div>
+
+
+
+
     </div>
-    -->
+
 
     <div>
 
