@@ -792,8 +792,10 @@ img.nasa_img {
     overflow-y : hidden;
 }
 
+
 .river_wrap img {
-    width: 7500px;
+    width: 500px;
+    float: left;
 }
 
 .river_frame {
