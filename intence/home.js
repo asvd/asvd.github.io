@@ -238,14 +238,16 @@ var earth_onscroll = function() {
 
 
 var earth_switch = function() {
-    var left = _el('earth_left');
-    var right = _el('earth_right');
+    var e1 = _el('earth1');
+    var e3 = _el('earth3');
 
-    var leftbg = left.style.backgroundImage;
-    var rightbg = right.style.backgroundImage;
-
-    left.style.backgroundImage = rightbg;
-    right.style.backgroundImage = leftbg;
+    if (e1.style.display == 'block') {
+        e1.style.display = 'none';
+        e3.style.display = 'block';
+    } else {
+        e3.style.display = 'none';
+        e1.style.display = 'block';
+    }
 }
 
 

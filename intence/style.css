@@ -758,12 +758,19 @@ img.nasa_img {
     cursor : grabbing;
 }
 
-#earth_left, #earth_right {
+#earth1, #earth2, #earth3 {
     width : 1350px;
     height: 1350px;
     float: left;
 }
 
+#earth1, #earth3 {
+    background-image: url('world_west.png');
+}
+
+#earth2 {
+    background-image: url('world_east.png');
+}
 
 .river_frame {
     cursor : -webkit-grab;
