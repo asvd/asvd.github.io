@@ -194,6 +194,11 @@ body {
     height: 80px;
 }
 
+._420_80 {
+    width : 420px;
+    height: 80px;
+}
+
 ._394_260 {
     width: 394px;
     height: 260px;
@@ -217,6 +222,16 @@ body {
 ._340_80 {
     width: 340px;
     height: 80px;
+}
+
+._300_80 {
+    width: 300px;
+    height: 80px;
+}
+
+._300_60 {
+    width: 300px;
+    height: 60px;
 }
 
 ._290_410 {
@@ -367,10 +382,6 @@ body {
 
 .minus_t40 {
     margin-top: -40px;
-}
-
-.minus_t10 {
-    margin-top: -10px;
 }
 
 .minus_l183 {
@@ -813,6 +824,7 @@ img.nasa_img {
 .share_icons img {
     width : 60px;
     height: 60px;
+    float : left;
 }
 
 
@@ -925,7 +937,29 @@ img.nasa_img {
 }
 
 
+.browser_icons {
+}
 
+.browser_icons img {
+    width : 60px;
+    height: 60px;
+    opacity : .8;
+    float : left;
+}
+
+
+
+.browser_versions {
+}
+
+.version {
+    width: 60px;
+    float : left;
+    text-align: center;
+    font-weight: bold;
+    color : #7A94AA;
+    font-family: 'PT Sans Caption', sans-serif;
+}
 
 
 .waterface {

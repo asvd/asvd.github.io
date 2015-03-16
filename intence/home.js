@@ -298,7 +298,7 @@ var share = function(type) {
         url = 'https://vk.com/share.php?url=http://asvd.github.io/intence/&title=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication&description=You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%2E&image=http://asvd.github.io/intence/intence_preview.png&noparse=true';
         break;
     case 'twitter':
-        url = 'https://twitter.com/intent/tweet?text=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication%2E%20You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%3A&url=http://asvd.github.io/intence/';
+        url = 'https://twitter.com/intent/tweet?text=%23intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication%2E%20You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%3A&url=http://asvd.github.io/intence/';
         break;
     case 'pinterest':
         url = 'https://www.pinterest.com/pin/create/button/?url=http://asvd.github.io/intence/&description=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication%2E%20You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%2E&media=http://asvd.github.io/intence/intence_preview.png';
