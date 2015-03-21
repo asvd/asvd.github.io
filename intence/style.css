@@ -8,10 +8,76 @@ body {
     height: 100%;
     padding: 0px;
     margin : 0px;
+    color : #A4C7DF;
     background-color : #334455;
     font-family: 'PT Sans', sans-serif;
     font-size : 16px;
+    cursor : default;
 }
+
+
+#loading {
+    width: 100%;
+    text-align: center;
+    padding-top : 80px;
+    font-family: 'PT Sans Caption', sans-serif;
+    font-size : 16px;
+}
+
+
+#not_supported {
+    display: none;
+    text-align: center;
+    padding-top : 80px;
+    font-family: 'PT Sans Caption', sans-serif;
+    font-size : 16px;
+    text-shadow: 0px 0px 4px rgba(142, 204, 224, 0.27);
+}
+
+#not_supported_text {
+    margin-bottom : 10px;
+}
+
+.browsers {
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom : 50px;
+    margin-top : 20px;
+    width: 340px;
+    height: 80px;
+}
+
+.browser {
+    float : left;
+    padding: 4px;
+}
+
+.browser img {
+    width: 60px;
+    height: 60px;
+    opacity : .9;
+}
+
+.browser p {
+    margin-top : -5px;
+    margin-bottom: 0px;
+    text-align: center;
+    padding-left: 10px;
+    font-family: 'PT Sans', sans-serif;
+}
+
+
+
+#everything {
+    display: none;
+}
+
+
+.mid {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 
 
 .line {
@@ -45,6 +111,10 @@ body {
     z-index : 1;
 }
 
+.z10 {
+    z-index : 10;
+}
+
 .align_left {
     text-align: left;
 }
@@ -55,6 +125,14 @@ body {
 
 .align_right {
     text-align: right;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.relative {
+    position: relative;
 }
 
 
@@ -86,19 +164,10 @@ body {
     float: right;
 }
 
-.relative {
-    position: relative;
-}
-
 
 .outer {
     margin-left: auto;
     margin-right: auto;
-    position : relative;
-}
-
-.inner {
-    position : absolute;
 }
 
 
@@ -108,14 +177,19 @@ body {
 }
 
 
-._700_360 {
+._700_435 {
     width: 700px;
-    height: 360px;
+    height: 435px;
 }
 
 ._700_400 {
     width: 700px;
     height: 400px;
+}
+
+._700_360 {
+    width: 700px;
+    height: 360px;
 }
 
 ._700_302 {
@@ -147,6 +221,11 @@ body {
 ._700_40 {
     width: 700px;
     height: 40px;
+}
+
+._700_35 {
+    width: 700px;
+    height: 35px;
 }
 
 ._700_50 {
@@ -376,6 +455,10 @@ body {
     margin-bottom: -20px;
 }
 
+.minus_t400 {
+    margin-top: -400px;
+}
+
 .minus_t50 {
     margin-top: -50px;
 }
@@ -585,6 +668,7 @@ body {
     font-family: 'PT Sans Caption', sans-serif;
 }
 
+
 .advice {
     font-size : 13px;
     text-align: center;
@@ -723,13 +807,10 @@ img.w {
 
 
 
-.nasa_wrap {
-    z-index: 10;
-}
-
 .nasa {
-    margin-top: 10px;
-    margin-right: 5px;
+    float : right;
+    padding-top: 3px;
+    padding-right: 5px;
 }
 
 
@@ -745,6 +826,9 @@ img.w {
 img.nasa_img {
     border: none;
 }
+
+
+
 
 
 
@@ -838,11 +922,6 @@ img.nasa_img {
     width : 100%;
     height: 60px;
     margin-top: -55px;
-    /*
-    background-color : #334455;
-    box-shadow: 0px -4px 26px rgba(35, 30, 36, 0.56);
-    border-top: 1.4px solid rgba(187, 195, 204, 0.78);
-    */
     box-shadow: 0px 4px 50px rgba(0, 0, 0, 0.4);
     background-color: #F6FFFB;
 }
@@ -858,8 +937,6 @@ img.nasa_img {
 
 .section_hacker {
     width : 100%;
-    background-color : #334455;
-    color : #A4C7DF;
 }
 
 
@@ -884,6 +961,7 @@ img.nasa_img {
 .section_hacker .code {
     background-image : none;
     background-color: #2D3D4D;
+    cursor : text;
 }
 
 .section_hacker .code pre {
@@ -915,9 +993,8 @@ img.nasa_img {
     letter-spacing: 1px;
 }
 
+
 .section_hacker .mid {
-    margin-left: auto;
-    margin-right: auto;
     width: 500px;
     text-align: left;
 }
@@ -936,30 +1013,6 @@ img.nasa_img {
     text-shadow: 0px 0px 3px rgba(174, 200, 203, 0.51);
 }
 
-
-.browser_icons {
-}
-
-.browser_icons img {
-    width : 60px;
-    height: 60px;
-    opacity : .8;
-    float : left;
-}
-
-
-
-.browser_versions {
-}
-
-.version {
-    width: 60px;
-    float : left;
-    text-align: center;
-    font-weight: bold;
-    color : #7A94AA;
-    font-family: 'PT Sans Caption', sans-serif;
-}
 
 
 .waterface {
