@@ -167,6 +167,7 @@
 
 
 var out = [
+    'Intence test:',
     'navigator.userAgent: ' + navigator.userAgent,
     '',
     'IS_FF: ' + IS_FF,
