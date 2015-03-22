@@ -20,19 +20,12 @@ function start() {
         init_river();
         init_earth();
 
-        dragscroll('river_scroll-scroller');
-        dragscroll('earth-scroller');
-        dragscroll('example_intro_area-scroller');
-        dragscroll('goethe_intence-scroller');
-        dragscroll('goethe_bar', true);
-        dragscroll('candy_intence-scroller');
-        dragscroll('code_intence-scroller');
-        
         init_analytics();
     } else {
         _el('not_supported').style.display = 'block';
     }
 }
+
 
 
 function dragscroll(id, y_only) {
@@ -99,7 +92,7 @@ function init_intro() {
         _el(example_intro[i][0]).style.opacity = 0;
     }
 
-    var ex1_scroller = _el("example_intro_area-scroller");
+    var ex1_scroller = _el("example_intro_area").scroller;
 
     var ex1_cur_arrow = null;
     var ex1_cur_annotation = null;
@@ -155,7 +148,7 @@ function init_intro() {
 
 function init_dynamic() {
     var gIntRoot = _el('goethe_intence');
-    var gInt = _el('goethe_intence-scroller');
+    var gInt = _el('goethe_intence').scroller;
     var gBar = _el('goethe_bar');
 
     var int_scrolled = false;
@@ -212,7 +205,7 @@ function init_dynamic() {
 
 var init_river = function() {
     var river = _el('river_scroll');
-    var river_scroller = _el('river_scroll-scroller');
+    var river_scroller = _el('river_scroll').scroller;
     var scroll = function(e) {
         if (e.deltaY) {
             river_scroller.scrollLeft += Math.round(e.deltaY/4);
@@ -231,7 +224,7 @@ var init_earth = function() {
         e.stopPropagation();
     }
 
-    var earth_scroller = _el('earth-scroller');
+    var earth_scroller = _el('earth').scroller;
     earth_scroller.addEventListener("wheel", wheel);
     earth_scroller.addEventListener('scroll', earth_onscroll, false);
 
@@ -244,7 +237,7 @@ var init_earth = function() {
 
 var earth_onscroll = function() {
     var earth = _el('earth');
-    var earth_scroller = _el('earth-scroller');
+    var earth_scroller = _el('earth').scroller;
     var earth_inner = _el('earth_inner');
 
     var width = earth.getBoundingClientRect().width;

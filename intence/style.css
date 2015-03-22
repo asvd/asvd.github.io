@@ -91,6 +91,16 @@ body {
 
 
 
+.vsizer100 {
+    position: static;
+    height: 100px;
+}
+
+.vsizer60 {
+    position: static;
+    height: 60px;
+}
+
 .vsizer30 {
     position: static;
     height: 30px;
@@ -101,10 +111,11 @@ body {
     height: 20px;
 }
 
-.vsizer100 {
+.vsizer10 {
     position: static;
-    height: 100px;
+    height: 10px;
 }
+
 
 .z1 {
     pointer-events : none;
@@ -125,6 +136,10 @@ body {
 
 .align_right {
     text-align: right;
+}
+
+.align_justify {
+    text-align: justify;
 }
 
 .absolute {
@@ -169,6 +184,29 @@ body {
     margin-left: auto;
     margin-right: auto;
 }
+
+
+
+
+.frame, .simple_frame {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.frame {
+    background-color: #F0FFFE;
+    border: 1px solid rgba(127, 129, 131, 0.5);
+    box-shadow: 0px 0px 4px rgba(49, 72, 89, 0.21);
+}
+
+.simple_frame {
+    border: 1px solid rgb(38, 50, 63);
+    box-shadow: none;
+}
+
+
+
 
 
 ._2700_1350 {
@@ -251,6 +289,11 @@ body {
 ._500_320 {
     width : 500px;
     height: 320px;
+}
+
+._500_300 {
+    width : 500px;
+    height: 300px;
 }
 
 ._500_140 {
@@ -348,6 +391,21 @@ body {
     height: 360px;
 }
 
+._200_900 {
+    width: 200px;
+    height: 900px;
+}
+
+._200_300 {
+    width: 200px;
+    height: 300px;
+}
+
+._200_200 {
+    width: 200px;
+    height: 200px;
+}
+
 ._169_260 {
     width: 169px;
     height: 260px;
@@ -399,8 +457,32 @@ body {
 }
 
 
+.w530 {
+    width: 530px;
+}
+
+.w470 {
+    width: 470px;
+}
+
+.w410 {
+    width: 410px;
+}
+
+.w235 {
+    width: 235px;
+}
+
+.w175 {
+    width: 175px;
+}
+
 .w210 {
     width: 210px;
+}
+
+.w180 {
+    width: 180px;
 }
 
 .w170 {
@@ -425,6 +507,10 @@ body {
 
 .w90 {
     width: 90px;
+}
+
+.h300 {
+    height: 300px;
 }
 
 .minus_r174 {
@@ -550,23 +636,6 @@ body {
 .opacity_animated {
     transition: opacity .3s;
     opacity : 0;
-}
-
-.frame, .simple_frame {
-    width: 100%;
-    height: 100%;
-    position: relative;
-}
-
-.frame {
-    background-color: #F0FFFE;
-    border: 1px solid rgba(127, 129, 131, 0.5);
-    box-shadow: 0px 0px 4px rgba(49, 72, 89, 0.21);
-}
-
-.simple_frame {
-    border: 1px solid rgb(38, 50, 63);
-    box-shadow: none;
 }
 
 .scrollable {
@@ -996,21 +1065,93 @@ img.nasa_img {
 
 .section_hacker .mid {
     width: 500px;
-    text-align: left;
+    text-align: justify;
 }
 
 
+.section_hacker .mid img {
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .section_hacker p {
+    padding-bottom : 5px;
+    padding-top : 5px;
 }
 
 .section_hacker ul {
     margin-left: -40px;;
 }
 
+.w100per {
+    width: 100%;
+}
+
+
+.w10 {
+    width: 10px;
+}
+
+
+.mid_floats {
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.mid_floats_500 {
+    width: 500px;
+    overflow: hidden;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+
+.float_left.mg8 {
+    margin-right: 8px;
+}
+
+.float_right.mg8 {
+    margin-left: 8px;
+}
+
+
 .section_hacker .intenceName {
     color: #B5CCE4;
     letter-spacing: 1px;
     text-shadow: 0px 0px 3px rgba(174, 200, 203, 0.51);
+}
+
+
+.strongly {
+    text-shadow: 0px 0px 4px rgba(174, 200, 203, 0.59);
+    font-family: 'PT Sans Caption', sans-serif;
+    letter-spacing: 2px;
+    font-variant: small-caps;
+}
+
+
+.notext {
+    background-image : url('rect_bg.png');
+}
+
+.section_hacker ._frame {
+    background-color: #2D3D4D;
+    border: 1px solid rgba(82, 109, 135, 1);
+    box-shadow: 0px 0px 37px rgba(91, 121, 155, 0.13);
+}
+
+.section_hacker ._frame_simple {
+    border: 1px solid rgba(89, 109, 128, 1);
+}
+
+
+
+.section_hacker .subtitle {
+    font-size : 13px;
+    font-style: italic;
+    padding: 10px;
 }
 
 

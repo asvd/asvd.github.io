@@ -35,6 +35,7 @@
 
 
     <script type="text/javascript" src="intence.js"></script>
+    <script type="text/javascript" src="dragscroll.js"></script>
     <script type="text/javascript" src="home.js"></script>
     <script type="text/javascript" src="hl/hl-all.js"></script>
   </head>
@@ -131,7 +132,7 @@
           <div class="_240_320 float_right">
             <div class=_240_300>
               <div class=frame>
-                <div class="scrollable intence"
+                <div class="scrollable intence dragscroll"
                      scrollImg="scroll_area2.png"
                      id="example_intro_area">
                   <div class=example_text>
@@ -679,7 +680,7 @@
           <div class="_230_320 float_left">
             <div class=_230_300>
               <div class=frame>
-                <div class="scrollable_y intence goethe"
+                <div class="scrollable_y intence dragscroll goethe"
                      scrollInfiniteSouth
                      id=goethe_intence
                      scrollImg="scroll_area2.png">
@@ -1055,7 +1056,7 @@
           <div class="_240_320 float_left plus_l30">
             <div class=_240_300>
               <div class=frame>
-                <div class="scrollable_y goethe" id=goethe_bar>
+                <div class="scrollable_y dragscroll goethe" id=goethe_bar>
                   <div class="w210 example_text">
 
             <div class=env>Augsburg. Ein Garten.</div>
@@ -1469,7 +1470,7 @@
           <div class="_290_410 float_left">
             <div class=_290_410>
               <div class=simple_frame>
-                <div class="scrollable_y intence candy"
+                <div class="scrollable_y intence dragscroll candy"
                      scrollImg="candy_scroll.png"
                      id=candy_intence>
                   <div class="candy_title">List of candies</div>
@@ -2267,7 +2268,7 @@
           <div class="_290_410 float_left plus_l20">
             <div class=_290_410>
               <div class=simple_frame>
-                <div class="scrollable_y intence example2_code_wrap"
+                <div class="scrollable_y intence dragscroll example2_code_wrap"
                      scrollImg="scroll_code2.png"
                      id=code_intence>
                   <div class="example2_code code">
@@ -3466,7 +3467,7 @@
 
       <div class="_700_230 outer">
 
-          <div class="scrollable_y intence river_frame"
+          <div class="scrollable_y intence dragscroll river_frame"
                id="river_scroll"
                scrollImg="river_scroll.jpg"
                scrollInfiniteEast
@@ -3511,7 +3512,7 @@
       <div class="_700_400 outer relative">
         <div class="_700_400 absolute">
           <div class=simple_frame>
-            <div class="scrollable intence"
+            <div class="scrollable intence dragscroll"
                  id="earth"
                  scrollImgNorth="scroll_earth_north.png"
                  scrollImgSouth="scroll_earth_south.png"
@@ -3620,7 +3621,7 @@
         <p>
           Download and unpack the library:
             <a href="https://github.com/asvd/intence/releases/download/v1.1.0/intence-1.1.0.tar.gz">intence-1.1.0.tar.gz</a>
-            (11.3 KB), and
+            (11.3KB), and
             include <span class=inline_code>intence.js</span> into
             your project (that is an UMD module):
         </p>
@@ -3631,8 +3632,7 @@
         
         <p>
             Create a scrollable element with the content in a usual
-            way so that it is equipped with the scrollbars by the
-            browser:
+            way so that it is equipped with a scrollbar by a browser:
         </p>
 
 
@@ -3674,6 +3674,144 @@
           the <span class=inline_code>&lt;body&gt;</span> element and
           get the whole page indicated.
         </p>
+
+        <p>
+          When selecting a texture for indication, have in mind that
+          it will be <span class=strongly>strongly</span> squeezed
+          vertically:
+        </p>
+
+
+        <div class="center w100per">
+          <img src=squeeze.png width=350/>
+        </div>
+
+
+        
+        <p class="subtitle align_center">
+          The shapes on the texture can be highly detailed
+          horizontally, but should have significant size in vertical
+          dimension
+        </p>
+
+        
+        <p>
+          The texture image is rotated to have its top oriented
+          towards a side of a scrollable area:
+        </p>
+      </div>
+
+
+      <div class="mid_floats w410">
+        <div class="_200_200 float_left _frame_simple">
+          <img src=rotate_orig.png width=200/>
+        </div>
+        <div class="_200_200 float_right _frame_simple">
+          <img src=rotate_applied.png width=200/>
+        </div>
+      </div>
+
+      <div class="mid_floats w410">
+        <div class="w180 float_left subtitle align_center p10">
+          original image
+        </div>
+        <div class="w180 float_right subtitle align_center p10">
+          applied as indicator
+        </div>
+      </div>
+
+
+        
+      <div class=mid>
+        <p>
+          The texture rolls within an indicator at a different speed:
+          the closer it is to the area side, the slower it moves. But
+          additionally it depends on the height of the texture, which
+          means you can affect the roll speed by selecting a higher or
+          a lower image:
+        </p>
+
+        <p class="subtitle align_center">
+          slowly scroll the areas by dragging and compare the roll speed
+        </p>
+      </div>
+
+
+      <div class="w530">
+        <img class="float_left mg8 _frame" src="rollspeed_high.png"/>
+        <div class="_200_300 float_left _frame intence dragscroll"
+             scrollImg=rollspeed_high.png
+             scrollInfiniteNorth
+             scrollInfiniteSouth>
+          <div class="_200_900 notext"></div>
+        </div>
+        <img class="float_right mg8 _frame" src="rollspeed_low.png"/>
+        <div class="_200_300 float_right _frame intence dragscroll"
+             scrollImg=rollspeed_low.png
+             scrollInfiniteNorth
+             scrollInfiniteSouth>
+          <div class="_200_900 notext"></div>
+        </div>
+      </div>
+
+      <div class="w470 mid_floats">
+        <div class="w175 float_left subtitle align_right">
+          Higher texture makes indicator move slower and more
+          fluent. This is especially important for the users who
+          scroll with a mouse wheel and normally have a discrete
+          jump-scrolling.
+        </div>
+        <div class="w235 float_right subtitle align_left">
+          Indicator with lower texture moves faster and its speed at
+          the far end from the side is getting closer to the content
+          scrolling speed. This is useful if a texture looks like a
+          continuation of the content, like in the Chinese scroll
+          example above.
+        </div>
+      </div>
+
+
+
+      <div class=mid>
+        <p>
+          Further things to consider about the texture:
+
+          - the size of indicator arises up to .16 of the size of the
+          displayed area
+
+          - additionally (due to some mathematical reasons) the size
+          of indicator cannot be more than approximately .6 of the
+          original texture height. Therefore you can use low texture
+          to limit the maximal indicator size
+        </p>
+
+        <p>
+          - blocks are a little bit overlapped, so avoid partially
+          transparent areas on the top and on the bottom
+        </p>
+
+        <p>
+          You can also select a different texture for any side. The
+          scrollImg attribute defines the texture to be used for all
+          sides, and for particular sides provide the respective
+          images as values for the attributes scrollImgNorth,
+          scrollImgSouth, scrollImgWest and scrollImgEast:
+        </p>
+
+        html code example
+
+
+        enabled flag
+
+        how to scroll programmatically and read scrolling data, check
+        againts enabled flag
+
+
+        dynamically adding the new element to be squeezed and reset
+        method
+        
+
+        on switching the infinite mode for dynamically added content
 
 
       </div>
