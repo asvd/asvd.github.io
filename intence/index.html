@@ -48,13 +48,15 @@
       <p>your browser is not capable for the future</p>
     </div>
 
-    <div class=browsers>
-      <div class=browser><img src="browsers/chrome.png"/><p>15+</p></div>
-      <div class=browser><img src="browsers/opera.png"/> <p>15+</p></div>
-      <div class=browser><img src="browsers/ie.png"/><p>9+</p></div>
-      <div class=browser><img src="browsers/ff.png"/><p>8+</p></div>
-      <div class=browser><img src="browsers/safari.png"/><p>7+</p></div>
-    </div>
+
+        <div class=browsers>
+          <div class=browser><img src="browsers/chrome.png"/><div>15+</div></div>
+          <div class=browser><img src="browsers/opera.png"/> <div>15+</div></div>
+          <div class=browser><img src="browsers/ie.png"/><div>9+</div></div>
+          <div class=browser><img src="browsers/ff.png"/><div>8+</div></div>
+          <div class=browser><img src="browsers/safari.png"/><div>7+</div></div>
+        </div>
+
     
   </div>
   <div id=everything>
@@ -3595,7 +3597,6 @@
       </div>
 
 
-      <div class=mid>
         <p>
           <span class=intenceName>intence</span> is shipped as an
           open-source javascript library
@@ -3609,11 +3610,11 @@
 
 
         <div class=browsers>
-          <div class=browser><img src="browsers/chrome.png"/><p>15+</p></div>
-          <div class=browser><img src="browsers/opera.png"/> <p>15+</p></div>
-          <div class=browser><img src="browsers/ie.png"/><p>9+</p></div>
-          <div class=browser><img src="browsers/ff.png"/><p>8+</p></div>
-          <div class=browser><img src="browsers/safari.png"/><p>7+</p></div>
+          <div class=browser><img src="browsers/chrome.png"/><div>15+</div></div>
+          <div class=browser><img src="browsers/opera.png"/> <div>15+</div></div>
+          <div class=browser><img src="browsers/ie.png"/><div>9+</div></div>
+          <div class=browser><img src="browsers/ff.png"/><div>8+</div></div>
+          <div class=browser><img src="browsers/safari.png"/><div>7+</div></div>
         </div>
 
         
@@ -3699,7 +3700,6 @@
           The texture image is rotated to have its top oriented
           towards a side of a scrollable area:
         </p>
-      </div>
 
 
       <div class="mid_floats w410">
@@ -3721,7 +3721,7 @@
       </div>
 
 
-<!--        
+
       <div class=mid>
         <p>
           The texture rolls within an indicator at a different speed:
@@ -3737,31 +3737,33 @@
       </div>
 
 
-      <div class="w530">
+      <div class="w530 mid">
         <img class="float_left mg8 _frame" src="rollspeed_high.png"/>
         <div class="_200_300 float_left _frame intence dragscroll"
+             id=notext_high
              scrollImg=rollspeed_high.png
              scrollInfiniteNorth
              scrollInfiniteSouth>
-          <div class="_200_900 notext"></div>
+          <div class="_200_1200 notext"></div>
         </div>
         <img class="float_right mg8 _frame" src="rollspeed_low.png"/>
         <div class="_200_300 float_right _frame intence dragscroll"
+             id=notext_low
              scrollImg=rollspeed_low.png
              scrollInfiniteNorth
              scrollInfiniteSouth>
-          <div class="_200_900 notext"></div>
+          <div class="_200_1200 notext"></div>
         </div>
       </div>
 
-      <div class="w470 mid_floats">
-        <div class="w175 float_left subtitle align_right">
+      <div class="w410 float_left">
+        <div class="w175 float_left subtitle align_center">
           Higher texture makes indicator move slower and more
           fluent. This is especially important for the users who
           scroll with a mouse wheel and normally have a discrete
           jump-scrolling.
         </div>
-        <div class="w235 float_right subtitle align_left">
+        <div class="w175 float_right subtitle align_center">
           Indicator with lower texture moves faster and its speed at
           the far end from the side is getting closer to the content
           scrolling speed. This is useful if a texture looks like a
@@ -3770,54 +3772,183 @@
         </div>
       </div>
 
+      <div class=sep></div>
+
+      <p>
+        The indicator is growing up to 0.16 of the scrollable area
+        size in the corresponding dimension. Additionally the
+        indicator size cannot be more than approximately 0.6 of the
+        texture height (due to some mathematical reasons). Therefore
+        you can use low texture to limit the maximal indicator size.
+      </p>
+
+      <p>
+        Indicator consists of a set of blocks, which are a little bit
+        overlapped sometimes, so in order to avoid dirty connections,
+        do not use partially transparent areas around top and bottom
+        sides of the texture. Moreover, prefer fully opaque images
+        &mdash; this will make the content fade out which notifies a
+        user that the content still continues. Instead of using
+        transparency, use the background of the scrollable content
+        &mdash; it will look as indicator is transparent, but the
+        content is fading out (see the demo with Candies above).
+      </p>
+
+      <p>
+        The mentioned <span class=inline_code>scrollImg</span>
+        attribute is used for all sides by default, but you may
+        specify different texture for a particular side
+        using <span class=inline_code>scrollImgNorth</span>, <span class=inline_code>scrollImgSouth</span>,
+        <span class=inline_code>scrollImgEast</span> and <span class=inline_code>scrollImgWest</span> attributes:
+      </p>
+
+        <div class=code>
+          <pre name="code" class="html">&lt;div class=intence
+     scrollImg=texture.png
+     scrollImgNorth=north.png&gt;
+    Big text goes here...
+&lt;/div&gt;</pre>
+        </div>
+
+        <p class="subtitle align_center">
+          &mdash; use north.png for the top side, and tetxure.png for
+          every other side
+        </p>
 
 
-      <div class=mid>
         <p>
-          Further things to consider about the texture:
+          As shown in the examples above, there is a special maximal
+          mode which should be activated in case when scrolling is
+          infinite, or if the content is dynamically appended and it
+          is not known in advance when will it be over.
+        </p>
 
-          - the size of indicator arises up to .16 of the size of the
-          displayed area
 
-          - additionally (due to some mathematical reasons) the size
-          of indicator cannot be more than approximately .6 of the
-          original texture height. Therefore you can use low texture
-          to limit the maximal indicator size
+        <p>
+          Such behaviour of an indicator is triggered by
+          the <span class=inline_code>scrollInfinite...</span>
+          attributes, for instance:
+        </p>
+        
+        <div class=code>
+          <pre name="code" class="html">&lt;div id=myElem
+     class=intence
+     scrollImg=texture.png
+     scrollInfiniteSouth&gt;
+    Big text goes here...
+&lt;/div&gt;</pre>
+        </div>
+
+        <p class="subtitle align_center">
+          &mdash; the bottom side will always be in maximal mode,
+          regardles of how much is it to scroll yet
         </p>
 
         <p>
-          - blocks are a little bit overlapped, so avoid partially
-          transparent areas on the top and on the bottom
+          After the last piece of content is delivered and appended to
+          the scrollable area, remove the attribute programmatically:
+        </p>
+        
+        <div class=code>
+<pre name="code" class="js">var elem = document.getElementById('myElem');
+elem.removeAttribute('scrollInfiniteSouth');
+</pre>
+        </div>
+
+        <p>
+          This will smoothly decrease the indicator to the proper size
+          reflecting the amount of remaining content. (This does not
+          happens instantly upon the attribute removal, but upon the
+          next act of scrolling instead.)
+        </p>
+
+
+        <p>
+          You can determine if <span class=intenceName>intence</span>
+          is disabled because it does not supported by the
+          browser. Check
+          the <span class=inline_code>intence.enabled</span> property
+          &mdash; it contains <span class=inline_code>true</span>
+          if <span class=intenceName>intence</span> works,
+          and <span class=inline_code>false</span> otherwise.
         </p>
 
         <p>
-          You can also select a different texture for any side. The
-          scrollImg attribute defines the texture to be used for all
-          sides, and for particular sides provide the respective
-          images as values for the attributes scrollImgNorth,
-          scrollImgSouth, scrollImgWest and scrollImgEast:
+          Upon the indicator is created for an element, its internal
+          structure is strongly rebuilt in order to hide the
+          scrollbars and create the indicator. The original element
+          does not actually performs scrolling anymore, so if you need
+          to operate the scrolling programmatically (to find out the
+          current scrolling position, or to change id), you can find
+          the actual scroller element at
+          the <span class=inline_code>.scroller</span> property of the
+          original element:
+        </p>
+        
+        <div class=code>
+<pre name="code" class="js">// this will not work
+// document.getElementById('myElem').scrollTop;
+
+// use this instead
+document.getElementById('myElem').scroller.scrollTop;
+</pre>
+        </div>
+
+        <p>
+          The <span class=inline_code>scroller</span> property is
+          available even in case
+          if <span class=intenceName>intence</span> is disabled (in
+          this case it simply points to the element itself), so there
+          is no need to additionally check
+          the <span class=inline_code>intence.enabled</span> flag.
         </p>
 
-        html code example
+
+        <p>
+          Finally if you add (or remove)
+          the <span class=inline_code>intence</span> class to the
+          element dynamically (or after the page load),
+          notify <span class=intenceName>intence</span> so that it
+          creates / removes the indicator for the respective elements:
+        </p>
 
 
-        enabled flag
+        <div class=code>
+          <pre name="code" class="js">intence.reset();</pre>
+        </div>
 
-        how to scroll programmatically and read scrolling data, check
-        againts enabled flag
 
+  <div class=line></div>
 
-        dynamically adding the new element to be squeezed and reset
-        method
+        <p>
+          As you probably
+          noticed, <span class=intenceName>intence</span> splits the
+          issues of scrolling indication, and scrolling
+          control. Namely, <span class=intenceName>intence</span> is
+          only an indicator, and does not provides elements to
+          controll the scrolling position &mdash; instead it is
+          supposed to be solved by a developer for a particular
+          case.
+        </p>
+
+        <p>
+          In most cases it might be enough to simply rely on a mouse
+          wheel or a touchscreen. Just keep in mind that it will
+          probably be convenient for a user to have something
+          additional &mdash; probably some slider buttons like in
+          image galleries, or a small preview of the content with the
+          detailed position designated, just like in Sublime Text. At
+          least it might be reasonable to simply add an opportunity to
+          scroll with a mouse drag, like most of the areas on this
+          page work. This can be done with the
+          tiny <a href="https://github.com/asvd/dragscroll"
+          target=_blank>dragscroll</a> library which perfectly works
+          with <span class=intenceName>intence</span>.
+        </p>
+
         
 
-        on switching the infinite mode for dynamically added content
 
-
-      </div>
-
-
--->        
 
 <div class=vsizer30></div>
 

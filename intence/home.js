@@ -19,6 +19,7 @@ function start() {
         init_dynamic();
         init_river();
         init_earth();
+        init_notext();
 
         init_analytics();
     } else {
@@ -269,6 +270,67 @@ var earth_switch = function() {
         e1.style.display = 'block';
     }
 }
+
+
+function init_notext() {
+    var high = _el('notext_high').scroller;
+    var low = _el('notext_low').scroller;
+
+    var high_scrolled = false;
+    var low_scrolled = false;
+
+    var high_onscroll = function() {
+        if (low_scrolled) {
+            low_scrolled = false;
+        } else {
+            high_scrolled = true;
+            low.scrollTop = high.scrollTop;
+        }
+    }
+
+    var low_onscroll = function() {
+        if (high_scrolled) {
+            high_scrolled = false;
+        } else {
+            low_scrolled = true;
+            high.scrollTop = low.scrollTop;
+        }
+    }
+
+    var height = 300;
+    var full = 1200;
+    var lim = 100;
+    var offset = 400;
+    var fix_low = function() {
+        var pos = low.scrollTop;
+        if (pos < lim) {
+            low.scrollTop += offset;
+        } else if (full-height-pos < lim) {
+            low.scrollTop -= offset;
+        }
+    }
+
+    var fix_high = function() {
+        var pos = high.scrollTop;
+        if (pos < lim) {
+            high.scrollTop += offset;
+        } else if (full-height-pos < lim) {
+            high.scrollTop -= offset;
+        }
+    }
+
+    high.addEventListener('scroll', high_onscroll, false);
+    low.addEventListener('scroll', low_onscroll, false);
+
+    high.addEventListener('scroll', fix_high, false);
+    low.addEventListener('scroll', fix_low, false);
+
+    low.scrollTop = 400;
+}
+
+
+
+
 
 
 var share = function(type) {
