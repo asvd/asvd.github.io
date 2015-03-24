@@ -3737,8 +3737,12 @@
       </div>
 
 
-      <div class="w530 mid">
-        <img class="float_left mg8 _frame" src="rollspeed_high.png"/>
+      <div class="w650 mid">
+        <img class="float_left" src="rollspeed_high.png"/>
+        <object class="z1 float_left arrow_svg"
+                width="100px" height="20px"
+                data="arrow_left_light.svg"
+                type="image/svg+xml"></object>
         <div class="_200_300 float_left _frame intence dragscroll"
              id=notext_high
              scrollImg=rollspeed_high.png
@@ -3746,7 +3750,11 @@
              scrollInfiniteSouth>
           <div class="_200_1200 notext"></div>
         </div>
-        <img class="float_right mg8 _frame" src="rollspeed_low.png"/>
+        <img class="float_right" src="rollspeed_low.png"/>
+        <object class="z1 float_right arrow_svg"
+                width="100px" height="20px"
+                data="arrow_right_light.svg"
+                type="image/svg+xml"></object>
         <div class="_200_300 float_right _frame intence dragscroll"
              id=notext_low
              scrollImg=rollspeed_low.png
@@ -3756,14 +3764,14 @@
         </div>
       </div>
 
-      <div class="w410 float_left">
-        <div class="w175 float_left subtitle align_center">
+      <div class="w500 float_left plus_l25">
+        <div class="w220 float_left subtitle align_right">
           Higher texture makes indicator move slower and more
           fluent. This is especially important for the users who
           scroll with a mouse wheel and normally have a discrete
           jump-scrolling.
         </div>
-        <div class="w175 float_right subtitle align_center">
+        <div class="w220 float_right subtitle align_left">
           Indicator with lower texture moves faster and its speed at
           the far end from the side is getting closer to the content
           scrolling speed. This is useful if a texture looks like a
@@ -3879,7 +3887,7 @@ elem.removeAttribute('scrollInfiniteSouth');
           scrollbars and create the indicator. The original element
           does not actually performs scrolling anymore, so if you need
           to operate the scrolling programmatically (to find out the
-          current scrolling position, or to change id), you can find
+          current scrolling position, or to change it), you can find
           the actual scroller element at
           the <span class=inline_code>.scroller</span> property of the
           original element:
@@ -3935,15 +3943,15 @@ document.getElementById('myElem').scroller.scrollTop;
           In most cases it might be enough to simply rely on a mouse
           wheel or a touchscreen. Just keep in mind that it will
           probably be convenient for a user to have something
-          additional &mdash; probably some slider buttons like in
-          image galleries, or a small preview of the content with the
-          detailed position designated, just like in Sublime Text. At
-          least it might be reasonable to simply add an opportunity to
-          scroll with a mouse drag, like most of the areas on this
-          page work. This can be done with the
+          additional &mdash; probably some slider buttons for an image
+          gallery, or a small preview of the content with the detailed
+          position designated, like in Sublime Text. At least it might
+          be reasonable to simply add an opportunity to scroll with a
+          mouse drag, like most of the areas on this page work. This
+          can be done with the
           tiny <a href="https://github.com/asvd/dragscroll"
           target=_blank>dragscroll</a> library which perfectly works
-          with <span class=intenceName>intence</span>.
+          together with <span class=intenceName>intence</span>.
         </p>
 
         
