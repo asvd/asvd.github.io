@@ -20,6 +20,7 @@ function start() {
         init_river();
         init_earth();
         init_notext();
+        init_fade();
 
         init_analytics();
     } else {
@@ -326,6 +327,38 @@ function init_notext() {
     low.addEventListener('scroll', fix_low, false);
 
     low.scrollTop = 400;
+}
+
+
+
+
+function init_fade() {
+    var opaque = _el('fade_opaque').scroller;
+    var transparent = _el('fade_transparent').scroller;
+
+    var opaque_scrolled = false;
+    var transparent_scrolled = false;
+
+    var opaque_onscroll = function() {
+        if (transparent_scrolled) {
+            transparent_scrolled = false;
+        } else {
+            opaque_scrolled = true;
+            transparent.scrollTop = opaque.scrollTop;
+        }
+    }
+
+    var transparent_onscroll = function() {
+        if (opaque_scrolled) {
+            opaque_scrolled = false;
+        } else {
+            transparent_scrolled = true;
+            opaque.scrollTop = transparent.scrollTop;
+        }
+    }
+
+    opaque.addEventListener('scroll', opaque_onscroll, false);
+    transparent.addEventListener('scroll', transparent_onscroll, false);
 }
 
 
