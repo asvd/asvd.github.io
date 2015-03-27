@@ -36,6 +36,7 @@
 
     <script type="text/javascript" src="intence.js"></script>
     <script type="text/javascript" src="dragscroll.js"></script>
+    <script type="text/javascript" src="syncscroll.js"></script>
     <script type="text/javascript" src="home.js"></script>
     <script type="text/javascript" src="hl/hl-all.js"></script>
   </head>
@@ -682,9 +683,10 @@
           <div class="_230_320 float_left">
             <div class=_230_300>
               <div class=frame>
-                <div class="scrollable_y intence dragscroll goethe"
+                <div class="scrollable_y intence dragscroll syncscroll goethe"
                      scrollInfiniteSouth
                      id=goethe_intence
+                     name=goethe
                      scrollImg="scroll_area2.png">
                   <div class="w210 example_text">
 
@@ -1058,7 +1060,9 @@
           <div class="_240_320 float_left plus_l30">
             <div class=_240_300>
               <div class=frame>
-                <div class="scrollable_y dragscroll goethe" id=goethe_bar>
+                <div class="scrollable_y dragscroll syncscroll goethe"
+                     id=goethe_bar
+                     name=goethe>
                   <div class="w210 example_text">
 
             <div class=env>Augsburg. Ein Garten.</div>
@@ -3743,8 +3747,9 @@
                 width="100px" height="20px"
                 data="arrow_left_light.svg"
                 type="image/svg+xml"></object>
-        <div class="_200_300 float_left _frame intence dragscroll"
+        <div class="_200_300 float_left _frame intence dragscroll syncscroll"
              id=notext_high
+             name=notext
              scrollImg=rollspeed_high.png
              scrollInfiniteNorth
              scrollInfiniteSouth>
@@ -3755,8 +3760,9 @@
                 width="100px" height="20px"
                 data="arrow_right_light.svg"
                 type="image/svg+xml"></object>
-        <div class="_200_300 float_right _frame intence dragscroll"
+        <div class="_200_300 float_right _frame intence dragscroll syncscroll"
              id=notext_low
+             name=notext
              scrollImg=rollspeed_low.png
              scrollInfiniteNorth
              scrollInfiniteSouth>
@@ -3798,7 +3804,7 @@
         sides of the texture. Moreover, prefer fully opaque images
         which will make the content fade out. This notifies a user
         that the content continues &mdash; actually even better than
-        highly contrast scrolling indicator.
+        high contrast scrolling indicator:
       </p>
 
       <div class="w650 mid">
@@ -3807,7 +3813,8 @@
                 width="100px" height="20px"
                 data="arrow_left_light.svg"
                 type="image/svg+xml"></object>
-        <div class="_200_300 float_left _frame intence dragscroll"
+        <div class="_200_300 float_left _frame intence dragscroll syncscroll"
+             name=fade
              id=fade_opaque
              scrollImg=fade_opaque.png>
           <div class="example_opacity">
@@ -3930,7 +3937,8 @@ Suspendisse dolor magna, lacinia in mauris eget, consectetur aliquet lacus. Done
                 width="100px" height="20px"
                 data="arrow_right_light.svg"
                 type="image/svg+xml"></object>
-        <div class="_200_300 float_right _frame intence dragscroll"
+        <div class="_200_300 float_right _frame intence dragscroll syncscroll"
+             name=fade
              id=fade_transparent
              scrollImg=fade_transparent.png>
           <div class="example_opacity">
@@ -4058,7 +4066,7 @@ Suspendisse dolor magna, lacinia in mauris eget, consectetur aliquet lacus. Done
       <p class=subtitle>
         Instead of using transparency, use the background of the
         scrollable content &mdash; it will look as indicator is
-        transparent, but the content is fading out.
+        still transparent, but the content is fading out.
       </p>
 
       <p>
@@ -4128,9 +4136,10 @@ elem.removeAttribute('scrollInfiniteSouth');
 
 
         <p>
-          You can determine if <span class=intenceName>intence</span>
-          is disabled because it does not supported by the
-          browser. Check
+          If a browser is too
+          old, <span class=intenceName>intence</span> will be
+          disabled, and will not change anythig on the page. You can
+          determine if this is the case by checking
           the <span class=inline_code>intence.enabled</span> property
           &mdash; it contains <span class=inline_code>true</span>
           if <span class=intenceName>intence</span> works,
@@ -4208,6 +4217,20 @@ document.getElementById('myElem').scroller.scrollTop;
           tiny <a href="https://github.com/asvd/dragscroll"
           target=_blank>dragscroll</a> library which perfectly works
           together with <span class=intenceName>intence</span>.
+        </p>
+
+        <p>
+          If you are going to create a library which provides some
+          controlls for scrolling to be used along
+          with <span class=intenceName>intence</span>, do not cover
+          the existing content or
+          the <span class=intenceName>intence</span> indicator. It is
+          currently transparent for mouse events, and should remain
+          like this (otherwise users will consider the controls as
+          being part of <span class=intenceName>intence</span> and
+          will be confused by it only working in some
+          applications). Put the controls outside of the area, and not
+          inside it. Do not create a scrollbar.
         </p>
 
         

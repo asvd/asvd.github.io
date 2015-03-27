@@ -20,7 +20,6 @@ function start() {
         init_river();
         init_earth();
         init_notext();
-        init_fade();
 
         init_analytics();
     } else {
@@ -28,44 +27,6 @@ function start() {
     }
 }
 
-
-
-function dragscroll(id, y_only) {
-    var el = _el(id);
-    var lastPageX, lastPageY;
-    var pushed = false;
-    var down = function(e) {
-        pushed = true;
-        lastPageX = e.pageX;
-        lastPageY = e.pageY;
-
-        e.preventDefault();
-        e.stopPropagation();
-    }
-    
-    var up = function() {
-        if (pushed) {
-            pushed = false;
-        }
-    }
-
-    var move = function(e) {
-        if (pushed) {
-            if (!y_only) {
-                el.scrollLeft -= (e.pageX - lastPageX);
-            }
-
-            el.scrollTop -= (e.pageY - lastPageY);
-
-            lastPageX = e.pageX;
-            lastPageY = e.pageY;
-        }
-    }
-
-    el.addEventListener('mousedown', down, false);
-    window.addEventListener('mouseup', up, false);
-    window.addEventListener('mousemove', move, false);
-}
 
 
 function init_analytics() {
@@ -153,29 +114,6 @@ function init_dynamic() {
     var gInt = _el('goethe_intence').scroller;
     var gBar = _el('goethe_bar');
 
-    var int_scrolled = false;
-    var bar_scrolled = false;
-
-    var int_onscroll = function() {
-        if (bar_scrolled) {
-            bar_scrolled = false;
-        } else {
-            int_scrolled = true;
-            gBar.scrollTop = gInt.scrollTop;
-            processScroll();
-        }
-    }
-
-    var bar_onscroll = function() {
-        if (int_scrolled) {
-            int_scrolled = false;
-        } else {
-            bar_scrolled = true;
-            gInt.scrollTop = gBar.scrollTop;
-            processScroll();
-        }
-    }
-
     var points = [];
     var shown = 0;
     var processScroll = function() {
@@ -200,8 +138,7 @@ function init_dynamic() {
         }
     }
 
-    gInt.addEventListener('scroll', int_onscroll, false);
-    gBar.addEventListener('scroll', bar_onscroll, false);
+    gInt.addEventListener('scroll', processScroll, false);
 }
 
 
@@ -277,27 +214,6 @@ function init_notext() {
     var high = _el('notext_high').scroller;
     var low = _el('notext_low').scroller;
 
-    var high_scrolled = false;
-    var low_scrolled = false;
-
-    var high_onscroll = function() {
-        if (low_scrolled) {
-            low_scrolled = false;
-        } else {
-            high_scrolled = true;
-            low.scrollTop = high.scrollTop;
-        }
-    }
-
-    var low_onscroll = function() {
-        if (high_scrolled) {
-            high_scrolled = false;
-        } else {
-            low_scrolled = true;
-            high.scrollTop = low.scrollTop;
-        }
-    }
-
     var height = 300;
     var full = 1200;
     var lim = 100;
@@ -320,76 +236,65 @@ function init_notext() {
         }
     }
 
-    high.addEventListener('scroll', high_onscroll, false);
-    low.addEventListener('scroll', low_onscroll, false);
-
     high.addEventListener('scroll', fix_high, false);
     low.addEventListener('scroll', fix_low, false);
 
-    low.scrollTop = 400;
+    setTimeout( function() {
+        high.scrollTop = 400;
+    }, 500);
 }
 
 
 
 
-function init_fade() {
-    var opaque = _el('fade_opaque').scroller;
-    var transparent = _el('fade_transparent').scroller;
 
-    var opaque_scrolled = false;
-    var transparent_scrolled = false;
 
-    var opaque_onscroll = function() {
-        if (transparent_scrolled) {
-            transparent_scrolled = false;
-        } else {
-            opaque_scrolled = true;
-            transparent.scrollTop = opaque.scrollTop;
-        }
-    }
 
-    var transparent_onscroll = function() {
-        if (opaque_scrolled) {
-            opaque_scrolled = false;
-        } else {
-            transparent_scrolled = true;
-            opaque.scrollTop = transparent.scrollTop;
-        }
-    }
-
-    opaque.addEventListener('scroll', opaque_onscroll, false);
-    transparent.addEventListener('scroll', transparent_onscroll, false);
+var encode = function(str) {
+    return str.
+        replace(/ /g, '%20').
+        replace(/,/g, '%2C').
+        replace(/\./g, '%2E').
+        replace(/#/g, '%23').
+        replace(/:/g, '%3A');
 }
-
-
-
-
 
 
 var share = function(type) {
+    var site = 'http://asvd.github.io/intence/';
+    var image = 'http://asvd.github.io/intence/intence_preview.png';
+    var name = encode('Intence');
+    var tag = encode('#intence');
+    var comma = encode(', ');
+    var dot = encode('. ');
+    var semi = encode(': ');
+    var subtitle = encode('a brand new way of scrolling indication');
+    var description = encode('You will never wish to see the scrollbar again');
+    
+
     var url = null;
 
     switch (type) {
     case 'fb':
-        url = 'https://www.facebook.com/sharer/sharer.php?u=http://asvd.github.io/intence/';
+        url = 'https://www.facebook.com/sharer/sharer.php?u='+site;
         break;
     case 'vk':
-        url = 'https://vk.com/share.php?url=http://asvd.github.io/intence/&title=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication&description=You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%2E&image=http://asvd.github.io/intence/intence_preview.png&noparse=true';
+        url = 'https://vk.com/share.php?url='+site+'&title='+name + comma + subtitle+'&description='+description+'&image='+image+'&noparse=true';
         break;
     case 'twitter':
-        url = 'https://twitter.com/intent/tweet?text=%23intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication%2E%20You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%3A&url=http://asvd.github.io/intence/';
+        url = 'https://twitter.com/intent/tweet?text='+tag+comma+subtitle+dot+description+semi+'&url='+site+'';
         break;
     case 'pinterest':
-        url = 'https://www.pinterest.com/pin/create/button/?url=http://asvd.github.io/intence/&description=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication%2E%20You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again%2E&media=http://asvd.github.io/intence/intence_preview.png';
+        url = 'https://www.pinterest.com/pin/create/button/?url='+site+'&description='+name + comma + subtitle+ dot +description+dot+'&media='+image+'';
         break;
     case 'googleplus':
-        url = 'https://plus.google.com/share?url=http://asvd.github.io/intence/';
+        url = 'https://plus.google.com/share?url='+site+'';
         break;
     case 'linkedin':
-        url = 'https://www.linkedin.com/shareArticle?mini=true&url=http://asvd.github.io/intence/&title=Intence%2C%20a%20brand%20new%20way%20of%20scrolling%20indication&summary=You%20will%20never%20wish%20to%20see%20the%20scrollbar%20again&source=http://asvd.github.io/intence/';
+        url = 'https://www.linkedin.com/shareArticle?mini=true&url='+site+'&title='+name + comma + subtitle+'&summary='+description+'&source='+site+'';
         break;
     case 'xing':
-        url = 'https://www.xing-share.com/app/user?op=share;sc_p=xing-share;url=http://asvd.github.io/intence/';
+        url = 'https://www.xing-share.com/app/user?op=share;sc_p=xing-share;url='+site+'';
         break;
     }
 
