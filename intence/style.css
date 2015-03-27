@@ -290,6 +290,11 @@ body {
     height: 80px;
 }
 
+._490_302 {
+    width : 490px;
+    height: 302px;
+}
+
 ._420_80 {
     width : 420px;
     height: 80px;
@@ -363,6 +368,11 @@ body {
 ._220_360 {
     width: 220px;
     height: 360px;
+}
+
+._210_300 {
+    width: 210px;
+    height: 300px;
 }
 
 ._200_1200 {
@@ -531,6 +541,14 @@ body {
     margin-top: -40px;
 }
 
+.minus_t20 {
+    margin-top: -20px;
+}
+
+.minus_l210 {
+    margin-left: -210px;
+}
+
 .minus_l183 {
     margin-left: -183px;
 }
@@ -543,8 +561,12 @@ body {
     margin-top: 280px;
 }
 
-.plus_t2 {
-    margin-top: 2px;
+.plus_t170 {
+    margin-top: 170px;
+}
+
+.plus_t85 {
+    margin-top: 85px;
 }
 
 .plus_t13 {
