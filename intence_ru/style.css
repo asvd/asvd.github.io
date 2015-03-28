@@ -170,6 +170,12 @@ body {
 }
 
 
+.lang {
+    position: absolute;
+    right: 32px;
+    top: 34px;
+}
+
 .mid {
     margin-left: auto;
     margin-right: auto;
