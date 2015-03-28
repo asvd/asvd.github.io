@@ -261,15 +261,15 @@ var encode = function(str) {
 
 
 var share = function(type) {
-    var site = 'http://asvd.github.io/intence/';
-    var image = 'http://asvd.github.io/intence/intence_preview.png';
-    var name = encode('Intence');
+    var site = 'http://asvd.github.io/intence_ru/';
+    var image = 'http://asvd.github.io/intence_ru/intence_preview.png';
+    var name = encode('Интэнс');
     var tag = encode('#intence');
     var comma = encode(', ');
     var dot = encode('. ');
     var semi = encode(': ');
-    var subtitle = encode('a brand new way of scrolling indication');
-    var description = encode('You will never wish to see the scrollbar again');
+    var subtitle = encode('индикатор прокрутки');
+    var description = encode('Полоса прокрутки больше не нужна');
     
 
     var url = null;
