@@ -4307,43 +4307,42 @@ document.getElementById('myElem').scroller.scrollTop;
 
         <p>
           Как уже было сказано, <span class=intenceName>интенс</span>
-          разделяет
-
-          
-          splits the issues of scrolling indication, and scrolling
-          control. Namely, <span class=intenceName>intence</span> is
-          only an indicator, and does not provides elements to
-          controll the scrolling position &mdash; instead it is
-          supposed to be solved by a developer for a particular case.
+          разделяет вопросы обозначения прокрутки, и управления
+          прокруткой. Точнее
+          говоря, <span class=intenceName>интенс</span> &mdash; это
+          только индикатор, и не предоставляет никаких элементов
+          управления. Вместо этого предполагается что разработчики
+          приложений будут решать этот вопрос для конретного
+          приложения.
         </p>
 
         <p>
-          In most cases it might be enough to simply rely on a mouse
-          wheel or a touchscreen. Just keep in mind that it will
-          probably be convenient for a user to have something
-          additional &mdash; some slider buttons for an image gallery,
-          or a small preview of the content with the detailed position
-          designated, like in Sublime Text. At least it might be
-          reasonable to simply add an opportunity to scroll with a
-          mouse drag, like most of the areas on this page work. This
-          can be done with the
-          tiny <a href="https://github.com/asvd/dragscroll"
-          target=_blank>dragscroll</a> library which perfectly works
-          together with <span class=intenceName>intence</span>.
+          В большинстве случаев может быть достаточно обычной
+          прокрутки с помощью колёсика мыши, или сенсорного экрана
+          планшетов. Просто не забывайте что возможно пользователю
+          будет удобно иметь какие-то дополнительные элементы
+          управления прокруткой &mdash; например, листалку страниц или
+          уменьшенное превью всего содержимого с точном обозначением
+          расположеня, как в Sublime Text. По крайней мере, имеет
+          смысл добавить возможность прокручивать область простаскивая
+          их мышью (как работают большинство областей на этой
+          странице). Это можно сделать с помощью
+          мини-библиотеки <a href="https://github.com/asvd/dragscroll"
+          target=_blank>dragscroll</a>, она прекрасно работает
+          совместно с <span class=intenceName>интенсом</span>.
         </p>
 
         <p>
-          If you are going to create a library which provides some
-          controlls for scrolling to be used along
-          with <span class=intenceName>intence</span>, do not cover
-          the existing content or
-          the <span class=intenceName>intence</span> indicator. It is
-          currently transparent for mouse events, and should remain
-          like this (otherwise users will consider the controls as
-          being part of <span class=intenceName>intence</span> and
-          will be confused by it only working in some
-          applications). Put the controls outside of the area, and not
-          inside it. Do not create a scrollbar.
+          Если вы собираетесь написать библиотеку, которая будет
+          создавать дополнительные элементы управления, чтоб
+          использовать её совместно
+          с <span class=intenceName>интенсом</span>, не перекрывайте
+          дополнительными элементами область прокрутки или индикатор
+          (иначе пользователи будут думать, что элементы управления
+          относятся к индикатору, и не поймут, почему оно работает не
+          везде). Размещайте элементы управления снаружи области
+          прокрутки, а не внутри. И не пересоздавайте полосу
+          прокрутки.
         </p>
 
         
@@ -4355,9 +4354,9 @@ document.getElementById('myElem').scroller.scrollTop;
 
 
 <div class=waterface>
-release by <u>waterface group</u>
+релиз <u>группы уотэрфейс</u>
 <br/>
-end of March 2015, Munich
+конец марта 2015, Мюнхен
 </div>
 
 
