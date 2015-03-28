@@ -41,9 +41,23 @@
     <script type="text/javascript" src="hl/hl-all.js"></script>
   </head>
   <body scrollImg=scroll_main2.png>
+  <div id=loading_shade>
+    take a deep breath
+  </div>
+  <div id=loading_shade2>
+    take a deep breath
+  </div>
+
+  <div id=mask_container>
+    <div id=loading_mask1></div>
+    <div id=loading_mask2></div>
+  </div>
+
   <div id=loading>
     take a deep breath
   </div>
+
+
   <div id=not_supported>
     <div id=not_supported_text>
       <p>your browser is not capable for the future</p>
@@ -672,7 +686,7 @@
           <div class="w210 top left plus_t170">
             <div class=subtitle>When an area is
             compact, <span class=intenceName>intence</span> indicator
-            is respectively shrinked and never covers too much of
+            is shrinked respectively and never covers too much of
             content</div>
           </div>
 
@@ -3631,7 +3645,7 @@
   As you probably noticed, <span class=intenceName>intence</span> does
   not provide any controls to operate the scrolling position, and this
   was done intentionally. In most cases the controls of a scrollbar
-  are not needed at all (proved by their absence on the tablets, and
+  are not needed at all (proved by their absence on tablets, and
   people do not seem to suffer much about it). Of course in some
   special cases it might be convenient to have some additional
   components to navigate far through the scrollable area, or to see
@@ -4162,6 +4176,13 @@ Suspendisse dolor magna, lacinia in mauris eget, consectetur aliquet lacus. Done
       </p>
 
       <p>
+        Images containing high-contrast shapes or making high-contrast
+        with the content area, should be avoided. Too much animation
+        during scrolling may distract a user so that he looses the
+        focus point on the content.
+      </p>
+
+      <p>
         The mentioned <span class=inline_code>scrollImg</span>
         attribute is used for all sides by default, but you may
         specify different texture for a particular side
@@ -4286,24 +4307,22 @@ document.getElementById('myElem').scroller.scrollTop;
   <div class=line></div>
 
         <p>
-          As you probably
-          noticed, <span class=intenceName>intence</span> splits the
-          issues of scrolling indication, and scrolling
+          As already mentioned, <span class=intenceName>intence</span>
+          splits the issues of scrolling indication, and scrolling
           control. Namely, <span class=intenceName>intence</span> is
           only an indicator, and does not provides elements to
           controll the scrolling position &mdash; instead it is
-          supposed to be solved by a developer for a particular
-          case.
+          supposed to be solved by a developer for a particular case.
         </p>
 
         <p>
           In most cases it might be enough to simply rely on a mouse
           wheel or a touchscreen. Just keep in mind that it will
           probably be convenient for a user to have something
-          additional &mdash; probably some slider buttons for an image
-          gallery, or a small preview of the content with the detailed
-          position designated, like in Sublime Text. At least it might
-          be reasonable to simply add an opportunity to scroll with a
+          additional &mdash; some slider buttons for an image gallery,
+          or a small preview of the content with the detailed position
+          designated, like in Sublime Text. At least it might be
+          reasonable to simply add an opportunity to scroll with a
           mouse drag, like most of the areas on this page work. This
           can be done with the
           tiny <a href="https://github.com/asvd/dragscroll"

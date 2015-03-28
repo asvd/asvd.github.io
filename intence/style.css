@@ -16,12 +16,132 @@ body {
 }
 
 
-#loading {
+#loading, #loading_shade, #loading_shade2 {
     width: 100%;
     text-align: center;
-    padding-top : 80px;
     font-family: 'PT Sans Caption', sans-serif;
     font-size : 16px;
+    height: 30px;
+}
+
+#loading_shade {
+    color : #334455;
+    padding-top : 80px;
+    margin-bottom : -30px;
+    text-shadow: 0px 0px 12px rgba(142, 204, 224, 1);
+}
+
+#loading_shade2 {
+    color : #334455;
+    text-shadow: 0px 0px 8px rgba(142, 204, 224, 1);
+}
+
+#loading {
+    margin-top : 30px;
+    position: relative;
+}
+
+
+#mask_container {
+    margin-right: auto;
+    margin-left: auto;
+    position: relative;
+    overflow : hidden;
+    width: 500px;
+    height: 40px;
+    margin-top: -40px;
+    margin-bottom: -60px;
+}
+
+#loading_mask1, #loading_mask2 {
+    position: absolute;
+    background-color: #778899;
+    background-color: #334455;
+    width: 500px;
+    height: 100px;
+    top : 0px;
+}
+
+
+
+@keyframes mask1{
+    0%    {width:100px;}
+    10%    {width:100px;}
+    50%   {width:400px;}
+    90%    {width:100px;}
+    100%  {width:100px;}
+}
+
+
+@-webkit-keyframes mask1{
+    0%    {width:100px;}
+    10%    {width:100px;}
+    50%   {width:400px;}
+    90%    {width:100px;}
+    100%  {width:100px;}
+}
+
+@-moz-keyframes mask1{
+    0%    {width:100px;}
+    10%    {width:100px;}
+    50%   {width:400px;}
+    90%    {width:100px;}
+    100%  {width:100px;}
+}
+
+
+#loading_mask1 {
+    box-shadow: 20px 0px 20px #334455;
+    animation-name: mask1;
+    animation-duration: 10s;
+    animation-iteration-count: infinite;
+    -webkit-animation-name: mask1;
+    -webkit-animation-duration: 10s;
+    -webkit-animation-iteration-count: infinite;
+    -moz-animation-name: mask1;
+    -moz-animation-duration: 10s;
+    -moz-animation-iteration-count: infinite;
+}
+
+
+@keyframes mask2{
+    0%    {left:100px;}
+    40%   {left:400px;}
+    50%   {left:400px;}
+    60%   {left:400px;}
+    100%  {left:100px;}
+}
+
+
+@-webkit-keyframes mask2{
+    0%    {left:100px;}
+    40%   {left:400px;}
+    50%   {left:400px;}
+    60%   {left:400px;}
+    100%  {left:100px;}
+}
+
+@-moz-keyframes mask2{
+    0%    {left:100px;}
+    40%   {left:400px;}
+    50%   {left:400px;}
+    60%   {left:400px;}
+    100%  {left:100px;}
+}
+
+
+#loading_mask2 {
+    left: 400px;
+    box-shadow: -20px 0px 20px #334455;
+    animation-name: mask1;
+    animation-duration: 10s;
+    animation-iteration-count: infinite;
+    -webkit-animation-name: mask2;
+    -webkit-animation-duration: 10s;
+    -webkit-animation-iteration-count: infinite;
+    -moz-animation-name: mask2;
+    -moz-animation-duration: 10s;
+    -moz-animation-iteration-count: infinite;
 }
 
 

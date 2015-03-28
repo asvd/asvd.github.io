@@ -6,6 +6,7 @@ var _el = function(id) {
 }
 
 function start() {
+    return;
     document.body.className = 'intence';
     intence.reset();
 
