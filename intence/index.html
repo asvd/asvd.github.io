@@ -44,10 +44,10 @@
 
 <div id=loading_container>
   <div id=loading_shade>
-    take a deep breath...
+    take a deep breath
   </div>
   <div id=loading_shade2>
-    take a deep breath...
+    take a deep breath
   </div>
 
   <div id=mask_container>
@@ -56,7 +56,7 @@
   </div>
 
   <div id=loading>
-    take a deep breath...
+    take a deep breath
   </div>
 </div>
 
@@ -3879,7 +3879,7 @@
 
       <div class="w500 float_left plus_l25">
         <div class="w220 float_left subtitle align_right">
-          Higher texture makes indicator move slower and more
+          Higher texture makes indicator roll slower and more
           fluent. This is especially important for the users who
           scroll with a mouse wheel and normally have a discrete
           jump-scrolling. Always prefer higher texture.
@@ -3896,7 +3896,7 @@
       <div class=sep></div>
 
       <p>
-        The indicator is growing up to 0.16 of the scrollable area
+        The indicator is growing up to 0.12 of the scrollable area
         size in the corresponding dimension. Additionally the
         indicator size cannot be more than approximately 0.6 of the
         texture height (due to some mathematical reasons). Therefore
@@ -4172,15 +4172,14 @@ Suspendisse dolor magna, lacinia in mauris eget, consectetur aliquet lacus. Done
 
       <p class=subtitle>
         Instead of using transparency, use the background of the
-        scrollable content &mdash; it will look as indicator is
-        still transparent, but the content is fading out.
+        scrollable content &mdash; the indicator still looks
+        transparent, but the content is fading out additionally.
       </p>
 
       <p>
         Images containing high-contrast shapes or making high-contrast
         with the content area, should be avoided. Too much animation
-        during scrolling may distract a user so that he looses the
-        focus point on the content.
+        during scrolling may distract user so that he looses the focus.
       </p>
 
       <p>
@@ -4207,10 +4206,10 @@ Suspendisse dolor magna, lacinia in mauris eget, consectetur aliquet lacus. Done
 
         <p>
           As shown in the examples above, there is a special maximal
-          mode which should be activated in case when scrolling is
-          infinite, or if the content is dynamically appended and it
-          is not known in advance when will it be over. Such behaviour
-          of an indicator is triggered by
+          mode to be activated in case of infinite scrolling or
+          dynamically appended content (when it is not known in
+          advance how much of content is still to be added). Such
+          behaviour of an indicator is triggered by
           the <span class=inline_code>scrollInfiniteNorth</span>, <span class=inline_code>scrollInfiniteSouth</span>, <span class=inline_code>scrollInfiniteWest</span>
           and <span class=inline_code>scrollInfiniteEast</span>
           attributes, for instance:
@@ -4243,17 +4242,17 @@ elem.removeAttribute('scrollInfiniteSouth');
 
         <p>
           This will smoothly decrease the indicator to the proper size
-          reflecting the amount of remaining content. (This does not
-          happens instantly upon the attribute removal, but upon the
-          next act of scrolling instead.)
+          reflecting the amount of remaining content (this does not
+          happen instantly upon the attribute removal, but upon the
+          next act of scrolling instead).
         </p>
 
 
         <p>
           If a browser is too
-          old, <span class=intenceName>intence</span> will be
-          disabled, and will not change anythig on the page. You can
-          determine if this is the case by checking
+          old, <span class=intenceName>intence</span> is not enabled,
+          and will not change anythig on the page. You can determine
+          if this is the case by checking
           the <span class=inline_code>intence.enabled</span> property
           &mdash; it contains <span class=inline_code>true</span>
           if <span class=intenceName>intence</span> works,
@@ -4262,12 +4261,12 @@ elem.removeAttribute('scrollInfiniteSouth');
 
         <p>
           Upon the indicator is created for an element, its internal
-          structure is strongly rebuilt in order to hide the
-          scrollbars and create the indicator. The original element
-          does not actually performs scrolling anymore, so if you need
-          to operate the scrolling programmatically (to find out the
-          current scrolling position, or to change it), you can find
-          the actual scroller element at
+          structure is rebuilt in order to hide the scrollbars and
+          create the indicator. The original element does not actually
+          perform scrolling anymore, so if you need to operate the
+          scrolling programmatically (to find out the current
+          scrolling position, or to change it), you can find the
+          actual scroller element at
           the <span class=inline_code>.scroller</span> property of the
           original element:
         </p>
@@ -4296,7 +4295,7 @@ document.getElementById('myElem').scroller.scrollTop;
           the <span class=inline_code>intence</span> class to the
           element dynamically (or after the page load),
           notify <span class=intenceName>intence</span> so that it
-          creates / removes the indicator for the respective elements:
+          creates / removes indicators for the respective elements:
         </p>
 
 
@@ -4311,29 +4310,28 @@ document.getElementById('myElem').scroller.scrollTop;
           As already mentioned, <span class=intenceName>intence</span>
           splits the issues of scrolling indication, and scrolling
           control. Namely, <span class=intenceName>intence</span> is
-          only an indicator, and does not provides elements to
-          controll the scrolling position &mdash; instead it is
-          supposed to be solved by a developer for a particular case.
+          only an indicator, and does not provide elements to control
+          the scrolling position &mdash; instead it is supposed to be
+          solved by a developer for a particular application.
         </p>
 
         <p>
           In most cases it might be enough to simply rely on a mouse
           wheel or a touchscreen. Just keep in mind that it will
           probably be convenient for a user to have something
-          additional &mdash; some slider buttons for an image gallery,
-          or a small preview of the content with the detailed position
-          designated, like in Sublime Text. At least it might be
-          reasonable to simply add an opportunity to scroll with a
-          mouse drag, like most of the areas on this page work. This
-          can be done with the
+          additional &mdash; slider buttons for an image gallery, or a
+          content preview with the detailed position designated, like
+          in Sublime Text. At least it might be reasonable to simply
+          add an opportunity to scroll with a mouse drag, like most of
+          the areas on this page work. This can be done with the
           tiny <a href="https://github.com/asvd/dragscroll"
           target=_blank>dragscroll</a> library which perfectly works
-          together with <span class=intenceName>intence</span>.
+          with <span class=intenceName>intence</span>.
         </p>
 
         <p>
           If you are going to create a library which provides some
-          controlls for scrolling to be used along
+          controls for scrolling to be used along
           with <span class=intenceName>intence</span>, do not cover
           the existing content or
           the <span class=intenceName>intence</span> indicator. It is
