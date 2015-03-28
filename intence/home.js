@@ -9,7 +9,7 @@ function start() {
     document.body.className = 'intence';
     intence.reset();
 
-    _el('loading').style.display = 'none';
+    _el('loading_container').style.display = 'none';
 
     if (intence.enabled) {
         _el('everything').style.display = 'block';
