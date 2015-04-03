@@ -37,10 +37,17 @@
     <script type="text/javascript" src="intence.js"></script>
     <script type="text/javascript" src="dragscroll.js"></script>
     <script type="text/javascript" src="syncscroll.js"></script>
+    <script type="text/javascript" src="viewport.js"></script>
+    <script type="text/javascript" src="scrollto.js"></script>
     <script type="text/javascript" src="home.js"></script>
     <script type="text/javascript" src="hl/hl-all.js"></script>
   </head>
-  <body scrollImg=scroll_main2.png>
+  <body>
+
+<div id=menu_container></div>
+
+  <div id=main_scroller class='intence main viewport' scrollImg=scroll_main5.png>
+
 
 <div id=loading_container>
   <div id=loading_shade>
@@ -86,6 +93,10 @@
         </a>
       </div>
 
+
+    <div class=section img=menu/01_intro.png>
+
+
       <div class=center>
         <div id=era_over>
           The scrollbar era is over
@@ -105,6 +116,18 @@
       </div>
 
 <div class=vsizer30></div>
+
+      <div class="_500_120 outer">
+          <div class="_500_120 align_left">
+            Together with an interactive navigation menu (like the one
+            you can see on the left
+            side), <span class=intenceName>intence</span> is supposed
+            to replace the traditional scrollbar. It clarifies, what
+            exactly is scrollable, and is there much to scroll.
+          </div>
+      </div>
+
+
 
       <div class="_500_320 outer">
           <div class="_280_300 minus_r20 float_left align_left relative">
@@ -533,8 +556,15 @@
           </div>
       </div>
 
+<div class=vsizer30></div>
+
+
+
+    </div>
+
   <div class=line></div>
 
+    <div class=section img=menu/02_lang.png>
 
       <div class="_500_140 outer">
           <div class="_210_100 float_left align_left">
@@ -607,7 +637,14 @@
 
 
 <div class=vsizer30></div>
+
+    </div>
+
   <div class=line></div>
+
+    <div class=section img=menu/03_designate.png>
+
+
 
 
       <div class="_500_100 outer">
@@ -658,8 +695,11 @@
 
 
 <div class=vsizer30></div>
+      </div>
+
   <div class=line></div>
 
+    <div class=section img=menu/04_responsive.png>
 
       <div class="_700_40 outer">
 
@@ -725,9 +765,12 @@
       </div>
 
 
+    </div>
+
 
   <div class=line></div>
 
+    <div class=section img=menu/05_infinite.png>
 
       <div class="_700_80 outer">
 
@@ -1546,15 +1589,18 @@
 
       </div>
 
+    </div>
 
   <div class=line></div>
 
+    <div class=section img=menu/06_design.png>
 
-      <div class="_500_80 outer">
+      <div class="_500_120 outer">
 
-          <div class="_500_80 float_left align_left">
-            By selecting a texture image used for
-            indication, <span class=intenceName>intence</span> can be
+          <div class="_500_120 float_left align_left">
+            Any texture image can be selected for the indication (or
+            simply a solid gradient, just like on this page). This
+            way <span class=intenceName>intence</span> can be
             customized to match to any topic or design purpose:
           </div>
 
@@ -3529,8 +3575,12 @@
 
 <div class=vsizer30></div>
 
+    </div>
 
   <div class=line></div>
+
+    <div class=section img=menu/07_horiz.png>
+  
 
 <div class=vsizer20></div>
 
@@ -3642,8 +3692,12 @@
 
 
 
+    </div>
 
 <div class=line></div>
+
+
+    <div class=section img=menu/08_share.png>
 
 <div class=vsizer30></div>
 
@@ -3652,15 +3706,16 @@
 
 <p class=normal>
   <span class=intenceName>intence</span> does not provide any controls
-  to operate the scrolling position, and this was done
-  intentionally. In most cases the controls of a scrollbar are not
-  necessary at all (proved by their absence on tablets). Of course in
-  special cases it might be convenient to have additional components
-  to navigate far through the scrollable area, or to see the precise
-  scrolling position. The developers of particular apllications can
-  now decide, should there be a pager or an area with small previews,
-  a progress bar, or something totally new and different, and how to
-  better represent it.
+  for changing the scrolling position, and this was done
+  intentionally.  From now the issues of scrolling indication and
+  scrolling control are
+  separated: <span class=intenceName>intence</span> is responsible for
+  indication and is supposed to work along with a navigation widget,
+  like the menu on the left side. It can be a pager, or an area with
+  small previews, a progress bar, or something totally new and
+  different. Such components can be designed for the needs of a
+  particular application and solve the issue of controlling the
+  scrolling better than the general-purpose scrollbar.
 </p>
 
 <div class=vsizer30></div>
@@ -3698,11 +3753,14 @@
 <div class=vsizer30></div>
 <div class=vsizer30></div>
 
+    </div>
 
     </div>
 
 
     <div class=section_hacker>
+
+    <div class=section dark img=menu/09_geeks.png>
 
       <div id=hacker_sizer></div>
       <div id=hacker_sizer2></div>
@@ -3793,6 +3851,10 @@
           get the whole page indicated.
         </p>
 
+    </div>
+
+    <div class=section dark img=menu/10_texture.png>
+
         <p>
           When selecting a texture for indication, have in mind that
           it will be <span class=strongly>strongly</span> squeezed
@@ -3837,6 +3899,9 @@
         </div>
       </div>
 
+    </div>
+
+    <div class=section dark img=menu/11_roll.png>
 
 
       <div class=mid>
@@ -3909,6 +3974,10 @@
         you can also use low texture to limit the maximal indicator
         size.
       </p>
+
+    </div>
+
+    <div class=section dark img=menu/12_blocks.png>
 
       <p>
         Indicator consists of a set of blocks, which are a little bit
@@ -4188,6 +4257,10 @@ Suspendisse dolor magna, lacinia in mauris eget, consectetur aliquet lacus. Done
         during scrolling may distract user so that he looses the focus.
       </p>
 
+    </div>
+
+    <div class=section dark img=menu/13_attrs.png>
+
       <p>
         The mentioned <span class=inline_code>scrollImg</span>
         attribute is used for all sides by default, but you may
@@ -4254,6 +4327,11 @@ elem.removeAttribute('scrollInfiniteSouth');
         </p>
 
 
+    </div>
+
+    <div class=section dark img=menu/14_reset.png>
+
+
         <p>
           If a browser is too
           old, <span class=intenceName>intence</span> is not enabled,
@@ -4310,7 +4388,11 @@ document.getElementById('myElem').scroller.scrollTop;
         </div>
 
 
+    </div>
+
   <div class=line></div>
+
+    <div class=section dark img=menu/15_final.png>
 
         <p>
           As already mentioned, <span class=intenceName>intence</span>
@@ -4322,7 +4404,7 @@ document.getElementById('myElem').scroller.scrollTop;
         </p>
 
         <p>
-          In most cases it might be enough to simply rely on a mouse
+          In many cases it might be enough to simply rely on a mouse
           wheel or a touchscreen. Just keep in mind that it will
           probably be convenient for a user to have something
           additional &mdash; slider buttons for an image gallery, or a
@@ -4339,14 +4421,15 @@ document.getElementById('myElem').scroller.scrollTop;
           If you are going to create a library which provides some
           controls for scrolling to be used along
           with <span class=intenceName>intence</span>, do not cover
-          the existing content or
-          the <span class=intenceName>intence</span> indicator. It is
-          currently transparent for mouse events, and should remain
-          like this (otherwise users will consider the controls as
-          being part of <span class=intenceName>intence</span> and
-          will be confused by it only working in some
-          applications). Put the controls outside of the area, and not
-          inside it. Do not create a scrollbar.
+          the internal content of a scrollable area, or
+          the <span class=intenceName>intence</span> indicator. The
+          indicator is currently transparent for mouse events, and
+          should remain like this (otherwise users will consider the
+          controls as being part
+          of <span class=intenceName>intence</span> and will be
+          confused by it only working in some applications). Put the
+          controls outside of the area, and not inside it. Do not
+          recreate the scrollbar.
         </p>
 
         
@@ -4364,13 +4447,14 @@ end of March 2015, Munich
 </div>
 
 
-
+    </div>
 
     </div>
 
 
     <div>
 
+  </div>
   </div>
   </body>
 </html>
