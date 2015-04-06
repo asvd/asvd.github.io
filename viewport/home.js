@@ -1,9 +1,14 @@
 
-var _el = function(id) {
+function _el(id) {
     return document.getElementById(id);
 }
 
+function lim(val, min, max) {
+    return Math.max(min, Math.min(max, val));
+}
 
+
+// invoked on page load
 function start() {
     window.addEventListener('resize', handle_resize, false);
     handle_resize();
@@ -19,17 +24,26 @@ function start() {
 }
 
 
+// creates bloomberg-style indicator on top of the viewport
 function create_bloomberg() {
-    _el('article').scroller.addEventListener('scroll', update_bloomberg, false);
+    _el('article').scroller.addEventListener(
+        'scroll', update_bloomberg, false
+    );
+
     update_bloomberg();
 }
 
+
+// updates bloomberg-indicator
 function update_bloomberg() {
     var current = _el('article').currentSection;
 
     if (current) {
-        var middle = Math.min(1, Math.max(0, current.viewportTopLocation));
-        _el('bloomberg_title').innerHTML = 'Now reading: '+current.getAttribute('section_title');
+        var middle = Math.min(
+            1, Math.max(0, current.viewportTopLocation)
+        );
+        _el('bloomberg_title').innerHTML =
+            'Now reading: '+current.getAttribute('section_title');
         _el('bloomberg_line').style.width = ''+ (middle*100) + '%';
     }
 }
@@ -37,6 +51,7 @@ function update_bloomberg() {
 
 var dailybeasts = {};
 
+// creates daisybeasts-style indicator
 function create_dailybeast() {
     var container = _el('dailybeast_container');
     var sections = document.getElementsByClassName('section');
@@ -89,6 +104,7 @@ function create_dailybeast() {
 }
 
 
+// updates dailybeasts-style indicator
 function update_dailybeast() {
     var current = _el('article').currentSection;
     var sections = document.getElementsByClassName('section');
@@ -113,6 +129,7 @@ function update_dailybeast() {
 
 var icons = {};
 
+// creates icons menu on the left side
 function create_icons() {
     var container = _el('icons_container');
     var sections = document.getElementsByClassName('section');
@@ -161,11 +178,15 @@ function create_icons() {
         };
     }
     
-    _el('article').scroller.addEventListener('scroll', update_icons, false);
+    _el('article').scroller.addEventListener(
+        'scroll', update_icons, false
+    );
+
     update_icons();
 }
 
 
+// updates icons and their indicators
 function update_icons() {
     var current = _el('article').currentSection;
     var sections = document.getElementsByClassName('section');
@@ -185,16 +206,11 @@ function update_icons() {
 }
 
 
+// updates viewport to the 'full' height
 function handle_resize() {
     var article = _el('article');
-    article.style.height = ''+Math.max(500, document.body.clientHeight - 320)+'px';
-}
-
-
-
-
-function lim(val, min, max) {
-    return Math.max(min, Math.min(max, val));
+    article.style.height =
+        ''+Math.max(500, document.body.clientHeight - 320)+'px';
 }
 
 
