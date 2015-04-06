@@ -32,8 +32,14 @@ function (exports) {
                 updateSection(entries[i].sections[j]);
             }
 
+            var listener = entries[i].viewport.vpListener;
+
             entries[i].viewport.removeEventListener(
-                'scroll', entries[i].viewport.vpListener
+                'scroll', listener, 0
+            );
+
+            window.addEventListener(
+                'resize', listener, 0
             );
         }
 
@@ -92,6 +98,10 @@ function (exports) {
             entries[i].viewport.addEventListener(
                 'scroll', listener, 0
             );
+
+            window.addEventListener(
+                'resize', listener, 0
+            );
         }
     }
 
@@ -125,10 +135,19 @@ function (exports) {
             section.viewportCenter = (vCenter - sRect.left) / sWidth;
             section.viewportRight = (vRect.right - sRect.left) / sWidth;
 
+            var ctx = 50;
+
             section.viewportScrollTopTarget =
-                viewport.scrollTop + sMiddle - vMiddle;
+                Math.min(
+                    viewport.scrollTop + sMiddle - vMiddle,
+                    viewport.scrollTop + sRect.top - vRect.top - ctx
+                );
+
             section.viewportScrollLeftTarget =
-                viewport.scrollLeft + sCenter - vCenter;
+                Math.min(
+                    viewport.scrollLeft + sCenter - vCenter,
+                    viewport.scrollLeft + sRect.left - vRect.left - ctx
+                );
 
         } else {
             delete section.viewportTop;
