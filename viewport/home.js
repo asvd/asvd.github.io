@@ -80,7 +80,7 @@ function create_dailybeast() {
             (function(id) {
                  return function() {
                      var target = _el(id).viewportScrollTopTarget;
-                     scrollto.top(_el('article'), target);
+                     naturalScroll.scrollTop(_el('article'), target);
                  }
             })(id),
             false
@@ -160,7 +160,7 @@ function create_icons() {
             (function(id) {
                  return function() {
                      var target = _el(id).viewportScrollTopTarget;
-                     scrollto.top(_el('article'), target);
+                     naturalScroll.scrollTop(_el('article'), target);
                  }
             })(id),
             false
