@@ -457,7 +457,7 @@ function createMenuItem(section) {
     button.addEventListener(
         'click',
         function() {
-            scrollto.top(
+            naturalScroll.scrollTop(
                 _el('main_scroller'),
                 section.viewportScrollTopTarget
             );
