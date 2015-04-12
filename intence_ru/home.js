@@ -505,13 +505,13 @@ function update_container_size() {
 
 
 function update_indicator() {
-    var i, item;
+    var i, item, intensity;
     for (i = 0; i < menu_items.length; i++) {
         item = menu_items[i];
 
-        var mid = lim(item.section.viewportMiddle, -.5, 1.5);
-        var rate = Math.abs(mid-.5);
-        var intensity = Math.min(1, -2*rate + 2);
+        intensity =
+            lim(item.section.viewportTopEnd, 0, 1) -
+            lim(item.section.viewportTopStart, 0, 1);
 
         item.icon.style.opacity = icon_opacity + (1-icon_opacity) * intensity;
     }
