@@ -119,11 +119,13 @@
 
       <div class="_500_120 outer">
           <div class="_500_120 align_left">
-            Together with an interactive navigation menu (like the one
-            you can see on the left
+             Together with an interactive navigation menu (like the
+            one you can see on the left
             side), <span class=intenceName>intence</span> is supposed
             to replace the traditional scrollbar. It highlights the
-            scrollable area, and reflects the content amount:
+            scrollable area, reflects the amount of content and is
+            therefore proposed as a general designation for a
+            scrollable area:
           </div>
       </div>
 
@@ -3709,13 +3711,18 @@
   for changing the scrolling position, and this was done
   intentionally.  From now the issues of scrolling indication and
   scrolling control are
-  separated: <span class=intenceName>intence</span> is responsible for
-  indication and is supposed to work along with a navigation widget,
+  separated: <span class=intenceName>intence</span> designates what is
+  scrollable, and is supposed to work along with a navigation widget,
   like the menu on the left side. It can be a pager, or an area with
   small previews, a progress bar, or something totally new and
-  different. Such components can be designed for the needs of a
-  particular application and solve the issue of controlling the
-  scrolling better than the general-purpose scrollbar.
+  different. For instance, have a look
+  at <a href="http://asvd.github.io/viewport/">some examples of the
+  navigation components</a> created with a
+  wonderful <a href="https://github.com/asvd/viewport">viewport.js
+  library</a>. Just like as <span class=intenceName>intence</span>
+  better than the scrollbar designates the scrollable area, such
+  components can be designed for the needs of a particular application
+  and solve the navigation issue in a more efficient manner.
 </p>
 
 <div class=vsizer30></div>
@@ -4404,17 +4411,30 @@ document.getElementById('myElem').scroller.scrollTop;
         </p>
 
         <p>
-          In many cases it might be enough to simply rely on a mouse
-          wheel or a touchscreen. Just keep in mind that it will
-          probably be convenient for a user to have something
-          additional &mdash; slider buttons for an image gallery, or a
-          content preview with the detailed position designated, like
-          in Sublime Text. At least it might be reasonable to simply
-          add an opportunity to scroll with a mouse drag, like most of
-          the areas on this page work. This can be done with the
-          tiny <a href="https://github.com/asvd/dragscroll"
-          target=_blank>dragscroll</a> library which perfectly works
-          with <span class=intenceName>intence</span>.
+          Think on which kind of navigation users need. In some cases
+          it might probably be enough to simply rely on a mouse wheel
+          or a touchscreen. But it will likely be convenient for a
+          user to have something additional &mdash; slider buttons for
+          an image gallery, or a content preview with the detailed
+          position designated, like in Sublime Text.
+        </p>
+
+
+        <p>
+          Here are some ideas. Add an opportunity to scroll the
+          content with a click-and-hold style
+          using <a href="https://github.com/asvd/dragscroll"
+          target=_blank>dragscroll</a> library (this is how areas on
+          this page can be scrolled). Create an interactive navigation
+          menu which reflects the scrolling state relatively to the
+          page sections &mdash; this can be done with
+          the <a href="https://github.com/asvd/viewport">viewport.js
+          library</a> (the menu on this page uses that library, also
+          have a look at
+          some <a href="http://asvd.github.io/viewport/">addititonal
+          examples</a>). Use <a href="https://github.com/asvd/naturalScroll">natural
+          scroll</a> if your navigation component scrolls the viewport
+          (by clicking on the menu item, for instance).
         </p>
 
         <p>
