@@ -15,7 +15,7 @@
    id="svg3526"
    version="1.1"
    inkscape:version="0.48.4 r9939"
-   sodipodi:docname="Новый документ 8">
+   sodipodi:docname="responsive.svg">
   <defs
      id="defs3528">
     <linearGradient
@@ -44,7 +44,7 @@
        xlink:href="#linearGradient3949"
        id="linearGradient4864"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.010672,0,0,1.4659681,247.48934,-902.5212)"
+       gradientTransform="matrix(2.010672,0,0,0.52941721,247.48934,-869.91752)"
        x1="60"
        y1="35"
        x2="60"
@@ -54,7 +54,7 @@
        xlink:href="#linearGradient3949"
        id="linearGradient5051"
        gradientUnits="userSpaceOnUse"
-       gradientTransform="matrix(2.010672,0,0,4.9121221,-1.5882901,-1222.8442)"
+       gradientTransform="matrix(2.010672,0,0,2.6577734,-1.5882901,-1144.3645)"
        x1="60"
        y1="35"
        x2="60"
@@ -68,8 +68,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="1"
-     inkscape:cx="137.32109"
-     inkscape:cy="179.66347"
+     inkscape:cx="389.06307"
+     inkscape:cy="166.6559"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -94,7 +94,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -195,19 +195,19 @@
     <rect
        ry="0"
        transform="scale(1,-1)"
-       style="fill:url(#linearGradient4864);fill-opacity:1;stroke:none;display:inline"
+       style="opacity:0.58662612;fill:url(#linearGradient4864);fill-opacity:1;stroke:none;display:inline"
        id="rect4862"
        width="240"
-       height="17.866486"
+       height="6.4522719"
        x="249.5"
        y="-851.48718" />
     <rect
        y="-1051.8407"
        x="0.4223699"
-       height="59.866486"
+       height="32.391613"
        width="240"
        id="rect5049"
-       style="fill:url(#linearGradient5051);fill-opacity:1;stroke:none;display:inline"
+       style="opacity:0.69300914;fill:url(#linearGradient5051);fill-opacity:1;stroke:none;display:inline"
        transform="scale(1,-1)"
        ry="0" />
   </g>
