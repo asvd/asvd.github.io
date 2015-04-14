@@ -18,9 +18,9 @@ function start() {
         init_earth();
         init_notext();
 
-        init_nav();
 
         setTimeout( function() {
+            init_nav();
             _el('main_scroller').scroller.scrollTop = 0;
         }, 500);
         
