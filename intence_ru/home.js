@@ -17,10 +17,10 @@ function start() {
         init_river();
         init_earth();
         init_notext();
+        init_nav();
 
 
         setTimeout( function() {
-            init_nav();
             _el('main_scroller').scroller.scrollTop = 0;
         }, 500);
         
@@ -356,6 +356,7 @@ var menu_items = [];
 
 function init_nav() {
     viewport.reset();
+
     var container = _el('menu_container');
 
     var sections = document.getElementsByClassName('section');
@@ -379,6 +380,23 @@ function init_nav() {
     _el('main_scroller').scroller.addEventListener(
         'scroll', update_indicator, false
     );
+    
+
+    // otherwise FF does not update for some reason
+    setTimeout(function(){
+                   viewport.reset();
+                   update_indicator();
+                         }, 1000);
+
+    setTimeout(function(){
+                   viewport.reset();
+                   update_indicator();
+                         }, 2000);
+
+    setTimeout(function(){
+                   viewport.reset();
+                   update_indicator();
+                         }, 3000);
 }
 
 var icon_opacity = .2;
