@@ -1195,6 +1195,18 @@ img.nasa_img {
     text-shadow: 0px 0px 5px rgba(125, 184, 231, 0.13);
 }
 
+.code .sh {
+    font: 14px Bitstream Vera Sans Mono, monospace;
+    color: #4FB3EA;
+    text-shadow: 0px 0px 5px rgba(77, 167, 239, 0.13);
+}
+
+
+.code .sh .dollar {
+    color: #2381B5;
+}
+
+
 
 
 .section_hacker .code {
