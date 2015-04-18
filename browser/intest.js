@@ -163,7 +163,18 @@ document.write(navigator.userAgent);
 document.write('<br/><br/>');
 document.write('SAFARI AAAAAAA: '+IS_SAFARI);
 document.write('<br/><br/>');
-document.write('SAFARI VERSION: '+(+(UA.match(/Version\/(\d+)/)[1])));
+
+var version = 'not set';
+var err = 'no error';
+try {
+    version = UA.match(/Version\/(\d+)/).toString();
+} catch(e) {
+    err = e.toString();
+}
+
+document.write('VERSION: '+version);
+document.write('<br/><br/>');
+document.write('ERROR: '+err);
 document.write('<br/><br/>');
 
     // disabling particular browsers
