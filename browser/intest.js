@@ -164,6 +164,7 @@ document.write('<br/><br/>');
 document.write('SAFARI BBBB: '+IS_SAFARI);
 document.write('<br/><br/>');
 
+    var UA = navigator.userAgent;
 var version = 'not set';
 var err = 'no error';
 try {
