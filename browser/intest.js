@@ -183,6 +183,7 @@ var out = [
     'IS_FF: ' + IS_FF,
     'IS_IE: ' + IS_IE,
     'IS_SAFARI: ' + IS_SAFARI,
+    'IS_CHROME: ' + IS_CHROME,
     '',
     'FEATURES:'
 ];
