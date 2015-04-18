@@ -43,7 +43,8 @@
         indexOf('Constructor') > 0;
     
 
-document.write('hello');
+document.write('hello2');
+
     // what is supported by the browser
     var features = {
         classList : !!elemSample.div.classList,
