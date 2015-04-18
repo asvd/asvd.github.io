@@ -43,8 +43,6 @@
         indexOf('Constructor') > 0;
     
 
-document.write('hello2');
-
     // what is supported by the browser
     var features = {
         classList : !!elemSample.div.classList,
@@ -95,6 +93,8 @@ document.write('hello2');
         }
     };
 
+document.write('hello3');
+
     var IS_IE9 = IS_IE && features.gradientMask.alphaFilter;
 
     var INTENCE_ENABLED = true;
@@ -114,6 +114,8 @@ document.write('hello2');
         // using a canvas element as a background
         canvas : null
     };
+
+document.write('hello4');
 
     if (features.canvas) {
         if (features.gradientMask.webkit) {
@@ -154,6 +156,8 @@ document.write('hello2');
         INTENCE_ENABLED = false;
     }
 
+document.write('hello5');
+
     // disabling particular browsers
     var UA = navigator.userAgent;
     if (
@@ -169,6 +173,8 @@ document.write('hello2');
 
 
 
+document.write('hello6');
+
 var out = [
     'Intence test:',
     'navigator.userAgent: ' + navigator.userAgent,
@@ -179,6 +185,8 @@ var out = [
     '',
     'FEATURES:'
 ];
+
+document.write('hello7');
 
 var f, f2;
 for (f in features) {
@@ -194,6 +202,8 @@ for (f in features) {
         }
     }
 }
+
+document.write('hello8');
 
 out.push('', 'METHODS:');
 
