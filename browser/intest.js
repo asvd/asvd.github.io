@@ -161,7 +161,7 @@ document.write('hello5');
 document.write('<br/><br/>');
 document.write(navigator.userAgent);
 document.write('<br/><br/>');
-document.write('SAFARI BBBB: '+IS_SAFARI);
+document.write('SAFARI CCC: '+IS_SAFARI);
 document.write('<br/><br/>');
 
     var UA = navigator.userAgent;
