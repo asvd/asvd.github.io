@@ -163,6 +163,8 @@ document.write(navigator.userAgent);
 document.write('<br/><br/>');
 document.write('SAFARI: '+IS_SAFARI);
 document.write('<br/><br/>');
+document.write('SAFARI VERSION: '+(+UA.match(/Version\/(\d+)/)[1]));
+document.write('<br/><br/>');
 
     // disabling particular browsers
     var UA = navigator.userAgent;
