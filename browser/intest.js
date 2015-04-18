@@ -1,3 +1,5 @@
+document.write('hello');
+
     var elemSample = {
         div    : document.createElement('div'),
         img    : document.createElement('img'),
