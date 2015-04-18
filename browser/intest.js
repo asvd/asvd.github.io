@@ -41,7 +41,8 @@
     var IS_SAFARI =
         Object.prototype.toString.call(window.HTMLElement).
         indexOf('Constructor') > 0;
-    
+    var IS_CHROME = !!window.chrome;
+
 
     // what is supported by the browser
     var features = {
@@ -93,7 +94,6 @@
         }
     };
 
-document.write('hello3');
 
     var IS_IE9 = IS_IE && features.gradientMask.alphaFilter;
 
@@ -115,7 +115,6 @@ document.write('hello3');
         canvas : null
     };
 
-document.write('hello4');
 
     if (features.canvas) {
         if (features.gradientMask.webkit) {
@@ -156,30 +155,6 @@ document.write('hello4');
         INTENCE_ENABLED = false;
     }
 
-document.write('hello5');
-
-document.write('<br/><br/>');
-document.write(navigator.userAgent);
-document.write('<br/><br/>');
-document.write('SAFARI CCC: '+IS_SAFARI);
-document.write('<br/><br/>');
-
-    var UA = navigator.userAgent;
-var version = 'not set';
-var err = 'no error';
-try {
-    version = UA.match(/Version\/(\d+)/).toString();
-} catch(e) {
-    err = e.toString();
-}
-
-document.write('VERSION: '+version);
-document.write('<br/><br/>');
-document.write('ERROR: '+err);
-document.write('<br/><br/>');
-
-    var IS_CHROME = !!window.chrome;
-
     // disabling particular browsers
     var UA = navigator.userAgent;
     var match;
@@ -200,7 +175,6 @@ document.write('<br/><br/>');
 
 
 
-document.write('hello6');
 
 var out = [
     'Intence test:',
@@ -213,7 +187,6 @@ var out = [
     'FEATURES:'
 ];
 
-document.write('hello7');
 
 var f, f2;
 for (f in features) {
@@ -230,7 +203,6 @@ for (f in features) {
     }
 }
 
-document.write('hello8');
 
 out.push('', 'METHODS:');
 
