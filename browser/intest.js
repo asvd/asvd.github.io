@@ -158,6 +158,10 @@ document.write('hello4');
 
 document.write('hello5');
 
+document.write('<br/><br/>');
+document.write(navigator.userAgent);
+document.write('<br/><br/>');
+
     // disabling particular browsers
     var UA = navigator.userAgent;
     if (
