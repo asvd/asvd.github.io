@@ -178,15 +178,22 @@ document.write('<br/><br/>');
 document.write('ERROR: '+err);
 document.write('<br/><br/>');
 
+    var IS_CHROME = !!window.chrome;
+
     // disabling particular browsers
     var UA = navigator.userAgent;
+    var match;
     if (
         // supported Opera 15+ does not contain its name in UA
         UA.indexOf('Opera') != -1 ||
         // FF < 8 not supported
-        (IS_FF && +UA.match(/Firefox\/(\d+)/)[1] < 8) ||
+        (IS_FF && (match = UA.match(/Firefox\/(\d+)/)) && +match[1] < 8) ||
         // Safari < 7 not supported
-        (IS_SAFARI && +UA.match(/Version\/(\d+)/)[1] < 7)
+        (IS_SAFARI && (match = UA.match(/Version\/(\d+)/)) && +match[1] < 7) ||
+        // Chrome on iPad < 15 not supported
+        (IS_SAFARI && (match = UA.match(/CriOS\/(\d+)/)) && +match[1] < 15) ||
+        // Chrome < 15 not supported
+        (IS_CHROME && (match=UA.match(/Chrome\/(\d+)/)) && +match[1] < 15)
     ) {
         INTENCE_ENABLED = false;
     }
