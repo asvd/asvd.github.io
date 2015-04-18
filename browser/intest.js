@@ -1,4 +1,3 @@
-document.write('hello');
 
     var elemSample = {
         div    : document.createElement('div'),
@@ -44,6 +43,7 @@ document.write('hello');
         indexOf('Constructor') > 0;
     
 
+document.write('hello');
     // what is supported by the browser
     var features = {
         classList : !!elemSample.div.classList,
