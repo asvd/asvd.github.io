@@ -18,7 +18,7 @@ var isLocal = __jailed__path__.substr(0,7).toLowerCase() == 'file://';
 
 var url = __jailed__path__ + '_worker.js';
 
-if (isLocal) {
+if (false&&isLocal) {
     // creating worker as a blob enables import of local files
     var blobCode = [
       ' self.addEventListener("message", function(m){          ',
