@@ -30,7 +30,7 @@ if (true||isLocal) {
     ].join('\n');
 
     url = window.URL.createObjectURL(
-        new Blob([blobCode])
+        new Blob([blobCode], {type: 'text/javascript'})
     );
 }
 
