@@ -14,22 +14,27 @@ var __jailed__path__ = scripts[scripts.length-1].src
     .slice(0, -1)
     .join('/')+'/';
 
-// creating worker as a blob enables import of local files
-var blobCode = [
-  ' self.addEventListener("message", function(m){          ',
-  '     if (m.data.type == "initImport") {                 ',
-  '         importScripts(m.data.url);                     ',
-  '         self.postMessage({type: "initialized"});       ',
-  '     }                                                  ',
-  ' });                                                    '
-].join('\n');
+var isLocal = __jailed__path__.substr(0,7).toLowerCase() == 'file://';
 
-var blobUrl = window.URL.createObjectURL(
-    new Blob([blobCode])
-);
+var url = __jailed__path__ + '_worker.js';
 
+if (isLocal) {
+    // creating worker as a blob enables import of local files
+    var blobCode = [
+      ' self.addEventListener("message", function(m){          ',
+      '     if (m.data.type == "initImport") {                 ',
+      '         importScripts(m.data.url);                     ',
+      '         self.postMessage({type: "initialized"});       ',
+      '     }                                                  ',
+      ' });                                                    '
+    ].join('\n');
 
-var worker = new Worker(blobUrl);
+    url = window.URL.createObjectURL(
+        new Blob([blobCode])
+    );
+}
+
+var worker = new Worker(url);
 
 // telling worker to load _pluginWeb.js (see blob code above)
 worker.postMessage({
