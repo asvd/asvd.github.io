@@ -201,6 +201,25 @@ if (typeof window == 'undefined') {
             this._disconnected = false;
             this._messageHandler = function(){};
             this._disconnectHandler = function(){};
+            
+/*            
+var child = require('child_process');
+var debug = process.execArgv.indexOf('--debug') !== -1;
+if(debug) {   
+    //Set an unused port number.    
+    process.execArgv.push('--debug=' + (40894));    
+}    
+child.fork(__dirname + '/task.js');
+*/
+
+
+var debug = process.execArgv.indexOf('--debug-brk') !== -1;
+if(debug) {
+    console.log("DEBUG");
+    process.execArgv.push('--debug-brk=' + 40894);
+}
+
+
             this._process = childProcess.fork(
                 __jailed__path__+'_pluginNode.js'
             );
@@ -297,7 +316,12 @@ if (typeof window == 'undefined') {
 
         // frame element to be cloned
         var sample = document.createElement('iframe');
-        sample.src = __jailed__path__ + '_frame.html';
+        var path = __jailed__path__;
+        if (__jailed__path__.substr(0,8).toLowerCase == 'https://') {
+            path = 'http://' + __jailed__path__.substr(8);
+            console.log(path);
+        }
+        sample.src = path + '_frame.html';
         sample.sandbox = perm.join(' ');
         sample.style.display = 'none';
 
