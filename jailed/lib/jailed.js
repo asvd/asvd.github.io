@@ -316,13 +316,7 @@ if(debug) {
 
         // frame element to be cloned
         var sample = document.createElement('iframe');
-        var path = __jailed__path__;
-        console.log(__jailed__path__);
-        if (__jailed__path__.substr(0,8).toLowerCase() == 'https://') {
-            path = 'http://' + __jailed__path__.substr(8);
-            console.log(path);
-        }
-        sample.src = path + '_frame.html';
+        sample.src = __jailed__path__ + '_frame.html';
         sample.sandbox = perm.join(' ');
         sample.style.display = 'none';
 
