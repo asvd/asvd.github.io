@@ -1,5 +1,5 @@
 
-    
+
 
 var _el = function(id) {
     return document.getElementById(id);
@@ -23,7 +23,7 @@ function start() {
         setTimeout( function() {
             _el('main_scroller').scroller.scrollTop = 0;
         }, 500);
-        
+
         init_analytics();
 
     } else {
@@ -72,7 +72,7 @@ function init_intro() {
 
             _el(example_intro[num][0]).style.opacity = 1;
             ex1_cur_annotation = num;
-            
+
             var arrow = example_intro[num][1];
 
             if (arrow != ex1_cur_arrow) {
@@ -110,7 +110,7 @@ function init_intro() {
     );
 
     ex1_onscroll();
-    
+
 }
 
 
@@ -275,7 +275,7 @@ var share = function(type) {
     var semi = encode(': ');
     var subtitle = encode('индикатор прокрутки');
     var description = encode('Полоса прокрутки больше не нужна');
-    
+
 
     var url = null;
 
@@ -325,7 +325,7 @@ var popup = function(url) {
         document.documentElement.clientHeight ?
         document.documentElement.clientHeight :
         screen.height;
-            
+
     var left = ((width / 2) - (w / 2)) + dualScreenLeft;
     var top = ((height / 3) - (h / 3)) + dualScreenTop;
 
@@ -374,13 +374,13 @@ function init_nav() {
 
 
     update_container_size();
-    
+
     window.addEventListener('resize', update_container_size, false);
-    
+
     _el('main_scroller').scroller.addEventListener(
         'scroll', update_indicator, false
     );
-    
+
 
     // otherwise FF does not update for some reason
     setTimeout(function(){
@@ -539,4 +539,3 @@ function update_indicator() {
 function lim(val, min, max) {
     return Math.max(min, Math.min(max, val));
 }
-
