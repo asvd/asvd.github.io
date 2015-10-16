@@ -1,7 +1,4 @@
-var code = 'self.postMessage({text: "sandbox created"});';
-var url = window.URL.createObjectURL(
-    new Blob([code], {type: 'text/javascript'})
-);
+var url = 'worker.js';
 
 var worker = new Worker(url);
 
