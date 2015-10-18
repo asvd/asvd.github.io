@@ -173,9 +173,15 @@ var initIframePlugin = function() {
     }, '*');
 }
 
+
+initIframePlugin();
+
+    /*
+
 try {
     initWebworkerPlugin();
 } catch(e) {
     initIframePlugin();
 }
 
+*/
