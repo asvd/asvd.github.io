@@ -82,6 +82,7 @@ var initIframePlugin = function() {
 
     // event listener for the plugin message
     window.addEventListener('message', function(e) {
+console.log('message from parent of type ' + e.data.data.type);
         var m = e.data.data;
         switch (m.type) {
         case 'import':
@@ -129,6 +130,7 @@ var initIframePlugin = function() {
 
     // loads and executes the javascript file with the given url
     var importScript = function(url) {
+console.log('importing ' + url);
         var sCb = function() {
             parent.postMessage({
                 type : 'importSuccess',
