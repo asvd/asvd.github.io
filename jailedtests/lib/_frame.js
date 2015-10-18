@@ -76,6 +76,7 @@ var initWebworkerPlugin = function() {
  * Creates plugin right in this iframe
  */
 var initIframePlugin = function() {
+    debugger
     window.application = {};
     window.connection = {};
 
@@ -188,3 +189,4 @@ try {
 } catch(e) {
     initIframePlugin();
 }
+
