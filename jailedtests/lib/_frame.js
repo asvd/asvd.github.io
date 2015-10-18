@@ -62,6 +62,7 @@ var initWebworkerPlugin = function() {
     worker.addEventListener('message', function(m) {
     console.log(m);
         if (m.data.type == 'initialized') {
+     console.log('CLEARING');
             clearTimeout(fallbackTimeout);
         }
         parent.postMessage(m.data, '*');
