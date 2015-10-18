@@ -42,20 +42,7 @@ var initWebworkerPlugin = function() {
         new Blob([blobCode])
     );
 
-    try {
-        console.log('CREATING');
-        var worker = new Worker(blobUrl);
-        console.log(worker);
-        worker.onerror = function() {
-            console.log('worker.onerror fired');
-        }
-        worker.onmessage = function() {
-            console.log('worker.message fired');
-        }
-        console.log('CREATED');
-    } catch (e) {
-        console.log('FAILED');
-    }
+    var worker = new Worker(blobUrl);
 
     // telling worker to load _pluginWeb.js (see blob code above)
     worker.postMessage({
@@ -63,10 +50,19 @@ var initWebworkerPlugin = function() {
         url: __jailed__path__ + '_pluginWeb.js'
     });
 
+    // mixed content warning in chrome silently skips worker
+    // initialization without exception, handling this with timeout
+    var fallbackTimeout = setTimeout(function() {
+ console.log('FALLBACK');
+        worker.terminate();
+        initIframePlugin();
+    }, 100);
 
     // forwarding messages between the worker and parent window
     worker.addEventListener('message', function(m) {
-    console.log('MESSAGE FROM WORKER');
+        if (m.data.type == 'initialized') {
+            clearTimeout(fallbackTimeout);
+        }
         parent.postMessage(m.data, '*');
     });
 
