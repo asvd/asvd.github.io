@@ -78,6 +78,7 @@ var initWebworkerPlugin = function() {
  * Creates plugin right in this iframe
  */
 var initIframePlugin = function() {
+ console.log('FALLBACK IFRAME');
     window.application = {};
     window.connection = {};
 
