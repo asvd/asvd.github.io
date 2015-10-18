@@ -53,20 +53,13 @@ var initWebworkerPlugin = function() {
     // mixed content warning in chrome silently skips worker
     // initialization without exception, handling this with timeout
     var fallbackTimeout = setTimeout(function() {
- console.log('FALLBACK');
         worker.terminate();
         initIframePlugin();
-    }, 1000);
-
-    var wtf = function(msg) {
-    console.log('wtf '+msg);
-    }
+    }, 10);
 
     // forwarding messages between the worker and parent window
     worker.addEventListener('message', function(m) {
-  wtf('WATAFA');
         if (m.data.type == 'initialized') {
-     wtf('CLEARING');
             clearTimeout(fallbackTimeout);
         }
         parent.postMessage(m.data, '*');
@@ -82,7 +75,7 @@ var initWebworkerPlugin = function() {
  * Creates plugin right in this iframe
  */
 var initIframePlugin = function() {
- console.log('FALLBACK IFRAME');
+        console.log('fallback');
     window.application = {};
     window.connection = {};
 
