@@ -42,8 +42,13 @@ var initWebworkerPlugin = function() {
         new Blob([blobCode])
     );
 
-
-    var worker = new Worker(blobUrl);
+    try {
+        console.log('CREATING');
+        var worker = new Worker(blobUrl);
+        console.log('CREATED');
+    } catch (e) {
+        console.log('FAILED');
+    }
 
     // telling worker to load _pluginWeb.js (see blob code above)
     worker.postMessage({
@@ -174,14 +179,8 @@ var initIframePlugin = function() {
 }
 
 
-initIframePlugin();
-
-    /*
-
 try {
     initWebworkerPlugin();
 } catch(e) {
     initIframePlugin();
 }
-
-*/
