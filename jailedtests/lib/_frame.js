@@ -66,6 +66,7 @@ var initWebworkerPlugin = function() {
 
     // forwarding messages between the worker and parent window
     worker.addEventListener('message', function(m) {
+    console.log('MESSAGE FROM WORKER');
         parent.postMessage(m.data, '*');
     });
 
