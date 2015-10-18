@@ -56,7 +56,7 @@ var initWebworkerPlugin = function() {
  console.log('FALLBACK');
         worker.terminate();
         initIframePlugin();
-    }, 100);
+    }, 1000);
 
     // forwarding messages between the worker and parent window
     worker.addEventListener('message', function(m) {
