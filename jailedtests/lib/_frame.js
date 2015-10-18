@@ -49,6 +49,9 @@ var initWebworkerPlugin = function() {
         worker.onerror = function() {
             console.log('worker.onerror fired');
         }
+        worker.onmessage = function() {
+            console.log('worker.message fired');
+        }
         console.log('CREATED');
     } catch (e) {
         console.log('FAILED');
