@@ -58,9 +58,13 @@ var initWebworkerPlugin = function() {
         initIframePlugin();
     }, 1000);
 
+    var wtf = function() {
+    console.log('WATAFUK');
+    }
+
     // forwarding messages between the worker and parent window
     worker.addEventListener('message', function(m) {
-    console.log(m);
+  wtf();
         if (m.data.type == 'initialized') {
      console.log('CLEARING');
             clearTimeout(fallbackTimeout);
