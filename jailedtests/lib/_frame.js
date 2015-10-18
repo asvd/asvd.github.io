@@ -62,6 +62,7 @@ var initWebworkerPlugin = function() {
         if (m.data.type == 'initialized') {
             clearTimeout(fallbackTimeout);
         }
+
         parent.postMessage(m.data, '*');
     });
 
@@ -75,7 +76,6 @@ var initWebworkerPlugin = function() {
  * Creates plugin right in this iframe
  */
 var initIframePlugin = function() {
-        console.log('fallback');
     window.application = {};
     window.connection = {};
 
