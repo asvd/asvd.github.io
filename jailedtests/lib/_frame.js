@@ -50,7 +50,8 @@ var initWebworkerPlugin = function() {
         url: __jailed__path__ + '_pluginWeb.js'
     });
 
-    // mixed content warning in chrome silently skips worker
+
+    // mixed content warning in Chrome silently skips worker
     // initialization without exception, handling this with timeout
     var fallbackTimeout = setTimeout(function() {
         worker.terminate();
@@ -81,7 +82,6 @@ var initIframePlugin = function() {
 
     // event listener for the plugin message
     window.addEventListener('message', function(e) {
-console.log('message from parent of type ' + e.data.data.type);
         var m = e.data.data;
         switch (m.type) {
         case 'import':
@@ -97,8 +97,15 @@ console.log('message from parent of type ' + e.data.data.type);
         }
     });
 
+    // handles script loading error
+    // (assuming scripts are loaded one by one in the iframe)
+    var currentErrorHandler = function(){};
+    window.addEventListener('error', function(message) {
+        currentErrorHandler();
+    });
+
     // loads additional script into the frame
-    var load = function(path, cb) {
+    var load = function(path, sCb, fCb) {
         var script = document.createElement('script');
         script.src = path;
 
@@ -107,14 +114,22 @@ console.log('message from parent of type ' + e.data.data.type);
             script.onerror = null;
             script.onreadystatechange = null;
             script.parentNode.removeChild(script);
+            currentErrorHandler = function(){};
         }
 
         var success = function() {
             clear();
-            cb();
+            sCb();
         }
 
-        script.onerror = clear;
+        var failure = function() {
+            clear();
+            fCb();
+        }
+
+        currentErrorHandler = failure;
+
+        script.onerror = failure;
         script.onload = success;
         script.onreadystatechange = function() {
             var state = script.readyState;
@@ -129,27 +144,30 @@ console.log('message from parent of type ' + e.data.data.type);
 
     // loads and executes the javascript file with the given url
     var importScript = function(url) {
-console.log('importing ' + url);
-        var sCb = function() {
+        var success = function() {
             parent.postMessage({
                 type : 'importSuccess',
                 url  : url
             }, '*');
         }
 
+        var failure = function() {
+           parent.postMessage({
+               type : 'importFailure',
+               url  : url
+           }, '*');
+        }
+
         var error = null;
         try {
-            load(url, sCb);
+            load(url, success, failure);
         } catch (e) {
             error = e;
         }
 
         if (error) {
-           parent.postMessage({
-               type : 'importFailure',
-               url  : url
-           }, '*');
-           throw error;
+            throw error;
+            failure();
         }
     }
 
@@ -183,7 +201,6 @@ console.log('importing ' + url);
         dedicatedThread : false
     }, '*');
 }
-
 
 try {
     initWebworkerPlugin();
