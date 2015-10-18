@@ -45,6 +45,7 @@ var initWebworkerPlugin = function() {
     try {
         console.log('CREATING');
         var worker = new Worker(blobUrl);
+        console.log(worker);
         console.log('CREATED');
     } catch (e) {
         console.log('FAILED');
