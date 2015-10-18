@@ -58,15 +58,15 @@ var initWebworkerPlugin = function() {
         initIframePlugin();
     }, 1000);
 
-    var wtf = function() {
-    console.log('WATAFUK');
+    var wtf = function(msg) {
+    console.log('wtf '+msg);
     }
 
     // forwarding messages between the worker and parent window
     worker.addEventListener('message', function(m) {
-  wtf();
+  wtf('WATAFA');
         if (m.data.type == 'initialized') {
-     console.log('CLEARING');
+     wtf('CLEARING');
             clearTimeout(fallbackTimeout);
         }
         parent.postMessage(m.data, '*');
