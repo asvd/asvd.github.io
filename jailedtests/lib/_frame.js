@@ -60,6 +60,7 @@ var initWebworkerPlugin = function() {
 
     // forwarding messages between the worker and parent window
     worker.addEventListener('message', function(m) {
+    console.log(m);
         if (m.data.type == 'initialized') {
             clearTimeout(fallbackTimeout);
         }
