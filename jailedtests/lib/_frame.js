@@ -46,6 +46,9 @@ var initWebworkerPlugin = function() {
         console.log('CREATING');
         var worker = new Worker(blobUrl);
         console.log(worker);
+        worker.onerror = function() {
+            console.log('worker.onerror fired');
+        }
         console.log('CREATED');
     } catch (e) {
         console.log('FAILED');
