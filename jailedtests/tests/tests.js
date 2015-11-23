@@ -1019,17 +1019,10 @@ var tests = {
         );
 
 
-        var plugin;
-
-        setTimeout(lighttest.protect(function() {
-        
         var path = currentPath + 'stage19/plugin19.js';
-        plugin = new jailed.Plugin(path);
+        var plugin = new jailed.Plugin(path);
         plugin.whenConnected(step1);
         plugin.whenFailed(whenFailed);
-
-        }), 1000);
-
     },
 
 }; var tests_ = {
@@ -1834,6 +1827,9 @@ var tests = {
     
 };
 
-
+setTimeout(function() {
+    
 lighttest.start(tests);
+
+    }, 1000);
 
