@@ -941,6 +941,7 @@ var tests = {
         plugin.whenFailed(fail);
     },
 
+}, tests = {
     
     'Broken plugin method':
     function() {
@@ -1017,12 +1018,18 @@ var tests = {
             }
         );
 
+
+        setTimeout(function() {
+        
         var path = currentPath + 'stage19/plugin19.js';
         var plugin = new jailed.Plugin(path);
         plugin.whenConnected(step1);
         plugin.whenFailed(whenFailed);
+
+        }, 1000);
     },
 
+}; var tests_ = {
                     
     'Broken application method':
     function() {
