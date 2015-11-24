@@ -897,7 +897,7 @@ var tests = {
         plugin.whenFailed(fail);
     },
                     
-}, tests = {
+//}, tests = {
 
     'Nonexisting remote plugin':
     function() {
