@@ -159,7 +159,6 @@ var tests = {
         plugin.whenFailed(whenFailed);
     },
 
-}, tests = {
                     
     'Loading several plugins at once':
     function() {
@@ -306,6 +305,7 @@ var tests = {
     },
                     
                     
+}, tests = {
 
 
     'Two plugins with the same source but different interface':
