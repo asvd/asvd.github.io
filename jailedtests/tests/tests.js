@@ -159,6 +159,7 @@ var tests = {
         plugin.whenFailed(whenFailed);
     },
 
+}, tests = {
                     
     'Loading several plugins at once':
     function() {
@@ -897,7 +898,6 @@ var tests = {
         plugin.whenFailed(fail);
     },
                     
-//}, tests = {
 
     'Nonexisting remote plugin':
     function() {
