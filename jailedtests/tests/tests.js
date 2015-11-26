@@ -305,8 +305,6 @@ var tests = {
     },
                     
                     
-}, tests = {
-
 
     'Two plugins with the same source but different interface':
     function() {
@@ -705,6 +703,8 @@ var tests = {
         pluginBad.whenFailed(whenFailed);
     },
  
+}, tests = {
+
                    
     'Permission restriction':
     function() {
