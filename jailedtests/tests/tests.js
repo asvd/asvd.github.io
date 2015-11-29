@@ -897,8 +897,6 @@ var tests = {
     },
                     
 
-}, tests = {
-
     'Nonexisting remote plugin':
     function() {
         var path = 'https://asvd.github.io/no_such_path.js';
@@ -943,6 +941,8 @@ var tests = {
     },
 
     
+}, tests = {
+
     'Broken plugin method':
     function() {
         var step1 = lighttest.protect(
