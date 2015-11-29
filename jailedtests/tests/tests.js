@@ -852,8 +852,6 @@ var tests = {
 
                     
                     
-}, tests = {
-
 
     'Nonexisting plugin':
     function() {
@@ -898,6 +896,8 @@ var tests = {
         plugin.whenFailed(fail);
     },
                     
+
+}, tests = {
 
     'Nonexisting remote plugin':
     function() {
