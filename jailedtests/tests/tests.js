@@ -703,8 +703,6 @@ var tests = {
         pluginBad.whenFailed(whenFailed);
     },
  
-}, tests = {
-
                    
     'Permission restriction':
     function() {
@@ -854,6 +852,8 @@ var tests = {
 
                     
                     
+}, tests = {
+
 
     'Nonexisting plugin':
     function() {
