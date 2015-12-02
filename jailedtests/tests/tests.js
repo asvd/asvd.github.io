@@ -1827,9 +1827,9 @@ var tests = {
     
 };
 
-setTimeout(function() {
+//setTimeout(function() {
     
 lighttest.start(tests);
 
-    }, 1000);
+//    }, 1000);
 
