@@ -941,8 +941,6 @@ var tests = {
     },
 
     
-}, tests = {
-
     'Broken plugin method':
     function() {
         var step1 = lighttest.protect(
@@ -1549,6 +1547,7 @@ var tests = {
     },
     
 
+}, tests = {
 
     'Delayed event subscription in the application':
     function() {
@@ -1646,6 +1645,8 @@ var tests = {
         stage1();
     },
 
+
+}, tests_ = {
 
 
     'Delayed event subscription in the plugin':
