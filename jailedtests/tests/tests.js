@@ -972,7 +972,7 @@ var tests = {
                             lighttest.done();
                         }
                     ),
-                    1000
+                    2000
                 );
 
                 var cb = lighttest.protect(
