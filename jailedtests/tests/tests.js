@@ -1025,7 +1025,6 @@ var tests = {
         plugin.whenFailed(whenFailed);
     },
 
-}, tests_ = {
                     
     'Broken application method':
     function() {
