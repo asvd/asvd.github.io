@@ -1564,12 +1564,15 @@ var tests = {
                 );
 
                 var connected = function() {
-    console.log('THERE%%%%');
+                    console.log('THERE%%%%');
+                    console.log((new Date()).toString());
                     connectionCompleted = true;
                 }
 
                 var connectCheck = lighttest.protect(
                     function() {
+                    console.log('HERE%%%%');
+                    console.log((new Date()).toString());
                         plugin.disconnect();
                         lighttest.check(connectionCompleted);
                         setTimeout(stage2, 300);
