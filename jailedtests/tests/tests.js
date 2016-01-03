@@ -1547,7 +1547,6 @@ var tests = {
     },
     
 
-}, tests = {
 
     'Delayed event subscription in the application':
     function() {
