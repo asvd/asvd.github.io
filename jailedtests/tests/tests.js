@@ -1559,29 +1559,17 @@ var tests = {
 
                 var tryConnect = lighttest.protect(
                     function() {
-            console.log('START%%%');
-            var a = new Date;
-            console.log(a.toString());
-            console.log(a.getMilliseconds());
                         plugin.whenConnected(connected);
-                        setTimeout(connectCheck, 4000);
+                        setTimeout(connectCheck, 3000);
                     }
                 );
 
                 var connected = function() {
-            console.log('THERE%%%%');
-            var a = new Date;
-            console.log(a.toString());
-            console.log(a.getMilliseconds());
                     connectionCompleted = true;
                 }
 
                 var connectCheck = lighttest.protect(
                     function() {
-            console.log('CHECK%%%%');
-            var a = new Date;
-            console.log(a.toString());
-            console.log(a.getMilliseconds());
                         plugin.disconnect();
                         lighttest.check(connectionCompleted);
                         setTimeout(stage2, 300);
@@ -1602,6 +1590,7 @@ var tests = {
                 var tryFailure = lighttest.protect(
                     function() {
                         plugin.whenFailed(failed);
+                        setTimeout(failureCheck, 3000);
                     }
                 );
 
@@ -1618,7 +1607,6 @@ var tests = {
                 );
 
                 setTimeout(tryFailure, 300);
-                setTimeout(failureCheck, 4500);
             }
         );
 
