@@ -1646,7 +1646,6 @@ var tests = {
     },
 
 
-}, tests_ = {
 
 
     'Delayed event subscription in the plugin':
