@@ -1576,7 +1576,7 @@ var tests = {
                 );
 
                 setTimeout(tryConnect, 300);
-                setTimeout(connectCheck, 4000);
+                setTimeout(connectCheck, 4500);
             }
         );
 
