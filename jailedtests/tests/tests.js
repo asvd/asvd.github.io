@@ -1594,17 +1594,29 @@ var tests = {
                 );
 
                 var failed = function() {
+            console.log('THERE%%%%');
+            var a = new Date;
+            console.log(a.toString());
+            console.log(a.getMilliseconds());
                     failureCompleted = true;
                 }
 
                 var failureCheck = lighttest.protect(
                     function() {
+            console.log('CHECK%%%%');
+            var a = new Date;
+            console.log(a.toString());
+            console.log(a.getMilliseconds());
                         plugin.disconnect();
                         lighttest.check(failureCompleted);
                         setTimeout(stage3, 300);
                     }
                 );
 
+            console.log('START%%%%');
+            var a = new Date;
+            console.log(a.toString());
+            console.log(a.getMilliseconds());
                 setTimeout(tryFailure, 300);
                 setTimeout(failureCheck, 3600);
             }
