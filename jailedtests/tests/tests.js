@@ -1564,6 +1564,7 @@ var tests = {
                 );
 
                 var connected = function() {
+    console.log('THERE%%%%');
                     connectionCompleted = true;
                 }
 
