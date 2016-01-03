@@ -1564,25 +1564,29 @@ var tests = {
                 );
 
                 var connected = function() {
-                console.log('THERE%%%%');
-                var a = new Date;
-                console.log(a.toString());
-                console.log(a.getMilliseconds());
+            console.log('THERE%%%%');
+            var a = new Date;
+            console.log(a.toString());
+            console.log(a.getMilliseconds());
                     connectionCompleted = true;
                 }
 
                 var connectCheck = lighttest.protect(
                     function() {
-                console.log('HERE%%%%');
-                var a = new Date;
-                console.log(a.toString());
-                console.log(a.getMilliseconds());
+            console.log('HERE%%%%');
+            var a = new Date;
+            console.log(a.toString());
+            console.log(a.getMilliseconds());
                         plugin.disconnect();
                         lighttest.check(connectionCompleted);
                         setTimeout(stage2, 300);
                     }
                 );
 
+            console.log('START%%%%');
+            var a = new Date;
+            console.log(a.toString());
+            console.log(a.getMilliseconds());
                 setTimeout(tryConnect, 300);
                 setTimeout(connectCheck, 3500);
             }
