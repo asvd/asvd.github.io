@@ -1564,7 +1564,7 @@ var tests = {
             console.log(a.toString());
             console.log(a.getMilliseconds());
                         plugin.whenConnected(connected);
-                        setTimeout(connectCheck, 2000);
+                        setTimeout(connectCheck, 4000);
                     }
                 );
 
