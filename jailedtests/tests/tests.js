@@ -1560,6 +1560,7 @@ var tests = {
                 var tryConnect = lighttest.protect(
                     function() {
                         plugin.whenConnected(connected);
+                        setTimeout(connectCheck, 500);
                     }
                 );
 
@@ -1576,7 +1577,6 @@ var tests = {
                 );
 
                 setTimeout(tryConnect, 300);
-                setTimeout(connectCheck, 4500);
             }
         );
 
