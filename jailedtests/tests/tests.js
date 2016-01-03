@@ -1588,7 +1588,7 @@ var tests = {
             console.log(a.toString());
             console.log(a.getMilliseconds());
                 setTimeout(tryConnect, 300);
-                setTimeout(connectCheck, 3500);
+                setTimeout(connectCheck, 5500);
             }
         );
 
