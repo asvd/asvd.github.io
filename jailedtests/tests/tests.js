@@ -1618,7 +1618,7 @@ var tests = {
             console.log(a.toString());
             console.log(a.getMilliseconds());
                 setTimeout(tryFailure, 300);
-                setTimeout(failureCheck, 4000);
+                setTimeout(failureCheck, 4500);
             }
         );
 
