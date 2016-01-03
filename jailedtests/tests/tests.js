@@ -1559,7 +1559,7 @@ var tests = {
 
                 var tryConnect = lighttest.protect(
                     function() {
-            console.log('THERE%%%%');
+            console.log('START%%%');
             var a = new Date;
             console.log(a.toString());
             console.log(a.getMilliseconds());
@@ -1569,6 +1569,10 @@ var tests = {
                 );
 
                 var connected = function() {
+            console.log('THERE%%%%');
+            var a = new Date;
+            console.log(a.toString());
+            console.log(a.getMilliseconds());
                     connectionCompleted = true;
                 }
 
