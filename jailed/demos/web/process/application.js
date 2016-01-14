@@ -111,26 +111,13 @@ function fill_code() {
         '                                                  '
     ].join('\n'));
 
-    el.container.code.innerHTML = code;
+    el.code.container.innerHTML = code;
 }
 
 
-function init() {
-    setTimeout(
-        function() {
             el.button_regen_input.onclick = regen_input;
             el.button_process.onclick = process;
             fill_code();
             regen_input();
-        }, 500
-    );
-}
-
-if (document.readyState == "complete") {
-    init();
-} else {
-    window.addEventListener("load", init, false);
-}
-
 
 
