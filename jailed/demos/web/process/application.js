@@ -111,7 +111,7 @@ function fill_code() {
         '                                                  '
     ].join('\n'));
 
-    el.code.innerHTML = code;
+    el.container.code.innerHTML = code;
 }
 
 

@@ -1797,6 +1797,14 @@
 
 
     /**
+     * @returns {Element} content container
+     */
+    Intence.prototype.getContainer = function() {
+        return this._cmp.container;
+    }
+
+
+    /**
      * Upgrades the element with a set of additional elements one
      * inside another so that the scrollbars are properly hidden, but
      * the container geometry is preserved
@@ -1918,6 +1926,11 @@
         util.attachChildren(
             this._cmp.container, util.detachChildren(this._elem)
         );
+
+        if (this._elem.getAttribute('contenteditable') == 'true') {
+            this._elem.setAttribute('contenteditable') = false;
+            this._cmp.container.setAttribute('contenteditable') = true;
+        }
 
         this._cmp.pusher.appendChild(this._cmp.container);
         this._cmp.scroller.appendChild(this._cmp.pusher);
@@ -3562,9 +3575,11 @@
                     intences.push(intence);
                     elem.intence = true;
                     elem.scroller = intence.getScroller();
+                    elem.container = intence.getContainer();
                 }
             } else {
                 elem.scroller = elem;
+                elem.container = elem;
             }
         }
     }
