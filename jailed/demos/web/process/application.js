@@ -115,10 +115,18 @@ function fill_code() {
 }
 
 
+function init() {
+    el.button_regen_input.onclick = regen_input;
+    el.button_process.onclick = process;
+    fill_code();
+    regen_input();
+}
 
-// initializes everything
-el.button_regen_input.onclick = regen_input;
-el.button_process.onclick = process;
-fill_code();
+if (document.readyState == "complete") {
+    init();
+} else {
+    window.addEventListener("load", init, false);
+}
 
-regen_input();
+
+
