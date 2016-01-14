@@ -1928,8 +1928,8 @@
         );
 
         if (this._elem.getAttribute('contenteditable') == 'true') {
-            this._elem.setAttribute('contenteditable') = false;
-            this._cmp.container.setAttribute('contenteditable') = true;
+            this._elem.setAttribute('contenteditable', false);
+            this._cmp.container.setAttribute('contenteditable', true);
         }
 
         this._cmp.pusher.appendChild(this._cmp.container);
