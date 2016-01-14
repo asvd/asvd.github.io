@@ -116,10 +116,14 @@ function fill_code() {
 
 
 function init() {
-    el.button_regen_input.onclick = regen_input;
-    el.button_process.onclick = process;
-    fill_code();
-    regen_input();
+    setTimeout(
+        function() {
+            el.button_regen_input.onclick = regen_input;
+            el.button_process.onclick = process;
+            fill_code();
+            regen_input();
+        }, 500
+    );
 }
 
 if (document.readyState == "complete") {
