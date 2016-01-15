@@ -41,6 +41,7 @@ function process() {
     var process = function() {
         var displayResult = function(result) {
             el.output_data.innerHTML = stringify(result);
+            plugin.disconnect();
         }
 
         plugin.remote.process(input, code, displayResult);
@@ -116,10 +117,14 @@ function fill_code() {
 
 
 function init() {
-            el.button_regen_input.onclick = regen_input;
-            el.button_process.onclick = process;
-            fill_code();
-            regen_input();
+    el.button_regen_input.onclick = regen_input;
+    el.button_process.onclick = process;
+    fill_code();
+    regen_input();
+
+    // caching
+    var plugin =  new jailed.Plugin(path+'plugin.js');
+    plugin.disconnect();
 }
 
 if (document.readyState == "complete") {
