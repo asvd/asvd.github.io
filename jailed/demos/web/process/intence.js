@@ -1896,6 +1896,7 @@
         };
 
 
+        var cs = window.getComputedStyle(this._elem, null);
         this._origStyle = {overflow : this._elem.style.overflow};
         if (this._isBody) {
             var margins = [
@@ -1903,7 +1904,6 @@
                 'marginBottom', 'marginLeft'
             ];
 
-            var cs = window.getComputedStyle(this._elem, null);
             var i, m;
             for (i = 0; i < margins.length; i++) {
                 m = margins[i];
@@ -1912,6 +1912,10 @@
             }
 
             style.elem.margin = 0;
+        }
+
+        if (cs.outline) {
+            style.elem.outline = cs.outline;
         }
 
         util.setStyle(this._elem, style.elem);
