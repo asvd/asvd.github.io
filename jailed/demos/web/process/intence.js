@@ -20,7 +20,7 @@
     var cfg = {
         textureMaxSqueeze : 1000,
         indicatorMaxArea  : .12,
-        indicatorGain     : 1/500,
+        indicatorGain     : 1/50,
         animationTime     : 160,
         animationDelay    : 20
     };
