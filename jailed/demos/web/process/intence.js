@@ -1916,6 +1916,7 @@
 
         if (cs.outline) {
             style.elem.outline = cs.outline;
+            style.elem.backgroundColor = '#ffffff';
         }
 
         util.setStyle(this._elem, style.elem);
