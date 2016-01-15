@@ -1915,8 +1915,7 @@
         }
 
         if (cs.outline) {
-            style.elem.outline = cs.outline;
-            style.elem.backgroundColor = '#ffffff';
+            style.container.outline = cs.outline;
         }
 
         util.setStyle(this._elem, style.elem);
