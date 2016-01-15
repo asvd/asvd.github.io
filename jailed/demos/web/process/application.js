@@ -124,7 +124,7 @@ function init() {
 
     // caching
     var plugin =  new jailed.Plugin(path+'plugin.js');
-    plugin.disconnect();
+    plugin.whenConnected(function(){plugin.disconnect();});
 }
 
 if (document.readyState == "complete") {
