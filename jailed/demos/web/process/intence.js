@@ -20,7 +20,7 @@
     var cfg = {
         textureMaxSqueeze : 1000,
         indicatorMaxArea  : .12,
-        indicatorGain     : 1/4500,
+        indicatorGain     : 1/6500,
         animationTime     : 160,
         animationDelay    : 20
     };
@@ -1988,6 +1988,10 @@
             if (this._origStyle.hasOwnProperty(prop)) {
                 this._elem.style[prop] = this._origStyle[prop];
             }
+        }
+
+        if (this._cmp.container.getAttribute('contenteditable') == 'true') {
+            this._elem.setAttribute('contenteditable', true);
         }
 
         util.attachChildren(this._elem, children);
