@@ -99,6 +99,7 @@ a:hover {
 
 .code {
     position: absolute;
+    padding: 5px;
     top: 0px;
     left: 160px;
     height: 200px;
@@ -106,7 +107,7 @@ a:hover {
     background-color: #051627;
     background-image: url('bg.png');
     border: 1px solid #000E1C;
-    color: #aabbcc;
+    color: #B4EEF5;
     font-family: monospace;
     font-size: 12px;
     line-height: 18px;
@@ -125,10 +126,7 @@ a:hover {
     height: 22px;
     top: 0px;
     left: 160px;
-    background-color: #051627;
-    background-image: url('bg.png');
-    border: 1px solid #334455;
-    color: #aabbcc;
+    color: #B4EEF5;
     font-family: monospace;
 }
 
@@ -141,18 +139,16 @@ a:hover {
 }
 
 .button {
-    border: 1px solid #334455;
-    background-color: #051627;
     font-variant: small-caps;
     text-align: center;
 }
 
 .button:hover {
-    background-color: #152637;
+    background-color: #172839;
 }
 
 .button:active {
-    background-color: #051627;
+    background-color: #0B1C2E;
 }
 
 #button_regen_input {
