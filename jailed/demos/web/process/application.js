@@ -31,16 +31,21 @@ function regen_input() {
     el.input_data.innerHTML = stringify(input);
 }
 
-
 // processes the input data using provided code
 function process() {
+    el.output_data.innerHTML = '<img class="loading" src="loading.gif"/>';
     var code = el.code.innerText;
     var input = el.input_data.innerText;
 
     var plugin =  new jailed.Plugin(path+'plugin.js');
     var process = function() {
         var displayResult = function(result) {
-            el.output_data.innerHTML = stringify(result);
+            if (result.error) {
+                el.output_data.innerHTML =
+                    '<span class="error">'+result.error + '</span>';
+            } else {
+                el.output_data.innerHTML = stringify(result.output);
+            }
             plugin.disconnect();
         }
 
@@ -125,13 +130,11 @@ function init() {
     // caching
     var plugin =  new jailed.Plugin(path+'plugin.js');
     plugin.whenConnected(function(){plugin.disconnect();});
+
+    el.code.container.focus();
 }
 
-if (document.readyState == "complete") {
-    init();
-} else {
-    window.addEventListener("load", init, false);
-}
+window.addEventListener("load", init, false);
 
 
 
