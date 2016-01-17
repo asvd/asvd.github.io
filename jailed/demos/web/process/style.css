@@ -94,12 +94,6 @@ a:hover {
     height : 30px;
 }
 
-.code_block {
-    position:relative;
-    width: 500px;
-    height : 200px;
-}
-
 .process_block {
     position:relative;
     margin-top: 10px;
@@ -115,12 +109,20 @@ a:hover {
 }
 
 
+.code_block {
+    position:relative;
+    width: 500px;
+    height : 250px;
+}
+
+
 .code {
+    cursor: auto;
     position: absolute;
     padding: 5px;
     top: 0px;
     left: 160px;
-    height: 200px;
+    height: 250px;
     width: 360px;
     background-color: #051627;
     background-image: url('bg.png');
@@ -152,7 +154,7 @@ a:hover {
 }
 
 #input_data {
-    width: 330px;
+    width: 334px;
 }
 
 #output_data {
@@ -162,6 +164,8 @@ a:hover {
 .button {
     font-variant: small-caps;
     text-align: center;
+    border : 1px solid #365666;
+    background-color: #06192B;
 }
 
 .button:hover {
@@ -176,9 +180,11 @@ a:hover {
     position: absolute;
     top: 0px;
     left: 500px;
-    width : 22px;
-    height: 22px;
+    width: 20px;
+    height: 20px;
     background-image: url('refresh.svg');
+    background-position: 2px 2px;
+    background-size: 16px;
     background-repeat: no-repeat;
 }
 
@@ -188,8 +194,6 @@ a:hover {
     left: 286px;
     width : 130px;
     height: 22px;
-    border : 1px solid #365666;
-    background-color: #06192B;
 }
 
 .error {
