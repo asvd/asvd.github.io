@@ -19,8 +19,9 @@
 
     var cfg = {
         textureMaxSqueeze : 1000,
-        indicatorMaxArea  : .12,  //16
-        indicatorGain     : 1/4500,  //500
+        indicatorMaxArea  : .12,
+        gainSlownessMin   : 300,
+        gainSlownessMax   : 5000,
         animationTime     : 160,
         animationDelay    : 20
     };
@@ -1860,6 +1861,17 @@
     }
 
 
+    // list of attributes to be forwarded to the container
+    Intence.prototype._forwardAttrs = [
+        'contenteditable'
+    ];
+
+    // element styles to be forwarded to the container
+    Intence.prototype._forwardStyles = [
+        'outline'
+    ];
+
+
     /**
      * Creates a set of elements
      */
@@ -1898,13 +1910,14 @@
 
         var cs = window.getComputedStyle(this._elem, null);
         this._origStyle = {overflow : this._elem.style.overflow};
+        var i;
         if (this._isBody) {
             var margins = [
                 'margin', 'marginTop', 'marginRight',
                 'marginBottom', 'marginLeft'
             ];
 
-            var i, m;
+            var m;
             for (i = 0; i < margins.length; i++) {
                 m = margins[i];
                 style.container[m] = cs[m];
@@ -1914,8 +1927,20 @@
             style.elem.margin = 0;
         }
 
-        if (cs.outline) {
-            style.container.outline = cs.outline;
+        for (i = 0; i < this._forwardAttrs.length; i++) {
+            var attr = this._forwardAttrs[i];
+            if (this._elem.hasAttribute(attr)) {
+                var value = this._elem.getAttribute(attr);
+                this._elem.removeAttribute(attr);
+                this._cmp.container.setAttribute(attr, value);
+            }
+        }
+
+        for (i = 0; i < this._forwardStyles.length; i++) {
+            var prop = this._forwardStyles[i];
+            if (cs[prop]) {
+                style.container[prop] = cs[prop];
+            }
         }
 
         util.setStyle(this._elem, style.elem);
@@ -1930,11 +1955,6 @@
         util.attachChildren(
             this._cmp.container, util.detachChildren(this._elem)
         );
-
-        if (this._elem.getAttribute('contenteditable') == 'true') {
-            this._elem.setAttribute('contenteditable', false);
-            this._cmp.container.setAttribute('contenteditable', true);
-        }
 
         this._cmp.pusher.appendChild(this._cmp.container);
         this._cmp.scroller.appendChild(this._cmp.pusher);
@@ -1994,8 +2014,13 @@
             }
         }
 
-        if (this._cmp.container.getAttribute('contenteditable') == 'true') {
-            this._elem.setAttribute('contenteditable', true);
+        for (var i = 0; i < this._forwardAttrs.length; i++) {
+            var attr = this._forwardAttrs[i];
+            if (this._cmp.container.hasAttribute(attr)) {
+                this._elem.setAttribute(
+                    attr, this._cmp.container.getAttribute(attr)
+                );
+            }
         }
 
         util.attachChildren(this._elem, children);
@@ -2097,9 +2122,14 @@
                 var areaSize =
                     util.isVertical[dir] ? geom.height : geom.width;
 
+                var scrollSize =
+                    util.isVertical[dir] ?
+                        scrollInfo.height : scrollInfo.width;
+
                 var intensity = this._getIntensity(
                     beyond[dir], infinite[dir],
-                    data.maxIntensity, areaSize
+                    data.maxIntensity, areaSize,
+                    scrollSize
                 );
 
                 var sideOffset =
@@ -2303,17 +2333,23 @@
      * @param {Boolean} infinite true if side is set as infinite
      * @param {Number} maxSize of the container
      * @param {Number} areaSize visible area size
+     * @param {Number} scrollSize total scrollable distance
      *
      * @returns {Number} current size of the container
      */
     Intence.prototype._getIntensity = function(
-        beyond, infinite, maxSize, areaSize
+        beyond, infinite, maxSize, areaSize, scrollSize
     ) {
-        var intensity =
-            infinite ? 1 : 1 - 1 / (beyond*cfg.indicatorGain + 1);
-        var max = Math.min(maxSize, cfg.indicatorMaxArea * areaSize);
-        var pad = 1;
-        var size = pad + Math.ceil(intensity * (max-pad))
+        var min = cfg.gainSlownessMin;
+        var max = cfg.gainSlownessMax;
+        var diff = max-min;
+        var rate = 1/Math.max(Math.log(Math.log(scrollSize/200)),1);
+        var slowness = max - rate * diff;
+        var gain = 1 / slowness;
+        var intensity = infinite ? 1 : 1 - 1 / (beyond*gain + 1);
+        var maximal = Math.min(maxSize, cfg.indicatorMaxArea * areaSize);
+        var pad = 1;  // in px
+        var size = pad + Math.ceil(intensity * (maximal-pad))
         return size;
     }
 
