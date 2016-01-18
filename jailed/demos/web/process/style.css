@@ -20,7 +20,7 @@ a:hover {
 }
 
 .hpad {
-    height : 15px;
+    height : 25px;
 }
 
 .rel {
@@ -91,21 +91,13 @@ a:hover {
 .input_block {
     position:relative;
     width: 500px;
-    height : 30px;
-}
-
-.process_block {
-    position:relative;
-    margin-top: 10px;
-    margin-bottom: 10px;
-    width: 500px;
-    height : 30px;
+    height : 22px;
 }
 
 .output_block {
     position:relative;
     width: 500px;
-    height : 30px;
+    height : 22px;
 }
 
 
@@ -145,27 +137,29 @@ a:hover {
 .data {
     position: absolute;
     height: 22px;
+    width : 238px;
+    overflow : hidden;
     top: 0px;
     left: 160px;
     color: #B4EEF5;
     font-family: monospace;
     background-color: #06192B;
     padding-left: 5px;
-}
-
-#input_data {
-    width: 334px;
-}
-
-#output_data {
-    width: 360px;
+    border: 1px solid #365666;
 }
 
 .button {
     font-variant: small-caps;
     text-align: center;
+    left: 404px;
+    height: 22px;
+    width : 100px;
+    padding-left : 16px;
     border : 1px solid #365666;
     background-color: #06192B;
+    background-position: 6px 2px;
+    background-size: 16px;
+    background-repeat: no-repeat;
 }
 
 .button:hover {
@@ -179,21 +173,13 @@ a:hover {
 #button_regen_input {
     position: absolute;
     top: 0px;
-    left: 500px;
-    width: 20px;
-    height: 20px;
     background-image: url('refresh.svg');
-    background-position: 2px 2px;
-    background-size: 16px;
-    background-repeat: no-repeat;
 }
 
 #button_process {
     position: absolute;
-    top: 5px;
-    left: 286px;
-    width : 130px;
-    height: 22px;
+    top: 0px;
+    background-image: url('process.svg');
 }
 
 .error {
