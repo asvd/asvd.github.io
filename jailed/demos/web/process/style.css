@@ -150,6 +150,7 @@ a:hover {
 
 .button {
     font-variant: small-caps;
+    font-size: 12px;
     text-align: center;
     left: 404px;
     height: 22px;
