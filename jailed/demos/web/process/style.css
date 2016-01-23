@@ -162,7 +162,7 @@ a:hover {
     top : 0px;
     left : 0px;
     width : 360px;
-    height : 256px;
+    height : 254px;
     padding: 5px;
     cursor: auto;
     background-color: #051627;
@@ -175,6 +175,8 @@ a:hover {
     white-space: pre;
     -moz-appearance:none;
     outline:0px none transparent;
+    border-top: 1px solid #365666;
+    border-bottom: 1px solid #365666;
 }
 
 .code:focus {
@@ -240,7 +242,7 @@ a:hover {
 
 
 .error {
-    color : #E67C60;
+    color : #FF955D;
 }
 
 .loading {

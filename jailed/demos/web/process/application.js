@@ -88,7 +88,7 @@ function trim_tails(string) {
 function fill_code() {
     var code = trim_tails([
         'function(input) {                                 ',
-        '    // bubble sorting the input array             ',
+        '    // bubble-sorting the input array             ',
         '                                                  ',
         '    // switches the two elems if needed           ',
         '    // returns true if switched                   ',
