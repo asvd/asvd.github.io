@@ -8,59 +8,50 @@
 
   </head>
   <body>
+    <div class=hpad></div>
+
     <div class=centered>
       <div class=rel>
-        <div class=main>
-          <div class=input_block>
-            <div class=label>Input</div>
-            <div class=data id=input_data></div>
-            <div class=button id=button_regen_input>Regenerate</div>
-          </div>
-
-          <div class=code_block>
-            <div class=label>Processing code</div>
-            <div class="code intence" id=code contenteditable=true scrollImg=scroll.png></div>
-          </div>
-
-          <div class=output_block>
-            <div class=label>Output</div>
-            <div class=data id=output_data></div>
-            <div class=button id=button_process>Process</div>
-          </div>
-
-          <div class=hpad></div>
-
-          <div class=link_block>
-            <div class=link_label>Demo source code</div>
-            <div class=link>
-              <a href='https://github.com/asvd/jailed/tree/master/demos/web/process/'>
-                https://github.com/asvd/jailed/tree/master/demos/web/process/
-              </a>
+        <div class=application_and_labels>
+          <div class=rel>
+            <div class=labels>
+              <div class=rel>
+                <div class=label>Input</div>
+                <div class=label id=code_label>Processing code</div>
+                <div class=label>Output</div>
+              </div>
             </div>
-          </div>
 
-          <div class=link_block>
-            <div class=link_label>Untrusted code sandboxing</div>
-            <div class=link>
-              <a href='https://github.com/asvd/jailed/'>
-                https://github.com/asvd/jailed/
-              </a>
+            <div class=application>
+              <div class=rel>
+                <div class=data_row id=input_row>
+                  <div class=rel>
+                    <div class=data_content id=input_data></div>
+                    <div class=data_inline_label>Regenerate</div>
+                    <div class=data_inline_icon id=input_regenerate_icon></div>
+                  </div>
+                </div>
+                <div class=code_container>
+                  <div class=rel>
+                    <div class="code intence"
+                         id=code contenteditable=true
+                         scrollImg=scroll.png></div>
+                  </div>
+                </div>
+                <div class=data_row id=output_row>
+                  <div class=rel>
+                    <div class=data_content id=output_data></div>
+                    <div class=data_inline_label>Process</div>
+                    <div class=data_inline_icon id=output_process_icon></div>
+                  </div>
+                </div>
+              </div>
             </div>
+
           </div>
-
-          <div class=link_block>
-            <div class=link_label>Scrolling indicator</div>
-            <div class=link>
-              <a href='https://asvd.github.com/intence/'>
-                https://asvd.github.com/intence/
-              </a>
-            </div>
-          </div>
-
-
         </div>
 
-        <div class=annotation>
+        <div class=description>
           <h3>data processing demo</h3>
 
           The input data is shipped by the application. Processing
@@ -71,9 +62,45 @@
           prevent accessing the main application.
         </div>
 
+      </div>
+    </div>
+
+    <div class=hpad></div>
+    <div class=hpad></div>
+
+    <div class=links_container>
+      <div class=rel>
+
+        <div class=link_block>
+          <div class=link_label>Demo source code</div>
+          <div class=link>
+            <a href='https://github.com/asvd/jailed/tree/master/demos/web/process/'>
+              https://github.com/asvd/jailed/tree/master/demos/web/process/
+            </a>
+          </div>
+        </div>
+
+        <div class=link_block>
+          <div class=link_label>Untrusted code sandboxing</div>
+          <div class=link>
+            <a href='https://github.com/asvd/jailed/'>
+              https://github.com/asvd/jailed/
+            </a>
+          </div>
+        </div>
+
+        <div class=link_block>
+          <div class=link_label>Scrolling indicator</div>
+          <div class=link>
+            <a href='https://asvd.github.com/intence/'>
+              https://asvd.github.com/intence/
+            </a>
+          </div>
+        </div>
 
       </div>
     </div>
+
 
     <script type="text/javascript" src="application.js"></script>
   </body>

@@ -8,10 +8,10 @@ var path = scripts[scripts.length-1].src
 // component shortcuts
 var el = {};
 var list = [
+    'input_row',
+    'output_row',
     'input_data',
     'output_data',
-    'button_regen_input',
-    'button_process',
     'code'
 ];
 
@@ -122,8 +122,8 @@ function fill_code() {
 
 
 function init() {
-    el.button_regen_input.onclick = regen_input;
-    el.button_process.onclick = process;
+    el.input_row.onclick = regen_input;
+    el.output_row.onclick = process;
     fill_code();
     regen_input();
 
