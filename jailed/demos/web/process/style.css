@@ -8,6 +8,14 @@ body {
     cursor: default;
 }
 
+::selection {
+  background: rgba(70, 237, 255, 0.15);
+}
+
+::-moz-selection {
+  background: rgba(70, 237, 255, 0.15);
+}
+
 
 a {
     color: #48D7E9;
@@ -30,7 +38,7 @@ a:hover {
 
 .centered {
     display: block;
-    width: 760px;
+    width: 800px;
     height: 300px;
     margin-left: auto;
     margin-right: auto;
@@ -39,7 +47,7 @@ a:hover {
 
 .application_and_labels {
     position : absolute;
-    width : 520px;
+    width : 563px;
     height: 300px;
     top : 0px;
     left : 0px;
@@ -71,19 +79,18 @@ a:hover {
 
 .application {
     position: absolute;
-    width : 360px;
+    width : 400px;
     right : 0px;
     height : 300px;
-    border-radius: 1px;
     border :  1px solid #365666;
     overflow: hidden;
-    box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.25);
+    box-shadow: 1px 1px 20px -7px rgba(0, 0, 0, 1);
 }
 
 
 .data_row {
     position : absolute;
-    width : 360px;
+    width : 400px;
     height : 22px;
     left : 0px;
     background-color : #10303F;
@@ -122,7 +129,7 @@ a:hover {
     position: absolute;
     text-align: right;
     top : 1px;
-    left: 236px;
+    left: 276px;
     width : 100px;
     height : 22px;
     font-variant: small-caps;
@@ -132,8 +139,8 @@ a:hover {
 .data_inline_icon {
     position: absolute;
     top : 0px;
-    left: 336px;
-    width : 100px;
+    left: 376px;
+    width : 22px;
     height : 22px;
     background-position: 6px 2px;
     background-size: 16px;
@@ -149,7 +156,7 @@ a:hover {
 }
 
 
-.code_container {
+.code_block {
     position : absolute;
     width : 360px;
     height : 256px;
@@ -157,33 +164,38 @@ a:hover {
     top : 22px;
 }
 
-.code {
+.code_container {
     position: absolute;
     top : 0px;
     left : 0px;
-    width : 360px;
+    width : 400px;
     height : 254px;
     padding: 5px;
-    cursor: auto;
     background-color: #051627;
     background-image: url('bg.png');
     color: #B4EEF5;
-    font-family: monospace;
-    font-size: 12px;
-    line-height: 18px;
-    overflow: auto;
+    line-height: initial;
     white-space: pre;
-    -moz-appearance:none;
-    outline:0px none transparent;
+    overflow: auto;
     border-top: 1px solid #365666;
     border-bottom: 1px solid #365666;
 }
 
-.code:focus {
-    outline: 0;
+.code_wrapper {
+    cursor: text;
+    line-height: initial;
+    padding: 10px;
+    padding-left: 0px;
+/*    background-color: rgba(70, 237, 255, 0.15);*/
 }
 
-
+.code {
+    font-family: 'Droid Sans Mono', monospace;
+    font-size: 13px;
+    line-height: 16px;
+    -moz-appearance:none;
+    outline:0px none transparent;
+}
 
 .description {
     position : absolute;
@@ -250,4 +262,18 @@ a:hover {
     opacity: .7;
 }
 
+
+.dragscroll {
+    cursor: -webkit-grab;
+    cursor: -moz-grab;
+    cursor: -o-grab;
+    cursor: grab;
+}
+
+.dragscroll:active {
+    cursor : -webkit-grabbing;
+    cursor : -moz-grabbing;
+    cursor : -o-grabbing;
+    cursor : grabbing;
+}
 

@@ -34,8 +34,9 @@ function regen_input() {
 // processes the input data using provided code
 function process() {
     el.output_data.innerHTML = '<img class="loading" src="loading.gif"/>';
-    var code = el.code.innerText;
-    var input = el.input_data.innerText;
+    var code = el.code.textContent;
+
+    var input = el.input_data.textContent;
 
     var plugin =  new jailed.Plugin(path+'plugin.js');
     var process = function() {
@@ -94,12 +95,14 @@ function fill_code() {
         '    // returns true if switched                   ',
         '    function switchEls(idx) {                     ',
         '        var switched = false;                     ',
+        '                                                  ',
         '        if (input[idx] < input[idx-1]) {          ',
         '            var tmp = input[idx];                 ',
         '            input[idx] = input[idx-1];            ',
         '            input[idx-1] = tmp;                   ',
         '            switched = true;                      ',
         '        }                                         ',
+        '                                                  ',
         '        return switched;                          ',
         '    }                                             ',
         '                                                  ',
@@ -117,7 +120,7 @@ function fill_code() {
         '                                                  '
     ].join('\n'));
 
-    el.code.container.innerHTML = code;
+    el.code.innerHTML = code;
 }
 
 
@@ -131,7 +134,7 @@ function init() {
     var plugin =  new jailed.Plugin(path+'plugin.js');
     plugin.whenConnected(function(){plugin.disconnect();});
 
-    el.code.container.focus();
+    el.code.focus();
 }
 
 window.addEventListener("load", init, false);

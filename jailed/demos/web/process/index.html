@@ -3,8 +3,10 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <title>Data processing demo</title>
     <script type="text/javascript" src="../../../lib/jailed.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script type="text/javascript" src="intence.js"></script>
+    <script type="text/javascript" src="dragscroll.js"></script>
 
   </head>
   <body>
@@ -31,11 +33,14 @@
                     <div class=data_inline_icon id=input_regenerate_icon></div>
                   </div>
                 </div>
-                <div class=code_container>
+                <div class=code_block>
                   <div class=rel>
-                    <div class="code intence"
-                         id=code contenteditable=true
-                         scrollImg=scroll.png></div>
+                    <div class="code_container intence dragscroll"
+                         scrollImg=scroll.png
+                         nochilddrag><span class=code_wrapper><span class=code
+                              contenteditable=true
+                              id=code
+                              spellcheck=false></span></span></div>
                   </div>
                 </div>
                 <div class=data_row id=output_row>
