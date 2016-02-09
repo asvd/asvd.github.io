@@ -85,6 +85,7 @@ a:hover {
     border :  1px solid #365666;
     overflow: hidden;
     box-shadow: 1px 1px 20px -7px rgba(0, 0, 0, 1);
+    border-radius: 1px;
 }
 
 
@@ -183,16 +184,18 @@ a:hover {
 
 .code_wrapper {
     cursor: text;
-    line-height: initial;
-    padding: 10px;
+/*    line-height: initial;*/
+/*    padding: 1px;
     padding-left: 0px;
+    padding-top: 1px;
+    padding-bottom: 1px;*/
 /*    background-color: rgba(70, 237, 255, 0.15);*/
 }
 
 .code {
     font-family: 'Droid Sans Mono', monospace;
     font-size: 13px;
-    line-height: 16px;
+/*    line-height: 16px;*/
     -moz-appearance:none;
     outline:0px none transparent;
 }

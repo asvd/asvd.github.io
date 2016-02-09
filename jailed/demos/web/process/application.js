@@ -12,7 +12,9 @@ var list = [
     'output_row',
     'input_data',
     'output_data',
-    'code'
+    'code',
+    'code_wrapper',
+    'code_container'
 ];
 
 for (var i = 0; i < list.length; i++){
@@ -79,7 +81,7 @@ function trim_tails(string) {
     var arr = string.split('\n');
 
     for (var i = 0; i < arr.length; i++) {
-        arr[i] = arr[i].replace(/[\s\uFEFF\xA0]+$/g, '');
+        arr[i] = arr[i].replace(/[\s]+$/g, '');
     }
 
     return arr.join('\n');
@@ -124,7 +126,7 @@ function fill_code() {
 }
 
 
-function init() {
+function init_application() {
     el.input_row.onclick = regen_input;
     el.output_row.onclick = process;
     fill_code();
@@ -137,7 +139,57 @@ function init() {
     el.code.focus();
 }
 
+
+function init_scrolling() {
+    // updates mouse highlight indicator
+    var lastActive = null;
+    var mousedowned = false;
+    var update_indicator = function(e) {
+        if (!mousedowned) {
+            var hover = document.elementFromPoint(e.clientX, e.clientY);
+            var active = null;
+            switch (hover) {
+            case el.code:
+            case el.code_wrapper:
+                active = 'code';
+                break;
+            case el.code_container.container:
+                active = 'code_container';
+                break;
+            }
+
+            if (active != lastActive) {
+                lastActive = active;
+                console.log(lastActive);
+            }
+        }
+    }
+
+    var mousedown = function(e) {
+        mousedowned = true;
+        update_indicator(e);
+    }
+
+    var mouseup = function(e) {
+        mousedowned = false;
+        update_indicator(e);
+    }
+
+
+    el.code.addEventListener('mouseover', update_indicator, false);
+    el.code.addEventListener('mouseout', update_indicator, false);
+    el.code_container.addEventListener('mouseover', update_indicator, false);
+    el.code_container.addEventListener('mouseout', update_indicator, false);
+
+    window.addEventListener('mousedown', mousedown, false);
+    window.addEventListener('mouseup', mouseup, false);
+}
+
+
+function init() {
+    init_application();
+    init_scrolling();
+}
+
 window.addEventListener("load", init, false);
-
-
 
