@@ -144,6 +144,33 @@ function init_scrolling() {
     // updates mouse highlight indicator
     var lastActive = null;
     var mousedowned = false;
+
+    var activate = function(key) {
+        switch (key) {
+        case 'code':
+            el.code.style.transition = 'opacity .15s';
+            el.code.style.opacity = '1';
+            break;
+        case 'code_container':
+            el.code_container.style.transition = 'background-color .15s';
+            el.code_container.style.backgroundColor = '#011223';
+            break;
+        }
+    }
+    
+    var deactivate = function(key) {
+        switch (key) {
+        case 'code':
+            el.code.style.transition = 'opacity .4s';
+            el.code.style.opacity = '.7';
+            break;
+        case 'code_container':
+            el.code_container.style.transition = 'background-color .4s';
+            el.code_container.style.backgroundColor = '#051627';
+            break;
+        }
+    }
+
     var update_indicator = function(e) {
         if (!mousedowned) {
             var hover = document.elementFromPoint(e.clientX, e.clientY);
@@ -159,8 +186,26 @@ function init_scrolling() {
             }
 
             if (active != lastActive) {
+                if (true) {
+                    switch (active) {
+                    case 'code':
+                        activate('code');
+                        activate('code_container');
+                        break;
+                    case 'code_container':
+                        deactivate('code');
+                        activate('code_container');
+                        break;
+                    default:
+                        deactivate('code');
+                        deactivate('code_container');
+                        break;
+                    }
+                } else {
+                    deactivate(lastActive);
+                    activate(active);
+                }
                 lastActive = active;
-                console.log(lastActive);
             }
         }
     }

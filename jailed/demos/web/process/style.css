@@ -173,13 +173,13 @@ a:hover {
     height : 254px;
     padding: 5px;
     background-color: #051627;
-    background-image: url('bg.png');
-    color: #B4EEF5;
+    color: #B5F7FF;
     line-height: initial;
     white-space: pre;
     overflow: auto;
     border-top: 1px solid #365666;
     border-bottom: 1px solid #365666;
+/*    background-image: url('bg.png');*/
 }
 
 .code_wrapper {
@@ -198,6 +198,7 @@ a:hover {
 /*    line-height: 16px;*/
     -moz-appearance:none;
     outline:0px none transparent;
+    opacity : .7;
 }
 
 .description {
@@ -217,7 +218,7 @@ a:hover {
 
 .links_container {
     display: block;
-    width: 560px;
+    width: 610px;
     height: 100px;
     margin-left: auto;
     margin-right: auto;
@@ -234,7 +235,7 @@ a:hover {
     font-size : 12px;
     text-align: right;
     height : 20px;
-    width: 150px;
+    width: 200px;
 }
 
 .link {
@@ -242,7 +243,7 @@ a:hover {
     width: 500px;
     height : 20px;
     top : 0px;
-    left: 160px;
+    left: 210px;
     font-size: 11px;
 }
 
