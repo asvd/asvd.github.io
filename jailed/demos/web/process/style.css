@@ -182,23 +182,13 @@ a:hover {
 /*    background-image: url('bg.png');*/
 }
 
-.code_wrapper {
-    cursor: text;
-/*    line-height: initial;*/
-/*    padding: 1px;
-    padding-left: 0px;
-    padding-top: 1px;
-    padding-bottom: 1px;*/
-/*    background-color: rgba(70, 237, 255, 0.15);*/
-}
-
 .code {
+    cursor: text;
     font-family: 'Droid Sans Mono', monospace;
     font-size: 13px;
-/*    line-height: 16px;*/
     -moz-appearance:none;
     outline:0px none transparent;
-    opacity : .85;
+    opacity : .82;
 }
 
 .description {

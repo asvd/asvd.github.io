@@ -153,7 +153,7 @@ function init_scrolling() {
             break;
         case 'code_container':
             el.code_container.style.transition = 'background-color .11s';
-            el.code_container.style.backgroundColor = '#031425';
+            el.code_container.style.backgroundColor = '#021324';
             break;
         }
     }
@@ -162,7 +162,7 @@ function init_scrolling() {
         switch (key) {
         case 'code':
             el.code.style.transition = 'opacity .2s';
-            el.code.style.opacity = '.85';
+            el.code.style.opacity = '.82';
             break;
         case 'code_container':
             el.code_container.style.transition = 'background-color .25s';
