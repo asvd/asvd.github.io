@@ -148,12 +148,12 @@ function init_scrolling() {
     var activate = function(key) {
         switch (key) {
         case 'code':
-            el.code.style.transition = 'opacity .15s';
+            el.code.style.transition = 'opacity .12s';
             el.code.style.opacity = '1';
             break;
         case 'code_container':
-            el.code_container.style.transition = 'background-color .15s';
-            el.code_container.style.backgroundColor = '#011223';
+            el.code_container.style.transition = 'background-color .11s';
+            el.code_container.style.backgroundColor = '#031425';
             break;
         }
     }
@@ -161,11 +161,11 @@ function init_scrolling() {
     var deactivate = function(key) {
         switch (key) {
         case 'code':
-            el.code.style.transition = 'opacity .4s';
-            el.code.style.opacity = '.7';
+            el.code.style.transition = 'opacity .2s';
+            el.code.style.opacity = '.85';
             break;
         case 'code_container':
-            el.code_container.style.transition = 'background-color .4s';
+            el.code_container.style.transition = 'background-color .25s';
             el.code_container.style.backgroundColor = '#051627';
             break;
         }

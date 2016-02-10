@@ -198,7 +198,7 @@ a:hover {
 /*    line-height: 16px;*/
     -moz-appearance:none;
     outline:0px none transparent;
-    opacity : .7;
+    opacity : .85;
 }
 
 .description {
