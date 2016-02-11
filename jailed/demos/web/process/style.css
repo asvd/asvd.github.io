@@ -6,6 +6,12 @@ body {
     font-size: 14px;
     line-height: 21px;
     cursor: default;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none; 
 }
 
 ::selection {
@@ -44,6 +50,7 @@ a:hover {
     margin-right: auto;
     padding: 0px;
 }
+
 
 .application_and_labels {
     position : absolute;
@@ -95,10 +102,11 @@ a:hover {
     height : 22px;
     left : 0px;
     background-color : #10303F;
+    transition : background-color .15s;
 }
 
 .data_row:hover {
-    background-color : #20404F;
+    background-color : #183847;
     cursor: pointer;
 }
 
