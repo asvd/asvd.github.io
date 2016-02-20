@@ -44,8 +44,8 @@ a:hover {
 
 .centered {
     display: block;
-    width: 800px;
-    height: 300px;
+    width: 880px;
+    height: 500px;
     margin-left: auto;
     margin-right: auto;
     padding: 0px;
@@ -56,7 +56,7 @@ a:hover {
     position : absolute;
     width : 563px;
     height: 300px;
-    top : 0px;
+    top : 45px;
     left : 0px;
 }
 
@@ -167,7 +167,7 @@ a:hover {
 
 .code_block {
     position : absolute;
-    width : 360px;
+    width : 400px;
     height : 256px;
     left : 0px;
     top : 22px;
@@ -180,14 +180,19 @@ a:hover {
     width : 400px;
     height : 254px;
     padding: 5px;
-    background-color: #051627;
     color: #B5F7FF;
     line-height: initial;
     white-space: pre;
     overflow: auto;
     border-top: 1px solid #365666;
     border-bottom: 1px solid #365666;
-/*    background-image: url('bg.png');*/
+}
+
+#code_background {
+    position: absoulte;
+    width : 100%;
+    height : 100%;
+    background-image: url('bg.png');
 }
 
 .code {
@@ -201,7 +206,8 @@ a:hover {
 
 .description {
     position : absolute;
-    width: 220px;
+    text-align: justify;
+    width: 235px;
     height: 400px;
     top : 0px;
     right : 0px;
@@ -215,43 +221,53 @@ a:hover {
 
 
 .links_container {
-    display: block;
-    width: 610px;
-    height: 100px;
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0px;
+    color : #56A7B7;
+    margin-top: 50px;
+    transition : opacity .2s;
+    opacity : .7;
 }
+
+.links_container:hover {
+    opacity : .9;
+}
+
 
 
 .link_block {
     position : relative;
 }
 
+.links_cast {
+    position:relative;
+    font-size: 14px;
+    text-align: left;
+    font-variant: small-caps;
+    font-weight: bold;
+    width: 100%;
+    left: 0px;
+    height : 24px;
+}
+
+
 .link_label {
     font-variant: small-caps;
     font-size : 12px;
-    text-align: right;
-    height : 20px;
-    width: 200px;
+    height : 16px;
+    text-align : left;
+    left : 0px;
+    width: 100%;
 }
 
 .link {
     position:absolute;
-    width: 500px;
-    height : 20px;
+    text-align: right;
+    width: 300px;
+    height : 16px;
     top : 0px;
-    left: 210px;
+    left: 0px;
+    width: 100%;
     font-size: 11px;
 }
-
-
-
-
-
-
-
-
 
 
 

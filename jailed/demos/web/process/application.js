@@ -6,20 +6,10 @@ var path = scripts[scripts.length-1].src
 
 
 // component shortcuts
-var el = {};
-var list = [
-    'input_row',
-    'output_row',
-    'input_data',
-    'output_data',
-    'code',
-    'code_wrapper',
-    'code_container'
-];
-
-for (var i = 0; i < list.length; i++){
-    el[list[i]] = document.getElementById(list[i]);
+var el = function(id) {
+    return document.getElementById(id);
 }
+
 
 // generates random input and puts it into input field
 var input;
@@ -30,24 +20,24 @@ function regen_input() {
         input.push(Math.floor(Math.random()*10));
     }
 
-    el.input_data.innerHTML = stringify(input);
+    el('input_data').innerHTML = stringify(input);
 }
 
 // processes the input data using provided code
 function process() {
-    el.output_data.innerHTML = '<img class="loading" src="loading.gif"/>';
-    var code = el.code.textContent;
+    el('output_data').innerHTML = '<img class="loading" src="loading.gif"/>';
+    var code = el('code').textContent;
 
-    var input = el.input_data.textContent;
+    var input = el('input_data').textContent;
 
     var plugin =  new jailed.Plugin(path+'plugin.js');
     var process = function() {
         var displayResult = function(result) {
             if (result.error) {
-                el.output_data.innerHTML =
+                el('output_data').innerHTML =
                     '<span class="error">'+result.error + '</span>';
             } else {
-                el.output_data.innerHTML = stringify(result.output);
+                el('output_data').innerHTML = stringify(result.output);
             }
             plugin.disconnect();
         }
@@ -122,13 +112,13 @@ function fill_code() {
         '                                                  '
     ].join('\n'));
 
-    el.code.innerHTML = code;
+    el('code').innerHTML = code;
 }
 
 
 function init_application() {
-    el.input_row.onclick = regen_input;
-    el.output_row.onclick = process;
+    el('input_row').onclick = regen_input;
+    el('output_row').onclick = process;
     fill_code();
     regen_input();
 
@@ -136,7 +126,7 @@ function init_application() {
     var plugin =  new jailed.Plugin(path+'plugin.js');
     plugin.whenConnected(function(){plugin.disconnect();});
 
-    el.code.focus();
+    el('code').focus();
 }
 
 
@@ -148,12 +138,12 @@ function init_scrolling() {
     var activate = function(key) {
         switch (key) {
         case 'code':
-            el.code.style.transition = 'opacity .12s';
-            el.code.style.opacity = '1';
+            el('code').style.transition = 'opacity .12s';
+            el('code').style.opacity = '1';
             break;
-        case 'code_container':
-            el.code_container.style.transition = 'background-color .11s';
-            el.code_container.style.backgroundColor = '#021324';
+        case 'code_background':
+            el('code_background').style.transition = 'opacity .11s';
+            el('code_background').style.opacity = '1';
             break;
         }
     }
@@ -161,12 +151,12 @@ function init_scrolling() {
     var deactivate = function(key) {
         switch (key) {
         case 'code':
-            el.code.style.transition = 'opacity .2s';
-            el.code.style.opacity = '.82';
+            el('code').style.transition = 'opacity .2s';
+            el('code').style.opacity = '.82';
             break;
-        case 'code_container':
-            el.code_container.style.transition = 'background-color .25s';
-            el.code_container.style.backgroundColor = '#051627';
+        case 'code_background':
+            el('code_background').style.transition = 'opacity .25s';
+            el('code_background').style.opacity = '.7';
             break;
         }
     }
@@ -176,12 +166,12 @@ function init_scrolling() {
             var hover = document.elementFromPoint(e.clientX, e.clientY);
             var active = null;
             switch (hover) {
-            case el.code:
-            case el.code_wrapper:
+            case el('code'):
+            case el('code_wrapper'):
                 active = 'code';
                 break;
-            case el.code_container.container:
-                active = 'code_container';
+            case el('code_container').container:
+                active = 'code_background';
                 break;
             }
 
@@ -190,15 +180,15 @@ function init_scrolling() {
                     switch (active) {
                     case 'code':
                         activate('code');
-                        activate('code_container');
+                        activate('code_background');
                         break;
-                    case 'code_container':
+                    case 'code_background':
                         deactivate('code');
-                        activate('code_container');
+                        activate('code_background');
                         break;
                     default:
                         deactivate('code');
-                        deactivate('code_container');
+                        deactivate('code_background');
                         break;
                     }
                 } else {
@@ -221,13 +211,16 @@ function init_scrolling() {
     }
 
 
-    el.code.addEventListener('mouseover', update_indicator, false);
-    el.code.addEventListener('mouseout', update_indicator, false);
-    el.code_container.addEventListener('mouseover', update_indicator, false);
-    el.code_container.addEventListener('mouseout', update_indicator, false);
+    el('code').addEventListener('mouseover', update_indicator, false);
+    el('code').addEventListener('mouseout', update_indicator, false);
+    el('code_container').addEventListener('mouseover', update_indicator, false);
+    el('code_container').addEventListener('mouseout', update_indicator, false);
 
     window.addEventListener('mousedown', mousedown, false);
     window.addEventListener('mouseup', mouseup, false);
+
+    deactivate('code');
+    deactivate('code_background');
 }
 
 
