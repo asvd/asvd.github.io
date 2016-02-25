@@ -22,6 +22,9 @@ body {
   background: rgba(70, 237, 255, 0.15);
 }
 
+.or {
+    opacity : .6;
+}
 
 a {
     color: #48D7E9;

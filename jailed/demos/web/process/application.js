@@ -112,6 +112,7 @@ function fill_code() {
         '                                                  '
     ].join('\n'));
 
+
     el('code').innerHTML = code;
 }
 
@@ -165,14 +166,10 @@ function init_scrolling() {
         if (!mousedowned) {
             var hover = document.elementFromPoint(e.clientX, e.clientY);
             var active = null;
-            switch (hover) {
-            case el('code'):
-            case el('code_wrapper'):
+            if (el('code').contains(hover)) {
                 active = 'code';
-                break;
-            case el('code_container').container:
+            } else if (hover == el('code_container').container) {
                 active = 'code_background';
-                break;
             }
 
             if (active != lastActive) {
@@ -224,9 +221,49 @@ function init_scrolling() {
 }
 
 
+
+function init_keypress() {
+    var handle_keypress = function(e) {
+        if (e.keyCode == 13) {  // Enter
+            // firefox places <br/> instead of newline
+            // which is not recognized by textContent
+            //
+            // also adding some padding from the left side
+            var sel = window.getSelection();
+            var ran = sel.getRangeAt(0);
+            if (el('code').contains(ran.startContainer) &&
+                el('code').contains(ran.endContainer)
+            ) {
+                ran.deleteContents();
+                var pos = ran.startOffset;
+                var node = ran.startContainer
+
+                ran.setStart(el('code'), 0);
+                var prevLine = ran.toString().split('\n').pop();
+                var spaces = prevLine.substr(0, (prevLine+'.').search(/\S/));
+                var data = '\n' + spaces;
+                node.insertData(pos, data);
+
+                // putting the selection after the newline
+                pos += data.length;
+                ran.setStart(node, pos);
+                ran.setEnd(node, pos);
+                sel.removeAllRanges();
+                sel.addRange(ran);
+
+                e.preventDefault();
+            }
+        }
+    }
+
+    el('code').addEventListener('keypress', handle_keypress, false);
+}
+
+
 function init() {
     init_application();
     init_scrolling();
+    init_keypress();
 }
 
 window.addEventListener("load", init, false);

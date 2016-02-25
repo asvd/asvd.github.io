@@ -7,6 +7,7 @@
     <link rel="stylesheet" type="text/css" href="style.css" />
     <script type="text/javascript" src="intence.js"></script>
     <script type="text/javascript" src="dragscroll.js"></script>
+    <script type="text/javascript" src="microlight.js"></script>
 
   </head>
   <body>
@@ -39,7 +40,8 @@
                     <div class="code_container intence dragscroll"
                          scrollImg=scroll.png
                          nochilddrag
-                         id=code_container><span class=code
+                         id=code_container><span
+                              class="code microlight"
                               contenteditable=true
                               id=code
                               spellcheck=false></span></div>
@@ -62,9 +64,9 @@
           <h3>data processing demo</h3>
 
           The input data is shipped by the application. Processing
-          code is provided by a user and is therefore untrusted. The
-          code is evaluated in a&nbsp;Plugin created with
-          the <a target="_blank"
+          code is provided <span class='or'>|</span> changeable by a
+          user and is therefore untrusted. The code is evaluated in
+          a&nbsp;Plugin created with the <a target="_blank"
           href="https://github.com/asvd/jailed">Jailed</a>
           library. The Plugin runs in a sandboxed iframe in order to
           prevent accessing the main application.
@@ -106,14 +108,6 @@
               </div>
             </div>
 
-            <div class=link_block>
-              <div class=link_label>scrolling with mouse drag</div>
-              <div class=link>
-                <a target="_blank" href='https://github.com/asvd/dragscroll/'>
-                  dragscroll
-                </a>
-              </div>
-            </div>
 <!--
             <div class=link_block>
               <div class=link_label>code highlight</div>
@@ -123,7 +117,17 @@
                 </a>
               </div>
             </div>
+-->
 
+            <div class=link_block>
+              <div class=link_label>scrolling with mouse drag</div>
+              <div class=link>
+                <a target="_blank" href='https://github.com/asvd/dragscroll/'>
+                  dragscroll
+                </a>
+              </div>
+            </div>
+<!--
             <div class=link_block>
               <div class=link_label>processing indicator</div>
               <div class=link>
