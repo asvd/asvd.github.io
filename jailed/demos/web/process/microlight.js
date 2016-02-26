@@ -63,7 +63,10 @@
                             pos=0,
                             j=0,
                             sel = _window.getSelection(),
-                            ran, res;
+                            ran, res,
+                            colorArr = /(\d*\, \d*\, \d*)(, ([.\d]*))?/g.exec(_window.getComputedStyle(el).color),
+                            color = 'rgba('+colorArr[1]+',',
+                            alpha = colorArr[3]||1;
 
                         if ((lastTextContent||'') != text) {
                             lastTextContent = text;
@@ -89,15 +92,20 @@
                                 chr = next;
                                 next=text[++j];
 
+                                // escaping if needed
+                                if ((type == 'string1' || type == 'string2') &&
+                                    prev2 == '\\') {
+                                    prev1 = '';
+                                }
+
                                 // checking if token should be finalized
-                                if (!type || !chr || {
+                                if (
+                                    !type || !chr || {
                                         comment      : chr         == '\n',
                                         multicomment : prev2+prev1 == '*/',
                                         string1      : prev1 == "'" &&
-                                                       prev2 != '\\' &&
                                                        token.length > 1,
                                         string2      : prev1 == '"' &&
-                                                       prev2 != '\\' &&
                                                        token.length > 1,
                                         word         : !/[$\w]/.test(chr),
                                         brace        : true
@@ -106,14 +114,14 @@
                                     // adding the token if finalized
                                     if (type) {
                                         result += '<span style="' + ({
-                                                comment      : 'opacity:.5;font-style:italic',
-                                                multicomment : 'opacity:.5;font-style:italic',
-                                                string1      : 'opacity:.6',
-                                                string2      : 'opacity:.6',
+                                                comment      : 'opacity:.5;text-shadow: 0px 0px 16px '+color + alpha*.4+')',
+                                                multicomment : 'opacity:.5;text-shadow: 0px 0px 16px '+color + alpha*.4+')',
+                                                string1      : 'opacity:.7;font-style:italic',
+                                                string2      : 'opacity:.7;font-style:italic',
                                                 word         : /^(abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)$/.test(token) ?
-                                                               'font-weight:bold' :
+                                                               'text-shadow: 0px 0px 12px '+color + alpha*.65+'), 0px 0px 2px '+color + alpha*.2+')':
                                                                '',
-                                                brace        : 'font-weight:bold'
+                                                brace        : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 2px '+color + alpha*.4+')'
                                             }[type]||'') + '">' + token + '</span>';
                                     } else {
                                         result += token;
