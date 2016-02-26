@@ -93,7 +93,7 @@
                                 next=text[++j];
 
                                 // escaping if needed
-                                if ((type == 'string1' || type == 'string2') &&
+                                if ((type == 'string1' || type == 'string2' || type == 'regex') &&
                                     prev2 == '\\') {
                                     prev1 = '';
                                 }
@@ -107,21 +107,26 @@
                                                        token.length > 1,
                                         string2      : prev1 == '"' &&
                                                        token.length > 1,
+                                        regex        : (prev1 == '/' || prev1 == '\n') &&
+                                                       token.length > 1,
                                         word         : !/[$\w]/.test(chr),
-                                        brace        : true
+                                        brace        : true,
+                                        punctuation  : true
                                     }[type]
                                 ) {
                                     // adding the token if finalized
                                     if (type) {
                                         result += '<span style="' + ({
-                                                comment      : 'opacity:.5;text-shadow: 0px 0px 16px '+color + alpha*.4+')',
-                                                multicomment : 'opacity:.5;text-shadow: 0px 0px 16px '+color + alpha*.4+')',
+                                                comment      : 'opacity:.5;text-shadow: 0px 0px 16px '+color + alpha*.5+')',
+                                                multicomment : 'opacity:.5;text-shadow: 0px 0px 16px '+color + alpha*.5+')',
                                                 string1      : 'opacity:.7;font-style:italic',
                                                 string2      : 'opacity:.7;font-style:italic',
-                                                word         : /^(abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|super|switch|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)$/.test(token) ?
-                                                               'text-shadow: 0px 0px 12px '+color + alpha*.65+'), 0px 0px 2px '+color + alpha*.2+')':
+                                                regex        : 'text-shadow: 0px 0px 7px '+color + alpha*.8+'), 0px 0px 3px '+color + alpha*.5+')',
+                                                word         : /^(abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|struct|super|switch|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)$/.test(token) ?
+                                                               'text-shadow: 0px 0px 12px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.2+')':
                                                                '',
-                                                brace        : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 2px '+color + alpha*.4+')'
+                                                brace        : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
+                                                punctuation  : 'opacity: .5; text-shadow: 0px 0px 7px '+color + alpha*.3+'), 0px 0px 3px '+color + alpha*.3+')'
                                             }[type]||'') + '">' + token + '</span>';
                                     } else {
                                         result += token;
@@ -137,10 +142,14 @@
                                         type = 'string1';
                                     } else if (chr == '"') {
                                         type = 'string2';
+                                    } else if (chr == '/') {
+                                        type = 'regex';
                                     } else if (/[$\w]/.test(chr)) {
                                         type = 'word';
                                     } else if (/[{}\[\]\(\)]/.test(chr)) {
                                         type = 'brace';
+                                    } else if (/[\-\+\*\/=<>:;|\.,!]/.test(chr)) {
+                                        type = 'punctuation';
                                     }
                                 }
 
