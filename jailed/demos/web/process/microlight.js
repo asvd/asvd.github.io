@@ -126,7 +126,7 @@
                                                                'text-shadow: 0px 0px 12px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.2+')':
                                                                '',
                                                 brace        : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
-                                                punctuation  : 'opacity: .5; text-shadow: 0px 0px 7px '+color + alpha*.3+'), 0px 0px 3px '+color + alpha*.3+')'
+                                                punctuation  : 'opacity: .6; text-shadow: 0px 0px 7px '+color + alpha*.3+'), 0px 0px 3px '+color + alpha*.3+')'
                                             }[type]||'') + '">' + token + '</span>';
                                     } else {
                                         result += token;
@@ -148,7 +148,7 @@
                                         type = 'word';
                                     } else if (/[{}\[\]\(\)]/.test(chr)) {
                                         type = 'brace';
-                                    } else if (/[\-\+\*\/=<>:;|\.,!]/.test(chr)) {
+                                    } else if (/[\-\+\*\/=<>:;|\.,!&]/.test(chr)) {
                                         type = 'punctuation';
                                     }
                                 }
