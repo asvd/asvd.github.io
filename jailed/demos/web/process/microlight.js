@@ -125,7 +125,8 @@
                                                 string2      : 'opacity:.7;font-style:italic',
                                                 regex        : 'text-shadow: 0px 0px 7px '+color + alpha*.8+'), 0px 0px 3px '+color + alpha*.5+')',
                                                 word         : /^(abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|struct|super|switch|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)$/.test(token) ?
-                                                               'text-shadow: 0px 0px 12px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.2+')':
+//                                                               'text-shadow: 0px 0px 12px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.2+')':
+                                                               'text-shadow: 0px 0px 10px '+color + alpha*.8+'), 0px 0px 3px '+color + alpha*.3+')':
                                                                '',
                                                 brace        : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
                                                 braceClose   : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
