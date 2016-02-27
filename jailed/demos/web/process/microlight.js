@@ -66,7 +66,8 @@
                             ran, res,
                             colorArr = /(\d*\, \d*\, \d*)(, ([.\d]*))?/g.exec(_window.getComputedStyle(el).color),
                             color = 'rgba('+colorArr[1]+',',
-                            alpha = colorArr[3]||1;
+                            alpha = colorArr[3]||1,
+                            lastType = 0;
 
                         if ((lastTextContent||'') != text) {
                             lastTextContent = text;
@@ -101,8 +102,8 @@
                                 // checking if token should be finalized
                                 if (
                                     !type || !chr || {
-                                        comment      : chr         == '\n',
-                                        multicomment : prev2+prev1 == '*/',
+                                        comment      : chr         == '\n',     //r
+                                        multicomment : prev2+prev1 == '*/',     //r
                                         string1      : prev1 == "'" &&
                                                        token.length > 1,
                                         string2      : prev1 == '"' &&
@@ -110,8 +111,9 @@
                                         regex        : (prev1 == '/' || prev1 == '\n') &&
                                                        token.length > 1,
                                         word         : !/[$\w]/.test(chr),
-                                        brace        : true,
-                                        punctuation  : true
+                                        brace        : true,                    //r
+                                        braceClose   : true,
+                                        punctuation  : true                     //r
                                     }[type]
                                 ) {
                                     // adding the token if finalized
@@ -126,8 +128,10 @@
                                                                'text-shadow: 0px 0px 12px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.2+')':
                                                                '',
                                                 brace        : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
+                                                braceClose   : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
                                                 punctuation  : 'opacity: .6; text-shadow: 0px 0px 7px '+color + alpha*.3+'), 0px 0px 3px '+color + alpha*.3+')'
-                                            }[type]||'') + '">' + token + '</span>';
+                                            }[type]||'') + '">' + token.replace('<', '&lt;').replace('>', '&gt;') + '</span>';
+                                        lastType = type;
                                     } else {
                                         result += token;
                                     }
@@ -142,12 +146,19 @@
                                         type = 'string1';
                                     } else if (chr == '"') {
                                         type = 'string2';
-                                    } else if (chr == '/') {
+                                    } else if (chr == '/' && (lastType == 'brace' ||
+                                                              lastType == 'punctuation'||
+                                                              lastType == 'comment' ||
+                                                              lastType == 'multicomment') &&
+                                               prev1 != '<'  // special fix for html closing tags
+                                    ) {
                                         type = 'regex';
                                     } else if (/[$\w]/.test(chr)) {
                                         type = 'word';
-                                    } else if (/[{}\[\]\(\)]/.test(chr)) {
+                                    } else if (/[{}\[\(]/.test(chr)) {
                                         type = 'brace';
+                                    } else if (/[\]\)]/.test(chr)) {
+                                        type = 'braceClose';
                                     } else if (/[\-\+\*\/=<>:;|\.,!&]/.test(chr)) {
                                         type = 'punctuation';
                                     }
