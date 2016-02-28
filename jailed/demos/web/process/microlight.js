@@ -81,7 +81,7 @@
 
                             // tokenizing the content
                             var token = '';
-                            var type = null;
+                            var type = 0;
 
                             var prev2 = '';
                             var prev1 = '';
@@ -94,51 +94,65 @@
                                 next1=text[++j];
 
                                 // escaping if needed
-                                if ((type == 'string1' || type == 'string2' || type == 'regex') &&
-                                    prev2 == '\\') {
+                                if (type < 8 && // string or regex but not comments
+                                    prev2 == '\\'
+                                ) {
+                                    // pervious character will not be
+                                    // therefore recognized as a token
+                                    // finalize condition
                                     prev1 = '';
                                 }
 
                                 // checking if token should be finalized
-                                if (
-                                    !type || !chr || {
-                                        comment      : chr         == '\n',
-                                        multicomment : prev2+prev1 == '*/',
-                                        htmlcomment  : text[j-4]+prev2+prev1 == '-->',
-                                        string1      : prev1 == "'" &&
-                                                       token.length > 1,
-                                        string2      : prev1 == '"' &&
-                                                       token.length > 1,
-                                        regex        : (prev1 == '/' || prev1 == '\n') &&
-                                                       token.length > 1,
-                                        word         : !/[$\w]/.test(chr),
-                                        brace        : true,
-                                        braceClose   : true,
-                                        operator     : true
-                                    }[type]
+                                if (!type ||
+                                    !chr  || // end of content
+                                    [ // finalize condition for every token type
+                                        1,                   // 1: operator
+                                        1,                   // 2: opening brace
+                                        1,                   // 3: closing brace
+                                        !/[$\w]/.test(chr),  // 4: word
+                                                             // 5: regex
+                                        (prev1 == '/' || prev1 == '\n') && token.length > 1,
+                                                             // 6: string with "
+                                        prev1 == '"' && token.length > 1,
+                                                             // 7: string with '
+                                        prev1 == "'" && token.length > 1,
+                                                             // 8: html comment
+                                        text[j-4]+prev2+prev1 == '-->',
+                                        prev2+prev1 == '*/', // 9: multiline comment
+                                        chr         == '\n'  // 10: single-line comment
+                                    ][type-1]
                                 ) {
                                     // adding the token if finalized
                                     if (type) {
-                                        result += '<span style="' + ({
-                                                comment      : 'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic',
-                                                multicomment : 'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic',
-                                                htmlcomment : 'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic',
-                                                string1      : 'opacity:.7;font-style:italic',
-                                                string2      : 'opacity:.7;font-style:italic',
-                                                regex        : 'text-shadow: 0px 0px 7px '+color + alpha*.8+'), 0px 0px 3px '+color + alpha*.5+')',
-                                                word         : /^(abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|struct|super|switch|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)$/.test(token) ?
+                                        result += '<span style="' + ([
+                                            // 1: opreator
+                                            'opacity: .6; text-shadow: 0px 0px 7px '+color + alpha*.3+'), 0px 0px 3px '+color + alpha*.3+')',
+                                            // 2: opening brace
+                                            'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
+                                            // 3: closing brace
+                                            'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
+                                            // 4: word
+                                            /^(abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|struct|super|switch|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)$/.test(token) ?
 //                                                               'text-shadow: 0px 0px 12px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.2+')':
                                                                'text-shadow: 0px 0px 10px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.3+')':
                                                                '',
-                                                brace        : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
-                                                braceClose   : 'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
-                                                operator     : 'opacity: .6; text-shadow: 0px 0px 7px '+color + alpha*.3+'), 0px 0px 3px '+color + alpha*.3+')'
-                                            }[type]||'') + '">' + token.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+                                            // 5: regex
+                                            'text-shadow: 0px 0px 7px '+color + alpha*.8+'), 0px 0px 3px '+color + alpha*.5+')',
+                                            // 6: string with "
+                                            'opacity:.7;font-style:italic',
+                                            // 7: string with '
+                                            'opacity:.7;font-style:italic',
+                                            // 8: html comment
+                                            'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic',
+                                            // 9: multi-line comment
+                                            'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic',
+                                            // 10: single-line comment
+                                            'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic'
 
-                                        if (type != 'comment' &&
-                                            type != 'multicomment' &&
-                                            type != 'htmlcomment'
-                                        ) {
+                                            ][type-1]||'') + '">' + token.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+
+                                        if (type < 8) { // not a comment
                                             lastType = type;
                                         }
                                     } else {
@@ -146,31 +160,32 @@
                                     }
 
                                     // initializing the new token
-                                    type = token = '';
-                                    if (chr+next1 == '//') {
-                                        type = 'comment';
-                                    } else if (chr+next1 == '/*') {
-                                        type = 'multicomment';
-                                    } else if (chr+next1+text[j+1]+text[j+2] == '<!--') {
-                                        type = 'htmlcomment';
-                                    } else if (chr == "'") {
-                                        type = 'string1';
-                                    } else if (chr == '"') {
-                                        type = 'string2';
-                                    } else if (chr == '/' && (lastType == 'brace' ||
-                                                              lastType == 'operator') &&
-                                               prev1 != '<'  // special fix for html closing tags
-                                    ) {
-                                        type = 'regex';
-                                    } else if (/[$\w]/.test(chr)) {
-                                        type = 'word';
-                                    } else if (/[{}\[\(]/.test(chr)) {
-                                        type = 'brace';
-                                    } else if (/[\]\)]/.test(chr)) {
-                                        type = 'braceClose';
-                                    } else if (/[\-\+\*\/=<>:;|\.,!&]/.test(chr)) {
-                                        type = 'operator';
-                                    }
+                                    token = '';
+                                    type = 11;
+
+                                    while (![
+                                        1,                     // 0: everything else
+                                                               // 1: operator
+                                        /[\-\+\*\/=<>:;|\.,!&]/.test(chr),
+                                        /[{}\[\(]/.test(chr),  // 2: opening brace
+                                        /[\]\)]/.test(chr),    // 3: closing brace
+                                        /[$\w]/.test(chr),     // 4: word,
+                                        chr == '/' &&          // 5: regex
+                                            // previous token was an
+                                            // opening brace or an
+                                            // operator (otherwise
+                                            // division, not a regex)
+                                            lastType < 3 &&
+                                            // workaround for html
+                                            // closing tags
+                                            prev1 != '<',
+                                        chr == '"',            // 6: string with "
+                                        chr == "'",            // 7: string with '
+                                                               // 8: html comment
+                                        chr+next1+text[j+1]+text[j+2] == '<!--',
+                                        chr+next1 == '/*',     // 9: multiline comment
+                                        chr+next1 == '//'      // 10: single-line comment
+                                    ][--type]);
                                 }
 
                                 token += chr;
