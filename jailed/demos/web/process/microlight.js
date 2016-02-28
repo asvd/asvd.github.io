@@ -68,6 +68,7 @@
                             color = 'rgba('+colorArr[1]+',',
                             alpha = colorArr[3]||1,
                             lastType = 0;
+                            
 
                         if ((lastTextContent||'') != text) {
                             lastTextContent = text;
@@ -127,16 +128,16 @@
                                     if (type) {
                                         result += '<span style="' + ([
                                             // 1: opreator
-                                            'opacity: .6; text-shadow: 0px 0px 7px '+color + alpha*.3+'), 0px 0px 3px '+color + alpha*.3+')',
+                                            'opacity: .5; text-shadow: 0px 0px 7px '+color + alpha*.25+'), 0px 0px 3px '+color + alpha*.25+')',
                                             // 2: opening brace
                                             'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
                                             // 3: closing brace
                                             'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
                                             // 4: word
                                             /^(abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|struct|super|switch|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)$/.test(token) ?
-//                                                               'text-shadow: 0px 0px 12px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.2+')':
-                                                               'text-shadow: 0px 0px 10px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.3+')':
-                                                               '',
+//                                                'text-shadow: 0px 0px 10px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.3+')':
+                                                'text-shadow: 0px 0px 7px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.4+')':
+                                                '',
                                             // 5: regex
                                             'text-shadow: 0px 0px 7px '+color + alpha*.8+'), 0px 0px 3px '+color + alpha*.5+')',
                                             // 6: string with "
@@ -144,11 +145,11 @@
                                             // 7: string with '
                                             'opacity:.7;font-style:italic',
                                             // 8: html comment
-                                            'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic',
+                                            'opacity:.5;text-shadow: 3px 0px 5px '+color + alpha*.3+'), -3px 0px 5px '+color + alpha*.3+');font-style:italic',
                                             // 9: multi-line comment
-                                            'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic',
+                                            'opacity:.5;text-shadow: 3px 0px 5px '+color + alpha*.3+'), -3px 0px 5px '+color + alpha*.3+');font-style:italic',
                                             // 10: single-line comment
-                                            'opacity:.5;text-shadow: 4px 0px 5px '+color + alpha*.4+'), -4px 0px 5px '+color + alpha*.4+');font-style:italic'
+                                            'opacity:.5;text-shadow: 3px 0px 5px '+color + alpha*.3+'), -3px 0px 5px '+color + alpha*.3+');font-style:italic'
 
                                             ][type-1]||'') + '">' + token.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
 
@@ -164,7 +165,7 @@
                                     type = 11;
 
                                     while (![
-                                        1,                     // 0: everything else
+                                        1,                     // 0: whatever else
                                                                // 1: operator
                                         /[\-\+\*\/=<>:;|\.,!&]/.test(chr),
                                         /[{}\[\(]/.test(chr),  // 2: opening brace
