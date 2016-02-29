@@ -1,3 +1,12 @@
+/**
+ * @fileoverview microlight - syntax highlightning library
+ * @version 0.0.1
+ * 
+ * @license MIT, see http://github.com/asvd/microlight
+ * @copyright 2015 asvd <heliosframework@gmail.com> 
+ */
+
+
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define(['exports'], factory);
@@ -60,166 +69,168 @@
                 // MutationObserver can already be defined
                 // (in case when reset() was invoked again)
                 if (!el.ml) {
-                    el.ml = (new MutationObserver(cb = function(){
-                        var result = '',
-                            text = el.textContent,
-                            pos=0,
-                            j=0,
-                            sel = _window.getSelection(),
-                            ran, res,
-                            colorArr = /(\d*\, \d*\, \d*)(, ([.\d]*))?/g.exec(_window.getComputedStyle(el).color),
-                            pxColor = 'px rgba('+colorArr[1]+',',
-                            alpha = colorArr[3]||1,
-                            lastType = 0;
-                            
+                    el.ml = (new MutationObserver(cb =
+function(){
+    var result = '',
+        text = el.textContent,
+        pos=0,
+        j=0,
+        sel = _window.getSelection(),
+        ran, res,
+        colorArr = /(\d*\, \d*\, \d*)(, ([.\d]*))?/g.exec(_window.getComputedStyle(el).color),
+        pxColor = 'px rgba('+colorArr[1]+',',
+        alpha = colorArr[3]||1;
+        
 
-                        if ((lastTextContent||'') != text) {
-                            lastTextContent = text;
+    if ((lastTextContent||'') != text) {
+        lastTextContent = text;
 
-                            if (sel.rangeCount &&
-                                el.contains((ran = sel.getRangeAt(0)).startContainer)
-                            ) {
-                                ran.setStart(el, 0);
-                                pos = ran.toString()[length];
-                            }
+        if (sel.rangeCount &&
+            el.contains((ran = sel.getRangeAt(0)).startContainer)
+        ) {
+            ran.setStart(el, 0);
+            pos = ran.toString()[length];
+        }
 
-                            // tokenizing the content
-                            var token = '';
-                            var type = 0;
+        // tokenizing the content
+        var token = '',
+            type = 0,
+            prev2 = '',
+            prev1 = '',
+            chr   = 1,
+            next1  = text[0],
+            lastType = 0,
+            textShadow = ';text-shadow:',
+            opacity = ';opacity:.',
+            _0px_0px = ' 0px 0px ',
+            _3px_0px_5 = '3px 0px 5',
+            keywordStyle = textShadow+_0px_0px+7+pxColor + alpha*.6+'),'+_0px_0px+3+pxColor + alpha*.4+')',
+            stringStyle = opacity+7+textShadow+_3px_0px_5+pxColor + alpha*.2+'), -'+_3px_0px_5+pxColor + alpha*.2+')',
+            braceStyle = opacity+6+textShadow+_0px_0px+7+pxColor + alpha*.25+'),'+_0px_0px+3+pxColor + alpha*.25+')';
 
-                            var prev2 = '';
-                            var prev1 = '';
-                            var chr   = 1;
-                            var next1  = text[0];
-                            while (prev2 = prev1,
-                                   prev1 = chr
-                            ) {
-                                chr = next1;
-                                next1=text[++j];
+        while (prev2 = prev1,
+               prev1 = chr
+        ) {
+            chr = next1;
+            next1=text[++j];
 
-                                // escaping if needed
-                                if (type < 8 && // string or regex but not comments
-                                    prev2 == '\\'
-                                ) {
-                                    // pervious character will not be
-                                    // therefore recognized as a token
-                                    // finalize condition
-                                    prev1 = '';
-                                }
+            // escaping if needed
+            if (type < 8 && // string or regex but not comments
+                prev2 == '\\'
+            ) {
+                // pervious character will not be
+                // therefore recognized as a token
+                // finalize condition
+                prev1 = '';
+            }
 
-                                // checking if token should be finalized
-                                if (!type ||
-                                    !chr  || // end of content
-                                    [ // finalize condition for every token type
-                                        1,                   // 1: operator
-                                        1,                   // 2: opening brace
-                                        1,                   // 3: closing brace
-                                        !/[$\w]/[test](chr),  // 4: word
-                                                             // 5: regex
-                                        (prev1 == '/' || prev1 == '\n') && token[length] > 1,
-                                                             // 6: string with "
-                                        prev1 == '"' && token[length] > 1,
-                                                             // 7: string with '
-                                        prev1 == "'" && token[length] > 1,
-                                                             // 8: html comment
-                                        text[j-4]+prev2+prev1 == '-->',
-                                        prev2+prev1 == '*/', // 9: multiline comment
-                                        chr         == '\n', // 10: single-line comment
-                                        chr         == '\n', // 11: ruby-style comment
-                                    ][type-1]
-                                ) {
-                                    var textShadow = ';text-shadow:';
-                                    var opacity = ';opacity:.';
-                                    var _0px_0px = ' 0px 0px ';
-                                    var _3px_0px_5 = '3px 0px 5';
-                                    var keywordStyle = textShadow+_0px_0px+7+pxColor + alpha*.6+'),'+_0px_0px+3+pxColor + alpha*.4+')';
-                                    var stringStyle = opacity+7+textShadow+_3px_0px_5+pxColor + alpha*.3+'), -'+_3px_0px_5+pxColor + alpha*.3+')';
-                                    var braceStyle = opacity+6+textShadow+_0px_0px+7+pxColor + alpha*.25+'),'+_0px_0px+3+pxColor + alpha*.25+')';
+            // checking if token should be finalized
+            if (!type ||
+                !chr  || // end of content
+                [ // finalize condition for every token type
+                        1,                   // 1: operator
+                        1,                   // 2: opening brace
+                        1,                   // 3: closing brace
+                        !/[$\w]/[test](chr), // 4: word
+                                             // 5: regex
+                        (prev1 == '/' || prev1 == '\n') && token[length] > 1,
+                                             // 6: string with "
+                        prev1 == '"' && token[length] > 1,
+                                             // 7: string with '
+                        prev1 == "'" && token[length] > 1,
+                                             // 8: html comment
+                        text[j-4]+prev2+prev1 == '-->',
+                        prev2+prev1 == '*/', // 9: multiline comment
+                        chr         == '\n', // 10: single-line comment
+                        chr         == '\n', // 11: hash-style comment
+                    ][type-1]
+            ) {
+                // adding the token if finalized
+                if (type) {
+                    result += '<span style="' + ([
+                        // 1: opreator
+                        braceStyle,
+                        // 2: opening brace
+                        braceStyle,
+                        // 3: closing brace
+                        braceStyle,
+                        // 4: word
+                        /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|trict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ?
+                            keywordStyle:
+                            ' ',
+                        // 5: regex
+                        stringStyle,
+                        // 6: string with "
+                        stringStyle,
+                        // 7: string with '
+                        stringStyle
+                        // 8: html comment
+                        // 9: multi-line comment
+                        // 10: single-line comment
+                        // 10: hash-style comment
+                        //      -- all default to comment style
+                    ][type-1]||
+                        // default comment style
+                        'font-style:italic'+opacity+5+textShadow+_3px_0px_5+pxColor + alpha*.3+'), -'+_3px_0px_5+pxColor + alpha*.3+')'
+                    ) + '">' + token[replace](/&/g, '&amp;')[replace](/</g, '&lt;')[replace](/>/g, '&gt;') + '</span>';
 
-                                    // adding the token if finalized
-                                    if (type) {
-                                        result += '<span style="' + ([
-                                            // 1: opreator
-                                            braceStyle,
-                                            // 2: opening brace
-                                            braceStyle,
-                                            // 3: closing brace
-                                            braceStyle,
-                                            // 4: word
-                                            /^(a(bstract|nd|rguments|rray|s(m|sert)?|uto)|bool(ean)?|break|byte|c(ase|atch|har|lass|lone|onst|ontinue)|de(clare|bugger|f(ault)?|l(ete)?)|do|double|e(lif|lse(if)?|nd|num|x(cept|ec|p(licit|ort)|te(nds|rn)))|f(alse|inal(ly)?|loat|or(each)?|riend|rom|unction)|global|goto|i(f|mplements|mport|n(line|clude)?|nstanceof|nt(erface)?|s)|lambda|let|long|module|mutable|n(amespace|ative|ew|il|ot|ull)|operator|or|p(ackage|rivate|rotected|ublic)|r(aise|egister|equire|eturn)|s(elf|hort|izeof|tatic|truct|uper|witch)|t(emplate|hen|his|hrow(s?)|ransient|rue|ry|ype(def|id|name|of))|union|(un)?signed|use|using|var|virtual|void|volatile|when|while|with|xor|yield)$/[test](token) ?
-                                                keywordStyle:
-                                                ' ',
-                                            // 5: regex
-                                            stringStyle,
-                                            // 6: string with "
-                                            stringStyle,
-                                            // 7: string with '
-                                            stringStyle
-                                            // 8: html comment
-                                            // 9: multi-line comment
-                                            // 10: single-line comment
-                                            // 10: ruby-style comment
-                                            //      -- all default to comment style
-                                            ][type-1]||
-                                                // default comment style
-                                                'font-style:italic'+opacity+5+textShadow+_3px_0px_5+pxColor + alpha*.3+'), -'+_3px_0px_5+pxColor + alpha*.3+')'
-                                            ) + '">' + token[replace](/&/g, '&amp;')[replace](/</g, '&lt;')[replace](/>/g, '&gt;') + '</span>';
+                    if (type < 8) { // not a comment
+                        lastType = type;
+                    }
+                } else {
+                    result += token;
+                }
 
-                                        if (type < 8) { // not a comment
-                                            lastType = type;
-                                        }
-                                    } else {
-                                        result += token;
-                                    }
+                // initializing the new token
+                token = '';
 
-                                    // initializing the new token
-                                    token = '';
+                // going down until matching a
+                // token type start condition
+                type = 12;
+                while (![
+                    1,                     // 0: whatever else
+                                           // 1: operator
+                    /[\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
+                    /[{}\[\(]/[test](chr), // 2: opening brace
+                    /[\]\)]/[test](chr),   // 3: closing brace
+                    /[$\w]/[test](chr),    // 4: word,
+                    chr == '/' &&          // 5: regex
+                        // previous token was an
+                        // opening brace or an
+                        // operator (otherwise
+                        // division, not a regex)
+                        lastType < 3 &&
+                        // workaround for html
+                        // closing tags
+                        prev1 != '<',
+                    chr == '"',            // 6: string with "
+                    chr == "'",            // 7: string with '
+                                           // 8: html comment
+                    chr+next1+text[j+1]+text[j+2] == '<!--',
+                    chr+next1 == '/*',     // 9: multiline comment
+                    chr+next1 == '//',     // 10: single-line comment
+                    chr == '#'             // 11: hash-style comment
+                ][--type]);
+            }
 
-                                    // going down until matching a
-                                    // token type start condition
-                                    type = 12;
-                                    while (![
-                                        1,                     // 0: whatever else
-                                                               // 1: operator
-                                        /[\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
-                                        /[{}\[\(]/[test](chr), // 2: opening brace
-                                        /[\]\)]/[test](chr),   // 3: closing brace
-                                        /[$\w]/[test](chr),    // 4: word,
-                                        chr == '/' &&          // 5: regex
-                                            // previous token was an
-                                            // opening brace or an
-                                            // operator (otherwise
-                                            // division, not a regex)
-                                            lastType < 3 &&
-                                            // workaround for html
-                                            // closing tags
-                                            prev1 != '<',
-                                        chr == '"',            // 6: string with "
-                                        chr == "'",            // 7: string with '
-                                                               // 8: html comment
-                                        chr+next1+text[j+1]+text[j+2] == '<!--',
-                                        chr+next1 == '/*',     // 9: multiline comment
-                                        chr+next1 == '//',     // 10: single-line comment
-                                        chr == '#'             // 11: ruby-style comment
-                                    ][--type]);
-                                }
+            token += chr;
+        }
 
-                                token += chr;
-                            }
-
-
-                            el.innerHTML = result;
-
-                            if (pos) {
-                                ran = _document.createRange();
-                                res = findPos(el, pos);
-                                ran.setStart(res.n, res.p);
-                                ran.setEnd(res.n, res.p);
-                                sel.removeAllRanges();
-                                sel.addRange(ran);
-                            }
-                        }
-                    })).observe(el, {
+        el.innerHTML = result;
+        
+        if (pos) {
+            ran = _document.createRange();
+            if(!(res = findPos(el, pos)).n) {
+                res = {n:el, p:0};
+            };
+            ran.setStart(res.n, res.p);
+            ran.setEnd(res.n, res.p);
+            sel.removeAllRanges();
+            sel.addRange(ran);
+        }
+    }
+}
+            )).observe(el, {
                         characterData : 1,
                         subtree       : 1,
                         childList     : 1
@@ -240,3 +251,4 @@
 
     exports.reset = reset;
 }));
+
