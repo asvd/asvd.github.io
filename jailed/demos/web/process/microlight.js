@@ -9,6 +9,9 @@
 }(this, function (exports) {
     var _window = window;
     var _document = document;
+    var test = 'test';
+    var replace = 'replace';
+    var length = 'length';
 
     /**
      * Recursively calculates the node and a position inside that node
@@ -25,7 +28,7 @@
      * characters is stored in p.
      */
     var findPos = function(node, pos, result, len) {
-        if (len = node.length) {
+        if (len = node[length]) {
             // text node
             if (pos >= len) {
                 node = 0;
@@ -65,7 +68,7 @@
                             sel = _window.getSelection(),
                             ran, res,
                             colorArr = /(\d*\, \d*\, \d*)(, ([.\d]*))?/g.exec(_window.getComputedStyle(el).color),
-                            color = 'rgba('+colorArr[1]+',',
+                            pxColor = 'px rgba('+colorArr[1]+',',
                             alpha = colorArr[3]||1,
                             lastType = 0;
                             
@@ -77,7 +80,7 @@
                                 el.contains((ran = sel.getRangeAt(0)).startContainer)
                             ) {
                                 ran.setStart(el, 0);
-                                pos = ran.toString().length;
+                                pos = ran.toString()[length];
                             }
 
                             // tokenizing the content
@@ -111,47 +114,56 @@
                                         1,                   // 1: operator
                                         1,                   // 2: opening brace
                                         1,                   // 3: closing brace
-                                        !/[$\w]/.test(chr),  // 4: word
+                                        !/[$\w]/[test](chr),  // 4: word
                                                              // 5: regex
-                                        (prev1 == '/' || prev1 == '\n') && token.length > 1,
+                                        (prev1 == '/' || prev1 == '\n') && token[length] > 1,
                                                              // 6: string with "
-                                        prev1 == '"' && token.length > 1,
+                                        prev1 == '"' && token[length] > 1,
                                                              // 7: string with '
-                                        prev1 == "'" && token.length > 1,
+                                        prev1 == "'" && token[length] > 1,
                                                              // 8: html comment
                                         text[j-4]+prev2+prev1 == '-->',
                                         prev2+prev1 == '*/', // 9: multiline comment
-                                        chr         == '\n'  // 10: single-line comment
+                                        chr         == '\n', // 10: single-line comment
+                                        chr         == '\n', // 11: ruby-style comment
                                     ][type-1]
                                 ) {
+                                    var textShadow = ';text-shadow:';
+                                    var opacity = ';opacity:.';
+                                    var _0px_0px = ' 0px 0px ';
+                                    var _3px_0px_5 = '3px 0px 5';
+                                    var keywordStyle = textShadow+_0px_0px+7+pxColor + alpha*.6+'),'+_0px_0px+3+pxColor + alpha*.4+')';
+                                    var stringStyle = opacity+7+textShadow+_3px_0px_5+pxColor + alpha*.3+'), -'+_3px_0px_5+pxColor + alpha*.3+')';
+                                    var braceStyle = opacity+6+textShadow+_0px_0px+7+pxColor + alpha*.25+'),'+_0px_0px+3+pxColor + alpha*.25+')';
+
                                     // adding the token if finalized
                                     if (type) {
                                         result += '<span style="' + ([
                                             // 1: opreator
-                                            'opacity: .5; text-shadow: 0px 0px 7px '+color + alpha*.25+'), 0px 0px 3px '+color + alpha*.25+')',
+                                            braceStyle,
                                             // 2: opening brace
-                                            'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
+                                            braceStyle,
                                             // 3: closing brace
-                                            'opacity: .8; text-shadow: 0px 0px 7px '+color + alpha*.45+'), 0px 0px 3px '+color + alpha*.5+')',
+                                            braceStyle,
                                             // 4: word
-                                            /^(abstract|arguments|boolean|break|byte|case|catch|char|class|const|continue|debugger|default|delete|do|double|else|enum|export|extends|false|finally|float|for|function|goto|if|implements|import|in|instanceof|int|interface|let|long|native|new|null|package|private|protected|public|return|short|static|struct|super|switch|this|throw|throws|transient|true|try|typeof|var|void|volatile|while|with|yield)$/.test(token) ?
-//                                                'text-shadow: 0px 0px 10px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.3+')':
-                                                'text-shadow: 0px 0px 7px '+color + alpha*.7+'), 0px 0px 3px '+color + alpha*.4+')':
-                                                '',
+                                            /^(a(bstract|nd|rguments|rray|s(m|sert)?|uto)|bool(ean)?|break|byte|c(ase|atch|har|lass|lone|onst|ontinue)|de(clare|bugger|f(ault)?|l(ete)?)|do|double|e(lif|lse(if)?|nd|num|x(cept|ec|p(licit|ort)|te(nds|rn)))|f(alse|inal(ly)?|loat|or(each)?|riend|rom|unction)|global|goto|i(f|mplements|mport|n(line|clude)?|nstanceof|nt(erface)?|s)|lambda|let|long|module|mutable|n(amespace|ative|ew|il|ot|ull)|operator|or|p(ackage|rivate|rotected|ublic)|r(aise|egister|equire|eturn)|s(elf|hort|izeof|tatic|truct|uper|witch)|t(emplate|hen|his|hrow(s?)|ransient|rue|ry|ype(def|id|name|of))|union|(un)?signed|use|using|var|virtual|void|volatile|when|while|with|xor|yield)$/[test](token) ?
+                                                keywordStyle:
+                                                ' ',
                                             // 5: regex
-                                            'text-shadow: 0px 0px 7px '+color + alpha*.8+'), 0px 0px 3px '+color + alpha*.5+')',
+                                            stringStyle,
                                             // 6: string with "
-                                            'opacity:.7;font-style:italic',
+                                            stringStyle,
                                             // 7: string with '
-                                            'opacity:.7;font-style:italic',
+                                            stringStyle
                                             // 8: html comment
-                                            'opacity:.5;text-shadow: 3px 0px 5px '+color + alpha*.3+'), -3px 0px 5px '+color + alpha*.3+');font-style:italic',
                                             // 9: multi-line comment
-                                            'opacity:.5;text-shadow: 3px 0px 5px '+color + alpha*.3+'), -3px 0px 5px '+color + alpha*.3+');font-style:italic',
                                             // 10: single-line comment
-                                            'opacity:.5;text-shadow: 3px 0px 5px '+color + alpha*.3+'), -3px 0px 5px '+color + alpha*.3+');font-style:italic'
-
-                                            ][type-1]||'') + '">' + token.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '</span>';
+                                            // 10: ruby-style comment
+                                            //      -- all default to comment style
+                                            ][type-1]||
+                                                // default comment style
+                                                'font-style:italic'+opacity+5+textShadow+_3px_0px_5+pxColor + alpha*.3+'), -'+_3px_0px_5+pxColor + alpha*.3+')'
+                                            ) + '">' + token[replace](/&/g, '&amp;')[replace](/</g, '&lt;')[replace](/>/g, '&gt;') + '</span>';
 
                                         if (type < 8) { // not a comment
                                             lastType = type;
@@ -162,15 +174,17 @@
 
                                     // initializing the new token
                                     token = '';
-                                    type = 11;
 
+                                    // going down until matching a
+                                    // token type start condition
+                                    type = 12;
                                     while (![
                                         1,                     // 0: whatever else
                                                                // 1: operator
-                                        /[\-\+\*\/=<>:;|\.,!&]/.test(chr),
-                                        /[{}\[\(]/.test(chr),  // 2: opening brace
-                                        /[\]\)]/.test(chr),    // 3: closing brace
-                                        /[$\w]/.test(chr),     // 4: word,
+                                        /[\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
+                                        /[{}\[\(]/[test](chr), // 2: opening brace
+                                        /[\]\)]/[test](chr),   // 3: closing brace
+                                        /[$\w]/[test](chr),    // 4: word,
                                         chr == '/' &&          // 5: regex
                                             // previous token was an
                                             // opening brace or an
@@ -185,7 +199,8 @@
                                                                // 8: html comment
                                         chr+next1+text[j+1]+text[j+2] == '<!--',
                                         chr+next1 == '/*',     // 9: multiline comment
-                                        chr+next1 == '//'      // 10: single-line comment
+                                        chr+next1 == '//',     // 10: single-line comment
+                                        chr == '#'             // 11: ruby-style comment
                                     ][--type]);
                                 }
 
