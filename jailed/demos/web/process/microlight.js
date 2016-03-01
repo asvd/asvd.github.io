@@ -103,76 +103,66 @@ function(){
             textShadow = ';text-shadow:',
             opacity = ';opacity:.',
             _0px_0px = ' 0px 0px ',
-            _3px_0px_5 = '3px 0px 5',
-            keywordStyle = textShadow+_0px_0px+7+pxColor + alpha*.6+'),'+_0px_0px+3+pxColor + alpha*.4+')',
-            stringStyle = opacity+7+textShadow+_3px_0px_5+pxColor + alpha*.2+'), -'+_3px_0px_5+pxColor + alpha*.2+')',
-            braceStyle = opacity+6+textShadow+_0px_0px+7+pxColor + alpha*.25+'),'+_0px_0px+3+pxColor + alpha*.25+')';
+            _3px_0px_5 = '3px 0px 5';
 
         while (prev2 = prev1,
-               prev1 = chr
+               // escaping if needed
+               // pervious character will not be
+               // therefore recognized as a token
+               // finalize condition
+               prev1 = type < 8 && prev1 == '\\' ? 1 : chr
         ) {
             chr = next1;
             next1=text[++j];
 
-            // escaping if needed
-            if (type < 8 && // string or regex but not comments
-                prev2 == '\\'
-            ) {
-                // pervious character will not be
-                // therefore recognized as a token
-                // finalize condition
-                prev1 = '';
-            }
-
             // checking if token should be finalized
-            if (!type ||
-                !chr  || // end of content
-                [ // finalize condition for every token type
-                        1,                   // 1: operator
-                        1,                   // 2: opening brace
-                        1,                   // 3: closing brace
-                        !/[$\w]/[test](chr), // 4: word
-                                             // 5: regex
-                        (prev1 == '/' || prev1 == '\n') && token[length] > 1,
-                                             // 6: string with "
-                        prev1 == '"' && token[length] > 1,
-                                             // 7: string with '
-                        prev1 == "'" && token[length] > 1,
-                                             // 8: html comment
-                        text[j-4]+prev2+prev1 == '-->',
-                        prev2+prev1 == '*/', // 9: multiline comment
-                        chr         == '\n', // 10: single-line comment
-                        chr         == '\n', // 11: hash-style comment
-                    ][type-1]
+            if (!chr  || // end of content
+                // types 0 - 3 (operators and braces) always of a
+                // single character
+                type < 4 ||
+                // types 10-11 (single-line comments) end with a
+                // newline
+                (type > 9 && chr == '\n') ||
+                [ // finalize condition for other token types
+                    !/[$\w]/[test](chr), // 4: word
+                                         // 5: regex
+                    (prev1 == '/' || prev1 == '\n') && token[length] > 1,
+                                         // 6: string with "
+                    prev1 == '"' && token[length] > 1,
+                                         // 7: string with '
+                    prev1 == "'" && token[length] > 1,
+                                         // 8: html comment
+                    text[j-4]+prev2+prev1 == '-->',
+                    prev2+prev1 == '*/'  // 9: multiline comment
+                ][type-4]
             ) {
-                // adding the token if finalized
+                // appending the token to the result
                 if (type) {
-                    result += '<span style="' + ([
-                        // 1: opreator
-                        braceStyle,
-                        // 2: opening brace
-                        braceStyle,
-                        // 3: closing brace
-                        braceStyle,
-                        // 4: word
-                        /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|trict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ?
-                            keywordStyle:
-                            ' ',
-                        // 5: regex
-                        stringStyle,
-                        // 6: string with "
-                        stringStyle,
-                        // 7: string with '
-                        stringStyle
-                        // 8: html comment
-                        // 9: multi-line comment
-                        // 10: single-line comment
-                        // 10: hash-style comment
-                        //      -- all default to comment style
-                    ][type-1]||
-                        // default comment style
-                        'font-style:italic'+opacity+5+textShadow+_3px_0px_5+pxColor + alpha*.3+'), -'+_3px_0px_5+pxColor + alpha*.3+')'
-                    ) + '">' + token[replace](/&/g, '&amp;')[replace](/</g, '&lt;')[replace](/>/g, '&gt;') + '</span>';
+                    result += '<span style="' + (
+                        // operators and braces
+                        type < 4 ?
+                            opacity+6+
+                            textShadow+_0px_0px+7+pxColor + alpha/4+'),'+
+                                       _0px_0px+3+pxColor + alpha/4+')' :
+                        // comments
+                        type > 7 ?
+                            'font-style:italic'+
+                            opacity+5+
+                            textShadow+_3px_0px_5+pxColor + alpha/3+'), -'+
+                                       _3px_0px_5+pxColor + alpha/3+')' :
+                        // regex and strings
+                        type > 4 ?
+                            opacity+7+
+                            textShadow+_3px_0px_5+pxColor + alpha/5+'), -'+
+                                       _3px_0px_5+pxColor + alpha/5+')' :
+                        // type == 4 (key)word
+                        /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ?
+                        textShadow+_0px_0px+7+pxColor + alpha*.6+'),'+
+                                   _0px_0px+3+pxColor + alpha*.4+')' :
+                        ' '
+                    ) + '">' + token[replace](/&/g, '&amp;')
+                                    [replace](/</g, '&lt;')
+                                    [replace](/>/g, '&gt;') + '</span>';
 
                     if (type < 8) { // not a comment
                         lastType = type;
@@ -182,7 +172,6 @@ function(){
                 }
 
                 // initializing the new token
-                token = '';
 
                 // going down until matching a
                 // token type start condition
@@ -210,7 +199,7 @@ function(){
                     chr+next1 == '/*',     // 9: multiline comment
                     chr+next1 == '//',     // 10: single-line comment
                     chr == '#'             // 11: hash-style comment
-                ][--type]);
+                ][--type])token = '';
             }
 
             token += chr;
@@ -220,9 +209,7 @@ function(){
         
         if (pos) {
             ran = _document.createRange();
-            if(!(res = findPos(el, pos)).n) {
-                res = {n:el, p:0};
-            };
+            res = findPos(el, pos)
             ran.setStart(res.n, res.p);
             ran.setEnd(res.n, res.p);
             sel.removeAllRanges();

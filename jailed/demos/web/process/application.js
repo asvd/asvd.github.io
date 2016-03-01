@@ -223,6 +223,27 @@ function init_scrolling() {
 
 
 function init_keypress() {
+    var handle_paste = function(e) {
+        // inserting content as a plain text
+        // (otherwise firefox replaces newlines with <br>
+        //  which is not recognized by textContent)
+        var sel = window.getSelection();
+        var ran = sel.getRangeAt(0);
+        ran.deleteContents();
+        var pos = ran.startOffset;
+        var node = ran.startContainer
+        var pastedContent = e.clipboardData.getData('text/plain');
+        node.insertData(pos, pastedContent);
+
+        pos += pastedContent.length;
+        ran.setStart(node, pos);
+        ran.setEnd(node, pos);
+        sel.removeAllRanges();
+        sel.addRange(ran);
+        e.preventDefault();
+    }
+
+
     var handle_keypress = function(e) {
         if (e.keyCode == 13) {  // Enter
             // firefox places <br/> instead of newline
@@ -242,10 +263,13 @@ function init_keypress() {
                 var prevLine = ran.toString().split('\n').pop();
                 var spaces = prevLine.substr(0, (prevLine+'.').search(/\S/));
                 var data = '\n' + spaces;
+
                 node.insertData(pos, data);
 
-                // putting the selection after the newline
                 pos += data.length;
+
+
+                // putting the selection after the newline
                 ran.setStart(node, pos);
                 ran.setEnd(node, pos);
                 sel.removeAllRanges();
@@ -257,6 +281,7 @@ function init_keypress() {
     }
 
     el('code').addEventListener('keypress', handle_keypress, false);
+    el('code').addEventListener('paste', handle_paste, false);
 }
 
 
