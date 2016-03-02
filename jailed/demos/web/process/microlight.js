@@ -16,11 +16,11 @@
         factory((root.microlight = {}));
     }
 }(this, function (exports) {
-    var _window = window;
+    var _window   = window;
     var _document = document;
-    var test = 'test';
-    var replace = 'replace';
-    var length = 'length';
+    var test      = 'test';
+    var replace   = 'replace';
+    var length    = 'length';
 
     /**
      * Recursively calculates the node and a position inside that node
@@ -71,20 +71,54 @@
                 if (!el.ml) {
                     el.ml = (new MutationObserver(cb =
 function(){
-    var result = '',
-        text = el.textContent,
-        pos=0,
-        j=0,
-        sel = _window.getSelection(),
-        ran, res,
-        colorArr = /(\d*\, \d*\, \d*)(, ([.\d]*))?/g.exec(_window.getComputedStyle(el).color),
-        pxColor = 'px rgba('+colorArr[1]+',',
-        alpha = colorArr[3]||1;
-        
+    var result     = '',
 
-    if ((lastTextContent||'') != text) {
+        // selection data
+        sel        = _window.getSelection(),
+        ran, res,
+        pos,       // preserved selection position
+
+        // style and color templates
+        textShadow = ';text-shadow:',
+        opacity    = ';opacity:.',
+        _0px_0px   = ' 0px 0px ',
+        _3px_0px_5 = '3px 0px 5',
+        colorArr   = /(\d*\, \d*\, \d*)(, ([.\d]*))?/g.exec(
+            _window.getComputedStyle(el).color
+        ),
+        pxColor    = 'px rgba('+colorArr[1]+',',
+        alpha      = colorArr[3]||1,
+        token      = '',  // current token
+
+        // current token type:
+        //  0: whitespace
+        //  1: operator or brace
+        //  2: closing brace (after which '/' is division not regex)
+        //  3: (key)word
+        //  4: regex
+        //  5: string starting with "
+        //  6: string starting with '
+        //  7: xml comment  <!-- -->
+        //  8: multiline comment /* */
+        //  9: single-line comment starting with two slashes //
+        // 10: single-line comment starting with a hash #
+        type = 0,
+        lastType,
+
+        text       = el.textContent,
+        j          = 0,        // current character position
+
+        // particular characters from a parsed string of code
+        prev2,                 // character before the previous
+        prev1,                 // previous character
+        chr        = 1,        // current character
+        next1      = text[0];  // next character
+
+
+    if ((lastTextContent||token) != text) {
         lastTextContent = text;
 
+        // saving the selection position
         if (sel.rangeCount &&
             el.contains((ran = sel.getRangeAt(0)).startContainer)
         ) {
@@ -93,65 +127,54 @@ function(){
         }
 
         // tokenizing the content
-        var token = '',
-            type = 0,
-            prev2 = '',
-            prev1 = '',
-            chr   = 1,
-            next1  = text[0],
-            lastType = 0,
-            textShadow = ';text-shadow:',
-            opacity = ';opacity:.',
-            _0px_0px = ' 0px 0px ',
-            _3px_0px_5 = '3px 0px 5';
-
         while (prev2 = prev1,
                // escaping if needed
                // pervious character will not be
                // therefore recognized as a token
                // finalize condition
-               prev1 = type < 8 && prev1 == '\\' ? 1 : chr
+               prev1 = type < 7 && prev1 == '\\' ? 1 : chr
         ) {
             chr = next1;
             next1=text[++j];
 
             // checking if token should be finalized
             if (!chr  || // end of content
-                // types 0 - 3 (operators and braces) always of a
-                // single character
-                type < 4 ||
-                // types 10-11 (single-line comments) end with a
+                // types 0 (whitespace, not highlighted), types 1 - 2
+                // (operators and braces) always consist of a single
+                // character
+                type < 3 ||
+                // types 9-10 (single-line comments) end with a
                 // newline
-                (type > 9 && chr == '\n') ||
+                (type > 8 && chr == '\n') ||
                 [ // finalize condition for other token types
-                    !/[$\w]/[test](chr), // 4: word
-                                         // 5: regex
+                    !/[$\w]/[test](chr), // 3: word
+                                         // 4: regex
                     (prev1 == '/' || prev1 == '\n') && token[length] > 1,
-                                         // 6: string with "
+                                         // 5: string with "
                     prev1 == '"' && token[length] > 1,
-                                         // 7: string with '
+                                         // 6: string with '
                     prev1 == "'" && token[length] > 1,
-                                         // 8: html comment
+                                         // 7: xml comment
                     text[j-4]+prev2+prev1 == '-->',
-                    prev2+prev1 == '*/'  // 9: multiline comment
-                ][type-4]
+                    prev2+prev1 == '*/'  // 8: multiline comment
+                ][type-3]
             ) {
                 // appending the token to the result
                 if (type) {
                     result += '<span style="' + (
                         // operators and braces
-                        type < 4 ?
+                        type < 3 ?
                             opacity+6+
                             textShadow+_0px_0px+7+pxColor + alpha/4+'),'+
                                        _0px_0px+3+pxColor + alpha/4+')' :
                         // comments
-                        type > 7 ?
+                        type > 6 ?
                             'font-style:italic'+
                             opacity+5+
                             textShadow+_3px_0px_5+pxColor + alpha/3+'), -'+
                                        _3px_0px_5+pxColor + alpha/3+')' :
                         // regex and strings
-                        type > 4 ?
+                        type > 3 ?
                             opacity+7+
                             textShadow+_3px_0px_5+pxColor + alpha/5+'), -'+
                                        _3px_0px_5+pxColor + alpha/5+')' :
@@ -164,41 +187,40 @@ function(){
                                     [replace](/</g, '&lt;')
                                     [replace](/>/g, '&gt;') + '</span>';
 
-                    if (type < 8) { // not a comment
+                    if (type < 7) { // not a comment
                         lastType = type;
                     }
                 } else {
                     result += token;
                 }
 
-                // initializing the new token
+                // initializing a new token
 
                 // going down until matching a
                 // token type start condition
-                type = 12;
+                type = 11;
                 while (![
-                    1,                     // 0: whatever else
-                                           // 1: operator
-                    /[\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
-                    /[{}\[\(]/[test](chr), // 2: opening brace
-                    /[\]\)]/[test](chr),   // 3: closing brace
-                    /[$\w]/[test](chr),    // 4: word,
-                    chr == '/' &&          // 5: regex
+                    1,                   //  0: whitespace
+                                         //  1: operator or braces
+                    /[{}\[\(\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
+                    /[\]\)]/[test](chr), //  2: closing brace
+                    /[$\w]/[test](chr),  //  3: word,
+                    chr == '/' &&        //  4: regex
                         // previous token was an
                         // opening brace or an
                         // operator (otherwise
                         // division, not a regex)
                         lastType < 3 &&
-                        // workaround for html
+                        // workaround for xml
                         // closing tags
                         prev1 != '<',
-                    chr == '"',            // 6: string with "
-                    chr == "'",            // 7: string with '
-                                           // 8: html comment
+                    chr == '"',          //  5: string with "
+                    chr == "'",          //  6: string with '
+                                         //  7: xml comment
                     chr+next1+text[j+1]+text[j+2] == '<!--',
-                    chr+next1 == '/*',     // 9: multiline comment
-                    chr+next1 == '//',     // 10: single-line comment
-                    chr == '#'             // 11: hash-style comment
+                    chr+next1 == '/*',   //  8: multiline comment
+                    chr+next1 == '//',   //  9: single-line comment
+                    chr == '#'           // 10: hash-style comment
                 ][--type])token = '';
             }
 
@@ -206,8 +228,9 @@ function(){
         }
 
         el.innerHTML = result;
-        
+
         if (pos) {
+            // restoring the selection position
             ran = _document.createRange();
             res = findPos(el, pos)
             ran.setStart(res.n, res.p);
