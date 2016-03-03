@@ -114,7 +114,6 @@ function(){
         chr        = 1,        // current character
         next1      = text[0];  // next character
 
-
     if ((lastTextContent||token) != text) {
         lastTextContent = text;
 

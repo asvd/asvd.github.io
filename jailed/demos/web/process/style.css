@@ -186,7 +186,7 @@ a:hover {
     color: #B5F7FF;
     line-height: initial;
     white-space: pre;
-    overflow: auto;
+    overflow: hidden;
     border-top: 1px solid #365666;
     border-bottom: 1px solid #365666;
 }
