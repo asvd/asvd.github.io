@@ -194,10 +194,11 @@ function(){
                 }
 
                 // initializing a new token
+                token = ''
 
                 // going down until matching a
                 // token type start condition
-                type = 11;
+                type = 12;
                 while (![
                     1,                   //  0: whitespace
                                          //  1: operator or braces
@@ -220,7 +221,7 @@ function(){
                     chr+next1 == '/*',   //  8: multiline comment
                     chr+next1 == '//',   //  9: single-line comment
                     chr == '#'           // 10: hash-style comment
-                ][--type])token = '';
+                ][--type]);
             }
 
             token += chr;
