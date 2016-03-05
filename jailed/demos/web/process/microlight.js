@@ -45,6 +45,7 @@
             }
         } else if (node.childNodes.length) {
             // node with subnodes
+            var num = 0;
             node = node.childNodes[0];
             do {
                 result = findPos(node, pos);
@@ -52,9 +53,22 @@
 
                 // if a node found, taking it and quitting the loop
                 if (result.n) {
-                    node = result.n;
+                    if (result.n.length &&
+                        result.p == result.n.length) {
+                        // end of text node
+                        // taking the pos between nodes
+                        // (FF handles newlines badly otherwise)
+                        node = node.parentNode;
+                        pos = num+1;
+                    } else {
+                        // child middle
+                        node = result.n;
+                    }
+
                     break;
                 }
+
+                num++;
             } while (
                 // quitting the loop when no subchild left
                 node = node.nextSibling
@@ -114,6 +128,7 @@
                 if (!el.ml) {
                     el.ml = (new MutationObserver(cb =
 function(){
+
     var result     = '',
 
         // selection data
@@ -166,12 +181,13 @@ function(){
     }
 
 
-    pos += insertNewlines(el);
+    var newly = insertNewlines(el);
+    pos += newly;
 
 
     text = el.textContent;
 
-    if ((lastTextContent||'') != text) {
+    if (newly || (lastTextContent||'') != text) {
         lastTextContent = text;
 
         j = 0;
