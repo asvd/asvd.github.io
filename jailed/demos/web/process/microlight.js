@@ -39,7 +39,7 @@
     var findPos = function(node, pos, result, len) {
         if (len = node[length]) {
             // text node
-            if (pos >= len) {
+            if (pos > len) {
                 node = 0;
                 pos -= len;
             }
@@ -49,11 +49,15 @@
             do {
                 result = findPos(node, pos);
                 pos = result.p;
-            } while (
+
                 // if a node found, taking it and quitting the loop
-                !(result.n && (node = result.n)) &&
-                // otherwise quitting the loop when no subchild left
-                (node = node.nextSibling)
+                if (result.n) {
+                    node = result.n;
+                    break;
+                }
+            } while (
+                // quitting the loop when no subchild left
+                node = node.nextSibling
             );
         } else {
             // node without subnodes
@@ -115,7 +119,7 @@ function(){
         // selection data
         sel        = _window.getSelection(),
         ran, res,
-        pos,       // preserved selection position
+        pos = 0,       // preserved selection position
 
         // style and color templates
         textShadow = ';text-shadow:',
@@ -163,6 +167,7 @@ function(){
 
 
     pos += insertNewlines(el);
+
 
     text = el.textContent;
 
@@ -285,8 +290,8 @@ function(){
 
         sel.removeAllRanges();
 
-        ran.setEnd(res.n, res.p);
         ran.setStart(res.n, res.p);
+        ran.setEnd(res.n, res.p);
         sel.addRange(ran);
     }
 }
