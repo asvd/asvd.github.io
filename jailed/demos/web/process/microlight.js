@@ -43,7 +43,7 @@
                 node = 0;
                 pos -= len;
             }
-        } else {
+        } else if (node.childNodes.length) {
             // node with subnodes
             node = node.childNodes[0];
             do {
@@ -55,9 +55,48 @@
                 // otherwise quitting the loop when no subchild left
                 (node = node.nextSibling)
             );
+        } else {
+            // node without subnodes
+            node = 0;
         }
 
         return {n:node, p:pos};
+    }
+
+
+    /**
+     * Recursively runs through the node children inserting the
+     * newlines before the nodes which look like a newline, but not
+     * recognized by innerText (<br> and <tr>)
+     *
+     * @param {Object} node to run through
+     *
+     * @returns {Number} of newlines inserted
+     */
+    var insertNewlines = function(node) {
+        var i = 0, childNode, result = 0;
+        while(childNode = node.childNodes[i++]) {
+            if (/br/i[test](childNode.nodeName)) {
+                node.replaceChild(
+                    _document.createTextNode('\n'), childNode
+                );
+                result++;
+            } else if (/tr/i[test](childNode.nodeName) &&
+                       // checking if a newline already inserted
+                       !(node.childNodes[i-1] &&
+                         node.childNodes[i-1].textContent == '\n')
+            ) {
+                node.insertBefore(
+                    _document.createTextNode('\n'), childNode
+                );
+                result++;
+                i++;
+            } else {
+                result += insertNewlines(childNode);
+            }
+        }
+
+        return result;
     }
 
 
@@ -105,25 +144,34 @@ function(){
         type = 0,
         lastType,
 
-        text       = el.textContent,
+        text,
         j          = 0,        // current character position
 
         // particular characters from a parsed string of code
         prev2,                 // character before the previous
         prev1,                 // previous character
         chr        = 1,        // current character
-        next1      = text[0];  // next character
+        next1;                 // next character
 
-    if ((lastTextContent||token) != text) {
+    // saving the selection position
+    if (sel.rangeCount &&
+        el.contains((ran = sel.getRangeAt(0)).startContainer)
+    ) {
+        ran.setStart(el, 0);
+        pos = ran.toString()[length];
+    }
+
+
+    pos += insertNewlines(el);
+
+    text = el.textContent;
+
+    if ((lastTextContent||'') != text) {
         lastTextContent = text;
 
-        // saving the selection position
-        if (sel.rangeCount &&
-            el.contains((ran = sel.getRangeAt(0)).startContainer)
-        ) {
-            ran.setStart(el, 0);
-            pos = ran.toString()[length];
-        }
+        j = 0;
+    
+        next1 = text[0];
 
         // tokenizing the content
         while (prev2 = prev1,
@@ -229,15 +277,17 @@ function(){
 
         el.innerHTML = result;
 
-        if (pos) {
-            // restoring the selection position
-            ran = _document.createRange();
-            res = findPos(el, pos)
-            ran.setStart(res.n, res.p);
-            ran.setEnd(res.n, res.p);
-            sel.removeAllRanges();
-            sel.addRange(ran);
-        }
+    }
+
+    // restoring the selection position
+    if (pos) {
+        res = findPos(el, pos);
+
+        sel.removeAllRanges();
+
+        ran.setEnd(res.n, res.p);
+        ran.setStart(res.n, res.p);
+        sel.addRange(ran);
     }
 }
             )).observe(el, {

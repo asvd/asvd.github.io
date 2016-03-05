@@ -280,8 +280,8 @@ function init_keypress() {
         }
     }
 
-    el('code').addEventListener('keypress', handle_keypress, false);
-    el('code').addEventListener('paste', handle_paste, false);
+//    el('code').addEventListener('keypress', handle_keypress, false);
+//    el('code').addEventListener('paste', handle_paste, false);
 }
 
 
