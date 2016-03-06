@@ -223,55 +223,28 @@ function init_scrolling() {
 
 
 function init_keypress() {
-    var handle_paste = function(e) {
-        // inserting content as a plain text
-        // (otherwise firefox replaces newlines with <br>
-        //  which is not recognized by textContent)
-        var sel = window.getSelection();
-        var ran = sel.getRangeAt(0);
-        ran.deleteContents();
-        var pos = ran.startOffset;
-        var node = ran.startContainer
-        var pastedContent = e.clipboardData.getData('text/plain');
-        node.insertData(pos, pastedContent);
-
-        pos += pastedContent.length;
-        ran.setStart(node, pos);
-        ran.setEnd(node, pos);
-        sel.removeAllRanges();
-        sel.addRange(ran);
-        e.preventDefault();
-    }
-
-
     var handle_keypress = function(e) {
         if (e.keyCode == 13) {  // Enter
-            // firefox places <br/> instead of newline
-            // which is not recognized by textContent
-            //
-            // also adding some padding from the left side
+            // adding some padding from the left side
             var sel = window.getSelection();
             var ran = sel.getRangeAt(0);
             if (el('code').contains(ran.startContainer) &&
                 el('code').contains(ran.endContainer)
             ) {
                 ran.deleteContents();
-                var pos = ran.startOffset;
-                var node = ran.startContainer
-
                 ran.setStart(el('code'), 0);
-                var prevLine = ran.toString().split('\n').pop();
+                var lines = ran.toString().split('\n');
+                var prevLine = lines[lines.length-2];
                 var spaces = prevLine.substr(0, (prevLine+'.').search(/\S/));
-                var data = '\n' + spaces;
+                var data = spaces;
 
-                node.insertData(pos, data);
-
-                pos += data.length;
-
-
+                var node = document.createTextNode(data);
+                ran.setStart(ran.endContainer, ran.endOffset);
+                ran.insertNode(node);
+                
                 // putting the selection after the newline
-                ran.setStart(node, pos);
-                ran.setEnd(node, pos);
+                ran.setStart(node, data.length);
+                ran.setEnd(node, data.length);
                 sel.removeAllRanges();
                 sel.addRange(ran);
 
@@ -280,8 +253,7 @@ function init_keypress() {
         }
     }
 
-//    el('code').addEventListener('keypress', handle_keypress, false);
-//    el('code').addEventListener('paste', handle_paste, false);
+    el('code').addEventListener('keypress', handle_keypress, false);
 }
 
 
