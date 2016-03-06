@@ -136,32 +136,36 @@ function init_scrolling() {
     var lastActive = null;
     var mousedowned = false;
 
-    var activate = function(key) {
-        switch (key) {
-        case 'code':
+    var common_timestamp_code;
+    var activate_code = function(activate) {
+        var timeout = 300;
+        var timestamp = common_timestamp_code = (new Date).getTime();
+
+        if (activate) {
             el('code').style.transition = 'opacity .12s';
             el('code').style.opacity = '1';
-            break;
-        case 'code_background':
-            el('code_background').style.transition = 'opacity .11s';
-            el('code_background').style.opacity = '1';
-            break;
+        } else {
+            // unhighlight should be a bit delayed to suppress filckering
+            setTimeout( function() {
+                if (timestamp == common_timestamp_code) {
+                    el('code').style.transition = 'opacity .2s';
+                    el('code').style.opacity = '.82';
+                } // else new activation requested
+            }, timeout);
         }
     }
     
-    var deactivate = function(key) {
-        switch (key) {
-        case 'code':
-            el('code').style.transition = 'opacity .2s';
-            el('code').style.opacity = '.82';
-            break;
-        case 'code_background':
+    var common_timestamp_bg;
+    var activate_bg = function(activate) {
+        if (activate) {
+            el('code_background').style.transition = 'opacity .11s';
+            el('code_background').style.opacity = '1';
+        } else {
             el('code_background').style.transition = 'opacity .25s';
             el('code_background').style.opacity = '.7';
-            break;
         }
     }
-
+    
     var update_indicator = function(e) {
         if (!mousedowned) {
             var hover = document.elementFromPoint(e.clientX, e.clientY);
@@ -176,21 +180,30 @@ function init_scrolling() {
                 if (true) {
                     switch (active) {
                     case 'code':
-                        activate('code');
-                        activate('code_background');
+                        activate_code(true);
+                        activate_bg(true);
                         break;
                     case 'code_background':
-                        deactivate('code');
-                        activate('code_background');
+                        activate_code(false);
+                        activate_bg(true);
                         break;
                     default:
-                        deactivate('code');
-                        deactivate('code_background');
+                        activate_code(false);
+                        activate_bg(false);
                         break;
                     }
                 } else {
-                    deactivate(lastActive);
-                    activate(active);
+                    if(lastActive == 'code') {
+                        activate_code(false);
+                    } else if (lastActive == 'code_background') {
+                        activate_bg(false);
+                    }
+
+                    if(active == 'code') {
+                        activate_code(true);
+                    } else if (active == 'code_background') {
+                        activate_bg(true);
+                    }
                 }
                 lastActive = active;
             }
@@ -216,8 +229,8 @@ function init_scrolling() {
     window.addEventListener('mousedown', mousedown, false);
     window.addEventListener('mouseup', mouseup, false);
 
-    deactivate('code');
-    deactivate('code_background');
+    activate_code(false);
+    activate_bg(false);
 }
 
 
@@ -247,8 +260,6 @@ function init_keypress() {
                 ran.setEnd(node, data.length);
                 sel.removeAllRanges();
                 sel.addRange(ran);
-
-                e.preventDefault();
             }
         }
     }
