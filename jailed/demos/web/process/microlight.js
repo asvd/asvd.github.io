@@ -22,6 +22,8 @@
     var replace   = 'replace';
     var length    = 'length';
 
+
+
     /**
      * Recursively calculates the node and a position inside that node
      * to restore the selection
@@ -98,6 +100,7 @@
                 node.replaceChild(
                     _document.createTextNode('\n'), childNode
                 );
+
                 result++;
             } else if (/tr/i[test](childNode.nodeName) &&
                        // checking if a newline already inserted
@@ -319,6 +322,35 @@ function(){
 
                     cb();
                 }
+                
+            el.addEventListener('keypress', function(e){
+                if (e.keyCode == 13) {  // Enter
+                    // firefox places <br/> instead of newline
+                    // which is not recognized by textContent
+                    //
+                    // also adding some padding from the left side
+                    var sel = window.getSelection();
+                    var ran = sel.getRangeAt(0);
+                    if (el.contains(ran.startContainer) &&
+                        el.contains(ran.endContainer)
+                    ) {
+                        ran.deleteContents();
+                        ran.insertNode(_document.createTextNode('\n'));
+
+                        ran.setStart(el, 0);
+                        var pos = ran.toString()[length];
+
+                        // putting the selection after the newline
+                        var res = findPos(el, pos);
+                        sel.removeAllRanges();
+                        ran.setStart(res.n, res.p);
+                        ran.setEnd(res.n, res.p);
+                        sel.addRange(ran);
+
+                        e.preventDefault();
+                    }
+                }
+            }, false);
             })(el);
         }
     }
