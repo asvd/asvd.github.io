@@ -51,18 +51,24 @@
         } else {
             // node with subnodes
             text = '';
-            for (i = 0; i < el[childNodes][length]; i++) {
-                if (selEl == el && selOffset == i) {
-                    pos = text[length];
+
+            if (el[childNodes][length]) {
+                for (i = 0; i < el[childNodes][length]; i++) {
+                    if (selEl == el && selOffset == i) {
+                        pos = text[length];
+                    }
+
+                    content = extractTextContent(el[childNodes][i], selEl, selOffset);
+
+                    if (content.p >= 0) {
+                        pos = text[length] + content.p;
+                    }
+                    text += content.t;
                 }
-
-                content = extractTextContent(el[childNodes][i], selEl, selOffset);
-
-                if (content.p >= 0) {
-                    pos = text[length] + content.p;
-                }
-                text += content.t;
-
+            } else if (selEl == el) {
+                // span with no children (happens on FF when removing
+                // the contents)
+                pos = 0;
             }
 
             if (/(br|tr)/i[test](el.nodeName)) {
@@ -340,9 +346,9 @@ function(){
 
 }
                 )).observe(el, {
-                            characterData : 1,
-                            subtree       : 1,
-                            childList     : 1
+                    characterData : 1,
+                    subtree       : 1,
+                    childList     : 1
                 });
 
                 cb();
