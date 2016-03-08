@@ -25,6 +25,57 @@
 
 
     /**
+     * Recursively extracts the text content from the given element.
+     *
+     * Additionally counts, how much characters is there until the
+     * selected point
+     *
+     * textContent property of an element does not work well here,
+     * because <br> and <tr> tags look like newlines, but are not
+     * recognized
+     *
+     * @param {Object} el to get text content from
+     * @param {Object} selEl selection element
+     * @param {Object} selOffset selection offset
+     */
+    var extractTextContent = function(el, selEl, selOffset, text, pos, len, i, content) {
+        pos = -1;
+        if (len = el[length]) {
+            // text node
+            text = el.textContent;
+
+            if (selEl == el) {
+                pos = selOffset;
+            }
+        } else {
+            // node with subnodes
+            text = '';
+            for (i = 0; i < el.childNodes[length]; i++) {
+                if (selEl == el && selOffset == i) {
+                    pos = text.length;
+                }
+
+                content = extractTextContent(el.childNodes[i], selEl, selOffset);
+
+                if (content.p >= 0) {
+                    pos = text.length + content.p;
+                }
+                text += content.t;
+
+            }
+
+            if (/(br|tr)/i[test](el.nodeName)) {
+                text += '\n';
+            }
+
+        }
+
+        return {t: text, p: pos};
+    }
+
+
+
+    /**
      * Recursively calculates the node and a position inside that node
      * to restore the selection
      *
@@ -45,79 +96,73 @@
                 node = 0;
                 pos -= len;
             }
-        } else if (node.childNodes.length) {
+        } else if (node.childNodes[length]) {
             // node with subnodes
-            var num = 0;
             node = node.childNodes[0];
             do {
                 result = findPos(node, pos);
                 pos = result.p;
-
-                // if a node found, taking it and quitting the loop
-                if (result.n) {
-                    if (result.n.length &&
-                        result.p == result.n.length) {
-                        // end of text node
-                        // taking the pos between nodes
-                        // (FF handles newlines badly otherwise)
-                        node = node.parentNode;
-                        pos = num+1;
-                    } else {
-                        // child middle
-                        node = result.n;
-                    }
-
-                    break;
-                }
-
-                num++;
             } while (
-                // quitting the loop when no subchild left
-                node = node.nextSibling
+                // if a node found, taking it and quitting the loop
+                !(result.n && (node = result.n)) &&
+                // otherwise quitting the loop when no subchild left
+                (node = node.nextSibling)
             );
         } else {
             // node without subnodes
-            node = 0;
-        }
-
-        return {n:node, p:pos};
-    }
-
-
-    /**
-     * Recursively runs through the node children inserting the
-     * newlines before the nodes which look like a newline, but not
-     * recognized by innerText (<br> and <tr>)
-     *
-     * @param {Object} node to run through
-     *
-     * @returns {Number} of newlines inserted
-     */
-    var insertNewlines = function(node) {
-        var i = 0, childNode, result = 0;
-        while(childNode = node.childNodes[i++]) {
-            if (/br/i[test](childNode.nodeName)) {
-                node.replaceChild(
-                    _document.createTextNode('\n'), childNode
-                );
-
-                result++;
-            } else if (/tr/i[test](childNode.nodeName) &&
-                       // checking if a newline already inserted
-                       !(node.childNodes[i-1] &&
-                         node.childNodes[i-1].textContent == '\n')
-            ) {
-                node.insertBefore(
-                    _document.createTextNode('\n'), childNode
-                );
-                result++;
-                i++;
+            // (can only be the <br/> tag)
+            if (pos == 0) {
+                // position before the <br/> tag
+                if (!node.previousSibling) {
+                    // first element
+                    node = node.parentNode;
+                } else if (node.previousSibling[length]) {
+                    // previous sibling is a text node
+                    // point in the end of that text
+                    node = node.previousSibling;
+                    pos = node[length];
+                } else if (node.previousSibling.childNodes[length]) {
+                    // previous sibling is <span> with text
+                    // point in the end of that text
+                    node = node.previousSibling.firstChild;
+                    pos = node[length];
+                } else {
+                    // previous sibling is <br/> as well
+                    // point between the nodes
+                    while (node.parentNode.childNodes[++pos] != node);
+                    node = node.parentNode;
+                }
+            } else if (pos == 1) {
+                // position right after the <br/> tag
+                if (!node.nextSibling) {
+                    // end of content
+                    node = node.parentNode;
+                    pos = node.childNodes[length]-1;
+                } else if (node.nextSibling[length]) {
+                    // next sibling is a text node
+                    // point in the begining of that text
+                    node = node.nextSibling;
+                    pos = 0;
+                } else if (node.nextSibling.childNodes[length]) {
+                    // next sibling is <span> with text
+                    // point in the begining of that text
+                    node = node.nextSibling.firstChild;
+                    pos = 0;
+                } else {
+                    // next sibling is <br/> as well
+                    // point between the nodes
+                    pos = 0;
+                    while (node.parentNode.childNodes[pos++] != node);
+                    node = node.parentNode;
+                }
             } else {
-                result += insertNewlines(childNode);
+                // point not yet reached
+                node = 0;
+                pos--;
             }
         }
 
-        return result;
+        return {n:node, p:pos};
     }
 
 
@@ -153,16 +198,17 @@ function(){
 
         // current token type:
         //  0: whitespace
-        //  1: operator or brace
-        //  2: closing brace (after which '/' is division not regex)
-        //  3: (key)word
-        //  4: regex
-        //  5: string starting with "
-        //  6: string starting with '
-        //  7: xml comment  <!-- -->
-        //  8: multiline comment /* */
-        //  9: single-line comment starting with two slashes //
-        // 10: single-line comment starting with a hash #
+        //  1: newline (separate token as <br/> tag)
+        //  2: operator or brace                                        
+        //  3: closing brace (after which '/' is division not regex)    
+        //  4: (key)word                                                
+        //  5: regex                                                    
+        //  6: string starting with "                                   
+        //  7: string starting with '                                   
+        //  8: xml comment  <!-- -->                                    
+        //  9: multiline comment /* */                                  
+        // 10: single-line comment starting with two slashes //         
+        // 11: single-line comment starting with a hash #               
         type = 0,
         lastType,
 
@@ -175,22 +221,20 @@ function(){
         chr        = 1,        // current character
         next1;                 // next character
 
-    // saving the selection position
-    if (sel.rangeCount &&
-        el.contains((ran = sel.getRangeAt(0)).startContainer)
-    ) {
-        ran.setStart(el, 0);
-        pos = ran.toString()[length];
+    var selEl = null;
+    var selOffset = null;
+
+    if (sel.rangeCount) {
+        ran = sel.getRangeAt(0);
+        selEl = ran.startContainer;
+        selOffset = ran.startOffset;
     }
 
+    var content = extractTextContent(el, selEl, selOffset);
 
-    var newly = insertNewlines(el);
-    pos += newly;
-
-
-    text = el.textContent;
-
-    if (newly || (lastTextContent||'') != text) {
+    text = content.t;
+    pos = content.p;
+    if ((lastTextContent||'') != text) {
         lastTextContent = text;
 
         j = 0;
@@ -203,49 +247,53 @@ function(){
                // pervious character will not be
                // therefore recognized as a token
                // finalize condition
-               prev1 = type < 7 && prev1 == '\\' ? 1 : chr
+               prev1 = type < 8 && prev1 == '\\' ? 1 : chr
         ) {
             chr = next1;
             next1=text[++j];
 
             // checking if token should be finalized
             if (!chr  || // end of content
-                // types 0 (whitespace, not highlighted), types 1 - 2
-                // (operators and braces) always consist of a single
-                // character
-                type < 3 ||
-                // types 9-10 (single-line comments) end with a
+                // types 0-1 (whitespace and newline, not
+                // highlighted), types 1 - 2 (operators and braces)
+                // always consist of a single character
+                type < 4 ||
+                // types 10-11 (single-line comments) end with a
                 // newline
-                (type > 8 && chr == '\n') ||
+                (type > 9 && chr == '\n') ||
                 [ // finalize condition for other token types
-                    !/[$\w]/[test](chr), // 3: word
-                                         // 4: regex
+                    !/[$\w]/[test](chr), // 4: (key)word
+                                         // 5: regex
                     (prev1 == '/' || prev1 == '\n') && token[length] > 1,
-                                         // 5: string with "
+                                         // 6: string with "
                     prev1 == '"' && token[length] > 1,
-                                         // 6: string with '
+                                         // 7: string with '
                     prev1 == "'" && token[length] > 1,
-                                         // 7: xml comment
+                                         // 8: xml comment
                     text[j-4]+prev2+prev1 == '-->',
-                    prev2+prev1 == '*/'  // 8: multiline comment
-                ][type-3]
+                    prev2+prev1 == '*/'  // 9: multiline comment
+                ][type-4]
             ) {
                 // appending the token to the result
                 if (type) {
-                    result += '<span style="' + (
+                    result +=
+                        // newline
+                        type == 1 ? '<br/>' :
+                        // everything else
+                        '<span style="' + (
                         // operators and braces
-                        type < 3 ?
+                        type < 4 ?
                             opacity+6+
                             textShadow+_0px_0px+7+pxColor + alpha/4+'),'+
                                        _0px_0px+3+pxColor + alpha/4+')' :
                         // comments
-                        type > 6 ?
+                        type > 7 ?
                             'font-style:italic'+
                             opacity+5+
                             textShadow+_3px_0px_5+pxColor + alpha/3+'), -'+
                                        _3px_0px_5+pxColor + alpha/3+')' :
                         // regex and strings
-                        type > 3 ?
+                        type > 4 ?
                             opacity+7+
                             textShadow+_3px_0px_5+pxColor + alpha/5+'), -'+
                                        _3px_0px_5+pxColor + alpha/5+')' :
@@ -258,7 +306,7 @@ function(){
                                     [replace](/</g, '&lt;')
                                     [replace](/>/g, '&gt;') + '</span>';
 
-                    if (type < 7) { // not a comment
+                    if (type < 8) { // not a comment
                         lastType = type;
                     }
                 } else {
@@ -270,14 +318,15 @@ function(){
 
                 // going down until matching a
                 // token type start condition
-                type = 12;
+                type = 13;
                 while (![
                     1,                   //  0: whitespace
-                                         //  1: operator or braces
+                    chr == '\n',         //  1: newline
+                                         //  2: operator or braces
                     /[{}\[\(\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
-                    /[\]\)]/[test](chr), //  2: closing brace
-                    /[$\w]/[test](chr),  //  3: word,
-                    chr == '/' &&        //  4: regex
+                    /[\]\)]/[test](chr), //  3: closing brace
+                    /[$\w]/[test](chr),  //  4: word,
+                    chr == '/' &&        //  5: regex
                         // previous token was an
                         // opening brace or an
                         // operator (otherwise
@@ -286,13 +335,13 @@ function(){
                         // workaround for xml
                         // closing tags
                         prev1 != '<',
-                    chr == '"',          //  5: string with "
-                    chr == "'",          //  6: string with '
-                                         //  7: xml comment
+                    chr == '"',          //  6: string with "
+                    chr == "'",          //  7: string with '
+                                         //  8: xml comment
                     chr+next1+text[j+1]+text[j+2] == '<!--',
-                    chr+next1 == '/*',   //  8: multiline comment
-                    chr+next1 == '//',   //  9: single-line comment
-                    chr == '#'           // 10: hash-style comment
+                    chr+next1 == '/*',   //  9: multiline comment
+                    chr+next1 == '//',   // 10: single-line comment
+                    chr == '#'           // 11: hash-style comment
                 ][--type]);
             }
 
@@ -301,56 +350,85 @@ function(){
 
         el.innerHTML = result;
 
+        // restoring the selection position
+        if (pos >= 0) {
+            sel.removeAllRanges();
+            res = findPos(el, pos);
+
+            if (res.n.length) {
+                // text node
+                ran.setStart(res.n, res.p);
+                ran.setEnd(res.n, res.p);
+                sel.addRange(ran);
+            } else {
+                // between the nodes
+                var node = res.n.childNodes[res.p];
+                if (node && /(br)/i[test](node.nodeName)) {
+                    // next node is <br/>
+                    ran.setStartBefore(node);
+                    ran.setEndBefore(node);
+                    var newNode = _document.createTextNode('\n');
+                    ran.insertNode(newNode);
+
+                    ran.setStartBefore(node);
+                    ran.setEndAfter(node);
+                    ran.deleteContents();
+                    sel.removeAllRanges();
+                    sel.addRange(ran);
+
+                    ran.setStart(newNode,0);
+                    ran.setEnd(newNode,0);
+                    sel.removeAllRanges();
+                    sel.addRange(ran);
+                } else {
+                    // last node or not a <br/>
+                    ran.setStart(res.n, res.p);
+                    ran.setEnd(res.n, res.p);
+                    sel.addRange(ran);
+                }
+
+                /*
+                if (/(br)/i[test](node.nodeName)) {
+                    ran.setStartBefore(node);
+                    ran.setEndBefore(node);
+                    var newNode = _document.createTextNode('\n');
+                    ran.insertNode(newNode);
+                    sel.removeAllRanges();
+                    sel.addRange(ran);
+
+                    ran.setStartBefore(node);
+                    ran.setEndAfter(node);
+                    ran.deleteContents();
+                    sel.removeAllRanges();
+                    sel.addRange(ran);
+
+                    ran.setStart(newNode,1);
+                    ran.setEnd(newNode,1);
+                    sel.removeAllRanges();
+                    sel.addRange(ran);
+                } else {
+                    ran.setStart(res.n, res.p);
+                    ran.setEnd(res.n, res.p);
+                    sel.addRange(ran);
+                }
+                 */
+            }
+
+            
+        }
     }
 
-    // restoring the selection position
-    if (pos) {
-        res = findPos(el, pos);
-
-        sel.removeAllRanges();
-
-        ran.setStart(res.n, res.p);
-        ran.setEnd(res.n, res.p);
-        sel.addRange(ran);
-    }
 }
-            )).observe(el, {
-                        characterData : 1,
-                        subtree       : 1,
-                        childList     : 1
-                    });
+                )).observe(el, {
+                            characterData : 1,
+                            subtree       : 1,
+                            childList     : 1
+                });
 
-                    cb();
-                }
+                cb();
+
+            }
                 
-            el.addEventListener('keypress', function(e){
-                if (e.keyCode == 13) {  // Enter
-                    // firefox places <br/> instead of newline
-                    // which is not recognized by textContent
-                    //
-                    // also adding some padding from the left side
-                    var sel = window.getSelection();
-                    var ran = sel.getRangeAt(0);
-                    if (el.contains(ran.startContainer) &&
-                        el.contains(ran.endContainer)
-                    ) {
-                        ran.deleteContents();
-                        ran.insertNode(_document.createTextNode('\n'));
-
-                        ran.setStart(el, 0);
-                        var pos = ran.toString()[length];
-
-                        // putting the selection after the newline
-                        var res = findPos(el, pos);
-                        sel.removeAllRanges();
-                        ran.setStart(res.n, res.p);
-                        ran.setEnd(res.n, res.p);
-                        sel.addRange(ran);
-
-                        e.preventDefault();
-                    }
-                }
-            }, false);
             })(el);
         }
     }
