@@ -21,6 +21,7 @@
     var test      = 'test';
     var replace   = 'replace';
     var length    = 'length';
+    var childNodes = 'childNodes';
 
 
 
@@ -50,15 +51,15 @@
         } else {
             // node with subnodes
             text = '';
-            for (i = 0; i < el.childNodes[length]; i++) {
+            for (i = 0; i < el[childNodes][length]; i++) {
                 if (selEl == el && selOffset == i) {
-                    pos = text.length;
+                    pos = text[length];
                 }
 
-                content = extractTextContent(el.childNodes[i], selEl, selOffset);
+                content = extractTextContent(el[childNodes][i], selEl, selOffset);
 
                 if (content.p >= 0) {
-                    pos = text.length + content.p;
+                    pos = text[length] + content.p;
                 }
                 text += content.t;
 
@@ -96,9 +97,9 @@
                 node = 0;
                 pos -= len;
             }
-        } else if (node.childNodes[length]) {
+        } else if (node[childNodes][length]) {
             // node with subnodes
-            node = node.childNodes[0];
+            node = node[childNodes][0];
             do {
                 result = findPos(node, pos);
                 pos = result.p;
@@ -117,7 +118,7 @@
                 pos--;
             } else {
                 // point right before the node, pos == 0
-                while (node.parentNode.childNodes[++pos] != node);
+                while (node.parentNode[childNodes][++pos] != node);
                 node = node.parentNode;
             }
         }
@@ -315,66 +316,25 @@ function(){
             sel.removeAllRanges();
             res = findPos(el, pos);
 
-            if (res.n.length) {
-                // text node
-                ran.setStart(res.n, res.p);
-                ran.setEnd(res.n, res.p);
-                sel.addRange(ran);
-            } else {
-                // between the nodes
-                var node = res.n.childNodes[res.p];
-                if (node && /(br)/i[test](node.nodeName)) {
-                    // next node is <br/>
-                    ran.setStartBefore(node);
-                    ran.setEndBefore(node);
-                    var newNode = _document.createTextNode('\n');
-                    ran.insertNode(newNode);
+            var node = res.n[childNodes] && res.n[childNodes][res.p];
+            if (!res.n[length] && node && /(br)/i[test](node.nodeName)) {
+                // between the nodes, next node is <br/>
 
-                    ran.setStartBefore(node);
-                    ran.setEndAfter(node);
-                    ran.deleteContents();
-                    sel.removeAllRanges();
-                    sel.addRange(ran);
+                // replacing next node with '\n' and putting the
+                // selection there (otherwise chorme treats it wrong)
+                ran.setStartBefore(node);
+                var newNode = _document.createTextNode('\n');
+                ran.insertNode(newNode);
+                ran.setStartBefore(node);
+                ran.setEndAfter(node);
+                ran.deleteContents();
 
-                    ran.setStart(newNode,0);
-                    ran.setEnd(newNode,0);
-                    sel.removeAllRanges();
-                    sel.addRange(ran);
-                } else {
-                    // last node or not a <br/>
-                    ran.setStart(res.n, res.p);
-                    ran.setEnd(res.n, res.p);
-                    sel.addRange(ran);
-                }
-
-                /*
-                if (/(br)/i[test](node.nodeName)) {
-                    ran.setStartBefore(node);
-                    ran.setEndBefore(node);
-                    var newNode = _document.createTextNode('\n');
-                    ran.insertNode(newNode);
-                    sel.removeAllRanges();
-                    sel.addRange(ran);
-
-                    ran.setStartBefore(node);
-                    ran.setEndAfter(node);
-                    ran.deleteContents();
-                    sel.removeAllRanges();
-                    sel.addRange(ran);
-
-                    ran.setStart(newNode,1);
-                    ran.setEnd(newNode,1);
-                    sel.removeAllRanges();
-                    sel.addRange(ran);
-                } else {
-                    ran.setStart(res.n, res.p);
-                    ran.setEnd(res.n, res.p);
-                    sel.addRange(ran);
-                }
-                 */
+                res = {n:newNode, p:0};
             }
 
-            
+            ran.setStart(res.n,res.p);
+            ran.setEnd(res.n,res.p);
+            sel.addRange(ran);
         }
     }
 
