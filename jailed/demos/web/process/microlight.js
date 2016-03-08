@@ -38,9 +38,9 @@
      * @param {Object} selEl selection element
      * @param {Object} selOffset selection offset
      */
-    var extractTextContent = function(el, selEl, selOffset, text, pos, len, i, content) {
+    var extractTextContent = function(el, selEl, selOffset, text, pos, i, content) {
         pos = -1;
-        if (len = el[length]) {
+        if (el[length]) {
             // text node
             text = el.textContent;
 
@@ -111,54 +111,14 @@
         } else {
             // node without subnodes
             // (can only be the <br/> tag)
-            if (pos == 0) {
-                // position before the <br/> tag
-                if (!node.previousSibling) {
-                    // first element
-                    node = node.parentNode;
-                } else if (node.previousSibling[length]) {
-                    // previous sibling is a text node
-                    // point in the end of that text
-                    node = node.previousSibling;
-                    pos = node[length];
-                } else if (node.previousSibling.childNodes[length]) {
-                    // previous sibling is <span> with text
-                    // point in the end of that text
-                    node = node.previousSibling.firstChild;
-                    pos = node[length];
-                } else {
-                    // previous sibling is <br/> as well
-                    // point between the nodes
-                    while (node.parentNode.childNodes[++pos] != node);
-                    node = node.parentNode;
-                }
-            } else if (pos == 1) {
-                // position right after the <br/> tag
-                if (!node.nextSibling) {
-                    // end of content
-                    node = node.parentNode;
-                    pos = node.childNodes[length]-1;
-                } else if (node.nextSibling[length]) {
-                    // next sibling is a text node
-                    // point in the begining of that text
-                    node = node.nextSibling;
-                    pos = 0;
-                } else if (node.nextSibling.childNodes[length]) {
-                    // next sibling is <span> with text
-                    // point in the begining of that text
-                    node = node.nextSibling.firstChild;
-                    pos = 0;
-                } else {
-                    // next sibling is <br/> as well
-                    // point between the nodes
-                    pos = 0;
-                    while (node.parentNode.childNodes[pos++] != node);
-                    node = node.parentNode;
-                }
-            } else {
+            if (pos) {
                 // point not yet reached
                 node = 0;
                 pos--;
+            } else {
+                // point right before the node, pos == 0
+                while (node.parentNode.childNodes[++pos] != node);
+                node = node.parentNode;
             }
         }
 

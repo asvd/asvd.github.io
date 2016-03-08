@@ -23,10 +23,31 @@ function regen_input() {
     el('input_data').innerHTML = stringify(input);
 }
 
+// extracts text content, treating <br> as newline
+function extractTextContent(el) {
+    var text;
+    if (el.length) {
+        // text node
+        text = el.textContent;
+    } else {
+        // node with subnodes
+        text = '';
+        for (var i = 0; i < el.childNodes.length; i++) {
+            text += extractTextContent(el.childNodes[i]);
+        }
+
+        if (/(br)/i.test(el.nodeName)) {
+            text += '\n';
+        }
+    }
+
+    return text;
+}
+
 // processes the input data using provided code
 function process() {
     el('output_data').innerHTML = '<img class="loading" src="loading.gif"/>';
-    var code = el('code').textContent;
+    var code = extractTextContent(el('code'));
 
     var input = el('input_data').textContent;
 
