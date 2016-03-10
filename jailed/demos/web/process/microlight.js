@@ -124,6 +124,7 @@
                 pos--;
             } else {
                 // point right before the node, pos == 0
+                pos--; // starting from -1 to check the first node
                 while (node.parentNode[childNodes][++pos] != node);
                 node = node.parentNode;
             }
