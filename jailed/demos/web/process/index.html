@@ -18,9 +18,19 @@
           <div class=rel>
             <div class=labels>
               <div class=rel>
-                <div class=label>Input</div>
-                <div class=label id=code_label>Processing code</div>
-                <div class=label>Output</div>
+                <div class=label>input data</div>
+                <div class=label_explanation>shipped by the application</div>
+                <div class=label>processing code</div>
+                <div class=label_explanation id=code_explanation>
+                  provided <span class='or'>|</span> changeable by a
+                  user and is therefore untrusted. The code is then
+                  evaluated in a&nbsp;Plugin created with
+                  the <a target="_blank"
+                  href="https://github.com/asvd/jailed">Jailed</a>
+                  library. The Plugin runs in a sandboxed iframe in
+                  order to prevent accessing the main application
+                </div>
+                <div class=label>output</div>
               </div>
             </div>
 
@@ -61,16 +71,6 @@
 
         <div class=description>
           <h3>data processing demo</h3>
-
-          The input data is shipped by the application. Processing
-          code is provided <span class='or'>|</span> changeable by a
-          user and is therefore untrusted. The code is evaluated in
-          a&nbsp;Plugin created with the <a target="_blank"
-          href="https://github.com/asvd/jailed">Jailed</a>
-          library. The Plugin runs in a sandboxed iframe in order to
-          prevent accessing the main application.
-
-
 
 
         <div class=links_container>

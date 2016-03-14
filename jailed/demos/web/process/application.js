@@ -23,7 +23,8 @@ function regen_input() {
     el('input_data').innerHTML = stringify(input);
 }
 
-// extracts text content, treating <br> as newline
+// extracts text content, properly treating <br> as newline
+// (which would not be recognized by .textContent property)
 function extractTextContent(el) {
     var text;
     if (el.length) {

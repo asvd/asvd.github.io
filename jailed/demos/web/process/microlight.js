@@ -48,24 +48,26 @@
             if (selEl == el) {
                 pos = selOffset;
             }
-        } else {
+        } else if (el[childNodes][length]) {
             // node with subnodes
             text = '';
-
-            if (el[childNodes][length]) {
-                for (i = 0; i < el[childNodes][length]; i++) {
-                    if (selEl == el && selOffset == i) {
-                        pos = text[length];
-                    }
-
-                    content = extractTextContent(el[childNodes][i], selEl, selOffset);
-
-                    if (content.p >= 0) {
-                        pos = text[length] + content.p;
-                    }
-                    text += content.t;
+            for (i = 0; i < el[childNodes][length]; i++) {
+                if (selEl == el && selOffset == i) {
+                    pos = text[length];
                 }
-            } else if (selEl == el) {
+
+                content = extractTextContent(el[childNodes][i], selEl, selOffset);
+
+                if (content.p >= 0) {
+                    pos = text[length] + content.p;
+                }
+                text += content.t;
+            }
+        } else {
+            // node without subnodes
+            text = '';
+
+            if (selEl == el) {
                 // span with no children (happens on FF when removing
                 // the contents)
                 pos = 0;
@@ -120,8 +122,8 @@
             // (can only be the <br/> tag)
             if (pos) {
                 // point not yet reached
-                node = 0;
                 pos--;
+                node = 0;
             } else {
                 // point right before the node, pos == 0
                 pos--; // starting from -1 to check the first node

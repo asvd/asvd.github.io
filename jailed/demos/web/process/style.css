@@ -57,7 +57,7 @@ a:hover {
 
 .application_and_labels {
     position : absolute;
-    width : 563px;
+    width : 608px;
     height: 300px;
     top : 45px;
     left : 0px;
@@ -66,24 +66,30 @@ a:hover {
 
 .labels {
     position : absolute;
-    width : 150px;
+    width : 190px;
     height: 300px;
     top : 0px;
     left : 0px;
 }
 
 .label {
-    height : 22px;
+    height : 20px;
     font-variant: small-caps;
     text-align: right;
+    color: #D3E8FD;
+    text-shadow: 0px 0px 7px rgba(181, 247, 255, 0.21), 0px 0px 3px rgba(181, 247, 255,0.4);
 }
 
-#code_label {
-    height : 256px;
+
+.label_explanation {
+    font-size: 11px;
+    text-align: right;
+    padding-bottom: 30px;
+    color: #72A6B8;
 }
 
-#output_label {
-    height : 22px;
+#code_explanation {
+    height : 157px;
 }
 
 
@@ -212,7 +218,7 @@ a:hover {
     text-align: justify;
     width: 235px;
     height: 400px;
-    top : 0px;
+    top : 45px;
     right : 0px;
 }
 
@@ -225,7 +231,6 @@ a:hover {
 
 .links_container {
     color : #56A7B7;
-    margin-top: 50px;
     transition : opacity .2s;
     opacity : .7;
 }
