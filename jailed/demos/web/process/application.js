@@ -25,30 +25,49 @@ function regen_input() {
 
 // extracts text content, properly treating <br> as newline
 // (which would not be recognized by .textContent property)
-function extractTextContent(el) {
-    var text;
+function extractTextContent(el, selNode, selPos) {
+    var text, pos = -1, content;
     if (el.length) {
         // text node
         text = el.textContent;
+
+        if (selNode == el) {
+            pos = selPos
+        }
     } else {
         // node with subnodes
         text = '';
         for (var i = 0; i < el.childNodes.length; i++) {
-            text += extractTextContent(el.childNodes[i]);
+            if (selNode == el && selPos == i) {
+                pos = text.length;
+            }
+
+            content = extractTextContent(
+                el.childNodes[i], selNode, selPos
+            )
+
+            if (content.pos >= 0) {
+                pos = text.length + content.pos;
+            }
+            text += content.text;
         }
 
         if (/(br)/i.test(el.nodeName)) {
             text += '\n';
+
+            if (selNode == el) {
+                pos = 0;
+            }
         }
     }
 
-    return text;
+    return {text: text, pos: pos};
 }
 
 // processes the input data using provided code
 function process() {
     el('output_data').innerHTML = '<img class="loading" src="loading.gif"/>';
-    var code = extractTextContent(el('code'));
+    var code = extractTextContent(el('code')).text;
 
     var input = el('input_data').textContent;
 
@@ -260,18 +279,25 @@ function init_scrolling() {
 function init_keypress() {
     var handle_keypress = function(e) {
         if (e.keyCode == 13) {  // Enter
-            // adding some padding from the left side
+            // adding spaces from the left side
             var sel = window.getSelection();
             var ran = sel.getRangeAt(0);
             if (el('code').contains(ran.startContainer) &&
                 el('code').contains(ran.endContainer)
             ) {
                 ran.deleteContents();
-                ran.setStart(el('code'), 0);
-                var lines = ran.toString().split('\n');
-                var prevLine = lines[lines.length-2];
+
+                var textContent = extractTextContent(
+                    el('code'), ran.startContainer, ran.startOffset
+                );
+
+                // searching for the beginning of the last line
+                var lines = textContent.text.
+                            slice(0, textContent.pos).split('\n');
+                
+                var prevLine = lines[lines.length-1];
                 var spaces = prevLine.substr(0, (prevLine+'.').search(/\S/));
-                var data = spaces;
+                var data = '\n'+spaces;
 
                 var node = document.createTextNode(data);
                 ran.setStart(ran.endContainer, ran.endOffset);
@@ -282,11 +308,12 @@ function init_keypress() {
                 ran.setEnd(node, data.length);
                 sel.removeAllRanges();
                 sel.addRange(ran);
+                e.preventDefault();
             }
         }
     }
 
-//    el('code').addEventListener('keypress', handle_keypress, false);
+    el('code').addEventListener('keypress', handle_keypress, false);
 }
 
 
