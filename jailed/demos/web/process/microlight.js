@@ -35,51 +35,52 @@
      * because <br> and <tr> tags look like newlines, but are not
      * recognized
      *
-     * @param {Object} el to get text content from
-     * @param {Object} selEl selection element
-     * @param {Object} selOffset selection offset
+     * @param {Object} node to get text content from
+     * @param {Object} pos selection offset
+     * @param {Object} selNode selection element
      */
-    var extractTextContent = function(el, selEl, selOffset, text, pos, i, content) {
-        pos = -1;
-        if (el[length]) {
+    var extractTextContent = function(node, pos, selNode) {
+        var resultText, resultPos, i, result;
+        resultPos = -1;
+        if (node[length]) {
             // text node
-            text = el.textContent;
+            resultText = node.textContent;
 
-            if (selEl == el) {
-                pos = selOffset;
+            if (selNode == node) {
+                resultPos = pos;
             }
-        } else if (el[childNodes][length]) {
+        } else if (node[childNodes][length]) {
             // node with subnodes
-            text = '';
-            for (i = 0; i < el[childNodes][length]; i++) {
-                if (selEl == el && selOffset == i) {
-                    pos = text[length];
+            resultText = '';
+            for (i = 0; i < node[childNodes][length]; i++) {
+                result = extractTextContent(node[childNodes][i], pos, selNode);
+
+                if (selNode == node && pos == i) {
+                    resultPos = resultText[length];
                 }
 
-                content = extractTextContent(el[childNodes][i], selEl, selOffset);
-
-                if (content.p >= 0) {
-                    pos = text[length] + content.p;
+                if (result.p >= 0) {
+                    resultPos = resultText[length] + result.p;
                 }
-                text += content.t;
+                resultText += result.t;
             }
         } else {
             // node without subnodes
-            text = '';
+            resultText = '';
 
-            if (selEl == el) {
+            if (selNode == node) {
                 // span with no children (happens on FF when removing
                 // the contents)
-                pos = 0;
+                resultPos = 0;
             }
 
-            if (/(br|tr)/i[test](el.nodeName)) {
-                text += '\n';
+            if (/(br|tr)/i[test](node.nodeName)) {
+                resultText += '\n';
             }
 
         }
 
-        return {t: text, p: pos};
+        return {t: resultText, p: resultPos};
     }
 
 
@@ -98,41 +99,74 @@
      * node and its subnodes. In this case the remaining amount of
      * characters is stored in p.
      */
-    var findPos = function(node, pos, result, len) {
+    var findPos = function(node, pos) {
+        var result, len, i, resultNode = 0, resultPos = pos;
         if (len = node[length]) {
             // text node
             if (pos > len) {
-                node = 0;
-                pos -= len;
+                resultPos -= len;
+            } else {
+                resultNode = node;
             }
         } else if (node[childNodes][length]) {
             // node with subnodes
-            node = node[childNodes][0];
-            do {
-                result = findPos(node, pos);
-                pos = result.p;
-            } while (
-                // if a node found, taking it and quitting the loop
-                !(result.n && (node = result.n)) &&
-                // otherwise quitting the loop when no subchild left
-                (node = node.nextSibling)
-            );
+            var found = false;
+            for (i = 0; i < node[childNodes][length]; i++) {
+                result = findPos(node[childNodes][i], resultPos);
+                resultPos = result.p;
+
+                if (result.n) {
+                    // node found, takingit and quitting the loop
+                    resultNode = result.n;
+                    break;
+                }
+            }
         } else {
             // node without subnodes
             // (can only be the <br/> tag)
             if (pos) {
                 // point not yet reached
-                pos--;
-                node = 0;
+                resultPos--;
+                resultNode = 0;
             } else {
-                // point right before the node, pos == 0
-                pos--; // starting from -1 to check the first node
-                while (node.parentNode[childNodes][++pos] != node);
-                node = node.parentNode;
+                // point right before the node, resultPos == 0
+                resultPos--; // starting from -1 to check the first node
+                while (node.parentNode[childNodes][++resultPos] != node);
+                resultNode = node.parentNode;
             }
         }
 
-        return {n:node, p:pos};
+        return {n:resultNode, p:resultPos};
+    }
+
+
+
+    /**
+     * Recursively runs through (sub)nodes and performs one of the two
+     * actions:
+     *
+     * - if selNode argument is given, it means that
+     *
+     * @param {Object} node to run through
+     * @param {Numebr} pos
+     * @param {Object} selNode
+     */
+    var burrowNodes = function(node, pos, selNode) {
+        var resultText, resultNode = 0, resultPos = 0; // resulting text content
+        if (node[length]) {
+            // text node
+            resultText = node.textContent;
+        } else if (node[childNodes][length]) {
+            // node with subnodes
+        } else {
+            // node without subnodes
+        }
+
+        return {
+            t : resultText,
+            n : resultNode,
+            p : resultPos
+        };
     }
 
 
@@ -200,7 +234,7 @@ function(){
         selOffset = ran.startOffset;
     }
 
-    var content = extractTextContent(el, selEl, selOffset);
+    var content = extractTextContent(el, selOffset, selEl);
 
     text = content.t;
     pos = content.p;
