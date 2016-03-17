@@ -22,6 +22,12 @@
     var replace   = 'replace';
     var length    = 'length';
     var childNodes = 'childNodes';
+    var mutationObserveOptions = {
+            characterData : 1,
+            subtree       : 1,
+            childList     : 1
+        };
+
 
 
     /**
@@ -31,9 +37,9 @@
      * - if selNode argument is given, it means that the function
      *   extracts the text content, replacing all <br> and <tr> tags
      *   with the newlines (which are not recognized by the
-     *   .textContent property of an element; additionally the
+     *   .textContent property of an element); additionally the
      *   function calculates the selection offset mesaured in number
-     *   of symbols in the resulted text. In this case, selNode is the
+     *   of symbols in the resulted text; in this case, selNode is the
      *   original element holding the selection, and pos is the offset
      *   inside that element; reuslt contains the .t property with the
      *   resulted text, and .p property with the selection offest
@@ -78,54 +84,56 @@
             } else {
                 resultNode = node;
             }
-        } else if (node[childNodes][length]) {
-            // node with subnodes
-            for (i = 0; i < node[childNodes][length]; i++) {
-                result = burrowNodes(
-                    node[childNodes][i],
-                    selNode ? pos : resultPos,
-                    selNode
-                );
-
-                if (selNode) {
-                    if (selNode == node && pos == i) {
-                        resultPos = resultText[length];
-                    }
-
-                    if (result.p >= 0) {
-                        resultPos = resultText[length] + result.p;
-                    }
-                } else {
-                    resultPos = result.p;
-
-                    if (result.n) {
-                        // node found, takingit and quitting the loop
-                        resultNode = result.n;
-                        break;
-                    }
-                }
-
-                resultText += result.t;
-            }
         } else {
-            // node without subnodes
-            if (selNode) {
-                if (selNode == node) {
-                    // span with no children (happens on FF when removing
-                    // the contents)
-                    resultPos = 0;
+            if (node[childNodes][length]) {
+                // node with subnodes
+                for (i = 0; i < node[childNodes][length]; i++) {
+                    result = burrowNodes(
+                        node[childNodes][i],
+                        selNode ? pos : resultPos,
+                        selNode
+                    );
+
+                    if (selNode) {
+                        if (selNode == node && pos == i) {
+                            resultPos = resultText[length];
+                        }
+
+                        if (result.p >= 0) {
+                            resultPos = resultText[length] + result.p;
+                        }
+                    } else {
+                        resultPos = result.p;
+
+                        if (result.n) {
+                            // node found, takingit and quitting the loop
+                            resultNode = result.n;
+                            break;
+                        }
+                    }
+
+                    resultText += result.t;
                 }
             } else {
-                // if point not reached, decreasing the pos one symbol,
-                // otherwise stariting the loop with -1
-                resultPos--;
-                if (pos) {
-                    // point not yet reached
-                    resultNode = 0;
+                // node without subnodes
+                if (selNode) {
+                    if (selNode == node) {
+                        // span with no children (happens on FF when removing
+                        // the contents)
+                        resultPos = 0;
+                    }
                 } else {
-                    // point right before the node, resultPos == 0
-                    while (node.parentNode[childNodes][++resultPos] != node);
-                    resultNode = node.parentNode;
+                    // if point not reached, decreasing the pos one symbol,
+                    // otherwise stariting the loop with -1
+                    resultPos--;
+                    if (pos) {
+                        // point not yet reached
+                        resultNode = 0;
+                    } else {
+                        // point right before the node, resultPos == 0
+                        while (node.parentNode[childNodes][++resultPos] != node);
+                        resultNode = node.parentNode;
+                    }
                 }
             }
 
@@ -146,11 +154,11 @@
         microlighted = _document.getElementsByClassName('microlight');
 
         for (i = 0; el = microlighted[i++];) {
-            (function(el, cb, lastTextContent) {
+            (function(el, cb) {
                 // MutationObserver can already be defined
                 // (in case when reset() was invoked again)
                 if (!el.ml) {
-                    el.ml = (new MutationObserver(cb =
+                    (el.ml = new MutationObserver(cb =
 function(){
 
     var result     = '',
@@ -197,8 +205,8 @@ function(){
         chr        = 1,        // current character
         next1;                 // next character
 
-    var selEl = null;
-    var selOffset = null;
+    var selEl = 1;  // should not be false when given to burrowNodes
+    var selOffset = 0;
 
     if (sel.rangeCount) {
         ran = sel.getRangeAt(0);
@@ -210,8 +218,6 @@ function(){
 
     text = content.t;
     pos = content.p;
-    if ((lastTextContent||'') != text) {
-        lastTextContent = text;
 
         j = 0;
     
@@ -266,12 +272,12 @@ function(){
                         type > 7 ?
                             'font-style:italic'+
                             opacity+5+
-                            textShadow+_3px_0px_5+pxColor + alpha/3+'), -'+
+                            textShadow+_3px_0px_5+pxColor + alpha/3+'),-'+
                                        _3px_0px_5+pxColor + alpha/3+')' :
                         // regex and strings
                         type > 4 ?
                             opacity+7+
-                            textShadow+_3px_0px_5+pxColor + alpha/5+'), -'+
+                            textShadow+_3px_0px_5+pxColor + alpha/5+'),-'+
                                        _3px_0px_5+pxColor + alpha/5+')' :
                         // type == 4 (key)word
                         /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ?
@@ -324,11 +330,14 @@ function(){
             token += chr;
         }
 
+    // temporarily disconnecting the observer for changing the dom
+    el.ml.disconnect();
         el.innerHTML = result;
 
         // restoring the selection position
         if (pos >= 0) {
             sel.removeAllRanges();
+
             res = burrowNodes(el, pos);
 
             var node = res.n[childNodes] && res.n[childNodes][res.p];
@@ -351,14 +360,13 @@ function(){
             ran.setEnd(res.n,res.p);
             sel.addRange(ran);
         }
-    }
+
+
+    el.ml.observe(el, mutationObserveOptions);
+
 
 }
-                )).observe(el, {
-                    characterData : 1,
-                    subtree       : 1,
-                    childList     : 1
-                });
+                )).observe(el, mutationObserveOptions);
 
                 cb();
 
