@@ -24,142 +24,114 @@
     var childNodes = 'childNodes';
 
 
-
     /**
-     * Recursively extracts the text content from the given element.
+     * Recursively runs through (sub)nodes and performs one of the two
+     * actions:
      *
-     * Additionally counts, how much characters is there until the
-     * selected point
+     * - if selNode argument is given, it means that the function
+     *   extracts the text content, replacing all <br> and <tr> tags
+     *   with the newlines (which are not recognized by the
+     *   .textContent property of an element; additionally the
+     *   function calculates the selection offset mesaured in number
+     *   of symbols in the resulted text. In this case, selNode is the
+     *   original element holding the selection, and pos is the offset
+     *   inside that element; reuslt contains the .t property with the
+     *   resulted text, and .p property with the selection offest
+     *   (which is -1 in case when the selection position is outside
+     *   of the node);
      *
-     * textContent property of an element does not work well here,
-     * because <br> and <tr> tags look like newlines, but are not
-     * recognized
+     * - if selNode argument is not provided, the function restores
+     *   the selection position in the generated highlited code
+     *   contained in the given node; in this case, pos stands for the
+     *   selection position inside the node; the resulted object
+     *   contans the .n property, holding the element, where the
+     *   selection should be restored, and the .p property standing
+     *   for the proper selection position inisde that element; if the
+     *   given selection position (pos) is greater than the number of
+     *   characters in the given node, this means that the node
+     *   holding the selection is not yet reached; in latter case the
+     *   .n property of the returned object is 0, and .p is the
+     *   remaining number of characters before the selection is
+     *   reached.
      *
-     * @param {Object} node to get text content from
-     * @param {Object} pos selection offset
-     * @param {Object} selNode selection element
+     * @param {Object} node to run through
+     * @param {Numebr} pos
+     * @param {Object} selNode
+     *
+     * @returns {Object} containing .n, .p, and .t properties
      */
-    var extractTextContent = function(node, pos, selNode) {
-        var resultText, resultPos, i, result;
-        resultPos = -1;
-        if (node[length]) {
+    var burrowNodes = function(node, pos, selNode) {
+        var resultText = '',
+            resultNode = 0,
+            resultPos = selNode?-1:pos,
+            i = 0, result, len;
+        if (len = node[length]) {
             // text node
             resultText = node.textContent;
 
-            if (selNode == node) {
-                resultPos = pos;
-            }
-        } else if (node[childNodes][length]) {
-            // node with subnodes
-            resultText = '';
-            for (i = 0; i < node[childNodes][length]; i++) {
-                result = extractTextContent(node[childNodes][i], pos, selNode);
-
-                if (selNode == node && pos == i) {
-                    resultPos = resultText[length];
+            if (selNode) {
+                if (selNode == node) {
+                    resultPos = pos;
                 }
-
-                if (result.p >= 0) {
-                    resultPos = resultText[length] + result.p;
-                }
-                resultText += result.t;
-            }
-        } else {
-            // node without subnodes
-            resultText = '';
-
-            if (selNode == node) {
-                // span with no children (happens on FF when removing
-                // the contents)
-                resultPos = 0;
-            }
-
-            if (/(br|tr)/i[test](node.nodeName)) {
-                resultText += '\n';
-            }
-
-        }
-
-        return {t: resultText, p: resultPos};
-    }
-
-
-
-    /**
-     * Recursively calculates the node and a position inside that node
-     * to restore the selection
-     *
-     * @param {Element} node root element
-     * @param {Number} pos position offset related to the root element
-     *
-     * Returned value contains an object with keys p and n: n stands
-     * for a subnode where the demanded position is located; p is a
-     * position offset inside that elemnt. If n is null, that means
-     * that the given pos exceeds the number of characters inside the
-     * node and its subnodes. In this case the remaining amount of
-     * characters is stored in p.
-     */
-    var findPos = function(node, pos) {
-        var result, len, i, resultNode = 0, resultPos = pos;
-        if (len = node[length]) {
-            // text node
-            if (pos > len) {
+            } else if (pos > len) {
                 resultPos -= len;
             } else {
                 resultNode = node;
             }
         } else if (node[childNodes][length]) {
             // node with subnodes
-            var found = false;
             for (i = 0; i < node[childNodes][length]; i++) {
-                result = findPos(node[childNodes][i], resultPos);
-                resultPos = result.p;
+                result = burrowNodes(
+                    node[childNodes][i],
+                    selNode ? pos : resultPos,
+                    selNode
+                );
 
-                if (result.n) {
-                    // node found, takingit and quitting the loop
-                    resultNode = result.n;
-                    break;
+                if (selNode) {
+                    if (selNode == node && pos == i) {
+                        resultPos = resultText[length];
+                    }
+
+                    if (result.p >= 0) {
+                        resultPos = resultText[length] + result.p;
+                    }
+                } else {
+                    resultPos = result.p;
+
+                    if (result.n) {
+                        // node found, takingit and quitting the loop
+                        resultNode = result.n;
+                        break;
+                    }
+                }
+
+                resultText += result.t;
+            }
+        } else {
+            // node without subnodes
+            if (selNode) {
+                if (selNode == node) {
+                    // span with no children (happens on FF when removing
+                    // the contents)
+                    resultPos = 0;
+                }
+            } else {
+                // if point not reached, decreasing the pos one symbol,
+                // otherwise stariting the loop with -1
+                resultPos--;
+                if (pos) {
+                    // point not yet reached
+                    resultNode = 0;
+                } else {
+                    // point right before the node, resultPos == 0
+                    while (node.parentNode[childNodes][++resultPos] != node);
+                    resultNode = node.parentNode;
                 }
             }
-        } else {
-            // node without subnodes
-            // (can only be the <br/> tag)
-            if (pos) {
-                // point not yet reached
-                resultPos--;
-                resultNode = 0;
-            } else {
-                // point right before the node, resultPos == 0
-                resultPos--; // starting from -1 to check the first node
-                while (node.parentNode[childNodes][++resultPos] != node);
-                resultNode = node.parentNode;
+
+            if (/(br|tr)/i[test](node.nodeName)) {
+                resultText += '\n';
             }
-        }
-
-        return {n:resultNode, p:resultPos};
-    }
-
-
-
-    /**
-     * Recursively runs through (sub)nodes and performs one of the two
-     * actions:
-     *
-     * - if selNode argument is given, it means that
-     *
-     * @param {Object} node to run through
-     * @param {Numebr} pos
-     * @param {Object} selNode
-     */
-    var burrowNodes = function(node, pos, selNode) {
-        var resultText, resultNode = 0, resultPos = 0; // resulting text content
-        if (node[length]) {
-            // text node
-            resultText = node.textContent;
-        } else if (node[childNodes][length]) {
-            // node with subnodes
-        } else {
-            // node without subnodes
         }
 
         return {
@@ -234,7 +206,7 @@ function(){
         selOffset = ran.startOffset;
     }
 
-    var content = extractTextContent(el, selOffset, selEl);
+    var content = burrowNodes(el, selOffset, selEl);
 
     text = content.t;
     pos = content.p;
@@ -357,7 +329,7 @@ function(){
         // restoring the selection position
         if (pos >= 0) {
             sel.removeAllRanges();
-            res = findPos(el, pos);
+            res = burrowNodes(el, pos);
 
             var node = res.n[childNodes] && res.n[childNodes][res.p];
             if (!res.n[length] && node && /(br)/i[test](node.nodeName)) {
