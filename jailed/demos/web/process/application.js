@@ -299,11 +299,6 @@ function init_keypress() {
                 var spaces = prevLine.substr(0, (prevLine+'.').search(/\S/));
                 var data = '\n'+spaces;
 
-                if (/{|\[|\(/.test(prevLine[prevLine.length-1])) {
-                    // last line starts a subsection, adding extra padding
-                    data += '    ';
-                }
-
                 var node = document.createTextNode(data);
                 ran.setStart(ran.endContainer, ran.endOffset);
                 ran.insertNode(node);
