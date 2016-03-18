@@ -23,10 +23,10 @@
     var length    = 'length';
     var childNodes = 'childNodes';
     var mutationObserveOptions = {
-            characterData : 1,
-            subtree       : 1,
-            childList     : 1
-        };
+        characterData : 1,
+        subtree       : 1,
+        childList     : 1
+    };
 
 
 
@@ -99,12 +99,11 @@
                             resultPos = resultText[length];
                         }
 
-                        if (result.p >= 0) {
+                        if (result.p+1) { // same as if (result.p >= 0)
                             resultPos = resultText[length] + result.p;
                         }
                     } else {
                         resultPos = result.p;
-
                         if (result.n) {
                             // node found, takingit and quitting the loop
                             resultNode = result.n;
@@ -126,13 +125,12 @@
                     // if point not reached, decreasing the pos one symbol,
                     // otherwise stariting the loop with -1
                     resultPos--;
-                    if (pos) {
-                        // point not yet reached
-                        resultNode = 0;
-                    } else {
+
+                    // if point not yet reached, resultNode is set to false
+                    // (otherwise redefined in inner loop)
+                    if (resultNode = !pos) {
                         // point right before the node, resultPos == 0
-                        while (node.parentNode[childNodes][++resultPos] != node);
-                        resultNode = node.parentNode;
+                        while ((resultNode = node.parentNode)[childNodes][++resultPos] != node);
                     }
                 }
             }
@@ -166,7 +164,6 @@ function(){
         // selection data
         sel        = _window.getSelection(),
         ran, res,
-        pos = 0,       // preserved selection position
 
         // style and color templates
         textShadow = ';text-shadow:',
@@ -203,10 +200,15 @@ function(){
         prev2,                 // character before the previous
         prev1,                 // previous character
         chr        = 1,        // current character
-        next1;                 // next character
+        next1,                 // next character
 
-    var selEl = 1;  // should not be false when given to burrowNodes
-    var selOffset = 0;
+        // should not be false when given to burrowNodes (so that it
+        // works in the proper mode of extracting text), but should
+        // not also be recognized as any of existing nodes
+        selEl = 1,
+        selOffset = 0,
+        content,
+        node; // used when restoring selection
 
     if (sel.rangeCount) {
         ran = sel.getRangeAt(0);
@@ -214,152 +216,147 @@ function(){
         selOffset = ran.startOffset;
     }
 
-    var content = burrowNodes(el, selOffset, selEl);
+    content = burrowNodes(el, selOffset, selEl);
 
     text = content.t;
-    pos = content.p;
-
-        j = 0;
     
-        next1 = text[0];
+    next1 = text[0];
 
-        // tokenizing the content
-        while (prev2 = prev1,
-               // escaping if needed
-               // pervious character will not be
-               // therefore recognized as a token
-               // finalize condition
-               prev1 = type < 8 && prev1 == '\\' ? 1 : chr
+    // tokenizing the content
+    while (prev2 = prev1,
+           // escaping if needed
+           // pervious character will not be
+           // therefore recognized as a token
+           // finalize condition
+           prev1 = type < 8 && prev1 == '\\' ? 1 : chr
+    ) {
+        chr = next1;
+        next1=text[++j];
+
+        // checking if token should be finalized
+        if (!chr  || // end of content
+            // types 0-1 (whitespace and newline, not
+            // highlighted), types 1 - 2 (operators and braces)
+            // always consist of a single character
+            type < 4 ||
+            // types 10-11 (single-line comments) end with a
+            // newline
+            (type > 9 && chr == '\n') ||
+            [ // finalize condition for other token types
+                !/[$\w]/[test](chr), // 4: (key)word
+                                     // 5: regex
+                (prev1 == '/' || prev1 == '\n') && token[length] > 1,
+                                     // 6: string with "
+                prev1 == '"' && token[length] > 1,
+                                     // 7: string with '
+                prev1 == "'" && token[length] > 1,
+                                     // 8: xml comment
+                text[j-4]+prev2+prev1 == '-->',
+                prev2+prev1 == '*/'  // 9: multiline comment
+            ][type-4]
         ) {
-            chr = next1;
-            next1=text[++j];
+            // appending the token to the result
+            if (type) {
+                result +=
+                    // newline
+                    type == 1 ? '<br/>' :
+                    // everything else
+                    '<span style="' + (
+                    // operators and braces
+                    type < 4 ?
+                        opacity+6+
+                        textShadow+_0px_0px+7+pxColor + alpha/4+'),'+
+                                   _0px_0px+3+pxColor + alpha/4+')' :
+                    // comments
+                    type > 7 ?
+                        'font-style:italic'+
+                        opacity+5+
+                        textShadow+_3px_0px_5+pxColor + alpha/3+'),-'+
+                                   _3px_0px_5+pxColor + alpha/3+')' :
+                    // regex and strings
+                    type > 4 ?
+                        opacity+7+
+                        textShadow+_3px_0px_5+pxColor + alpha/5+'),-'+
+                                   _3px_0px_5+pxColor + alpha/5+')' :
+                    // type == 4 (key)word
+                    /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ?
+                    textShadow+_0px_0px+7+pxColor + alpha*.6+'),'+
+                               _0px_0px+3+pxColor + alpha*.4+')' :
+                    ' '
+                ) + '">' + token[replace](/&/g, '&amp;')
+                                [replace](/</g, '&lt;')
+                                [replace](/>/g, '&gt;') + '</span>';
 
-            // checking if token should be finalized
-            if (!chr  || // end of content
-                // types 0-1 (whitespace and newline, not
-                // highlighted), types 1 - 2 (operators and braces)
-                // always consist of a single character
-                type < 4 ||
-                // types 10-11 (single-line comments) end with a
-                // newline
-                (type > 9 && chr == '\n') ||
-                [ // finalize condition for other token types
-                    !/[$\w]/[test](chr), // 4: (key)word
-                                         // 5: regex
-                    (prev1 == '/' || prev1 == '\n') && token[length] > 1,
-                                         // 6: string with "
-                    prev1 == '"' && token[length] > 1,
-                                         // 7: string with '
-                    prev1 == "'" && token[length] > 1,
-                                         // 8: xml comment
-                    text[j-4]+prev2+prev1 == '-->',
-                    prev2+prev1 == '*/'  // 9: multiline comment
-                ][type-4]
-            ) {
-                // appending the token to the result
-                if (type) {
-                    result +=
-                        // newline
-                        type == 1 ? '<br/>' :
-                        // everything else
-                        '<span style="' + (
-                        // operators and braces
-                        type < 4 ?
-                            opacity+6+
-                            textShadow+_0px_0px+7+pxColor + alpha/4+'),'+
-                                       _0px_0px+3+pxColor + alpha/4+')' :
-                        // comments
-                        type > 7 ?
-                            'font-style:italic'+
-                            opacity+5+
-                            textShadow+_3px_0px_5+pxColor + alpha/3+'),-'+
-                                       _3px_0px_5+pxColor + alpha/3+')' :
-                        // regex and strings
-                        type > 4 ?
-                            opacity+7+
-                            textShadow+_3px_0px_5+pxColor + alpha/5+'),-'+
-                                       _3px_0px_5+pxColor + alpha/5+')' :
-                        // type == 4 (key)word
-                        /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ?
-                        textShadow+_0px_0px+7+pxColor + alpha*.6+'),'+
-                                   _0px_0px+3+pxColor + alpha*.4+')' :
-                        ' '
-                    ) + '">' + token[replace](/&/g, '&amp;')
-                                    [replace](/</g, '&lt;')
-                                    [replace](/>/g, '&gt;') + '</span>';
-
-                    if (type < 8) { // not a comment
-                        lastType = type;
-                    }
-                } else {
-                    result += token;
+                if (type < 8) { // not a comment
+                    lastType = type;
                 }
-
-                // initializing a new token
-                token = ''
-
-                // going down until matching a
-                // token type start condition
-                type = 13;
-                while (![
-                    1,                   //  0: whitespace
-                    chr == '\n',         //  1: newline
-                                         //  2: operator or braces
-                    /[{}\[\(\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
-                    /[\]\)]/[test](chr), //  3: closing brace
-                    /[$\w]/[test](chr),  //  4: word,
-                    chr == '/' &&        //  5: regex
-                        // previous token was an
-                        // opening brace or an
-                        // operator (otherwise
-                        // division, not a regex)
-                        lastType < 3 &&
-                        // workaround for xml
-                        // closing tags
-                        prev1 != '<',
-                    chr == '"',          //  6: string with "
-                    chr == "'",          //  7: string with '
-                                         //  8: xml comment
-                    chr+next1+text[j+1]+text[j+2] == '<!--',
-                    chr+next1 == '/*',   //  9: multiline comment
-                    chr+next1 == '//',   // 10: single-line comment
-                    chr == '#'           // 11: hash-style comment
-                ][--type]);
+            } else {
+                result += token;
             }
 
-            token += chr;
+            // initializing a new token
+            token = ''
+
+            // going down until matching a
+            // token type start condition
+            type = 13;
+            while (![
+                1,                   //  0: whitespace
+                chr == '\n',         //  1: newline
+                                     //  2: operator or braces
+                /[{}\[\(\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
+                /[\]\)]/[test](chr), //  3: closing brace
+                /[$\w]/[test](chr),  //  4: word,
+                chr == '/' &&        //  5: regex
+                    // previous token was an
+                    // opening brace or an
+                    // operator (otherwise
+                    // division, not a regex)
+                    lastType < 3 &&
+                    // workaround for xml
+                    // closing tags
+                    prev1 != '<',
+                chr == '"',          //  6: string with "
+                chr == "'",          //  7: string with '
+                                     //  8: xml comment
+                chr+next1+text[j+1]+text[j+2] == '<!--',
+                chr+next1 == '/*',   //  9: multiline comment
+                chr+next1 == '//',   // 10: single-line comment
+                chr == '#'           // 11: hash-style comment
+            ][--type]);
         }
+
+        token += chr;
+    }
 
     // temporarily disconnecting the observer for changing the dom
     el.ml.disconnect();
-        el.innerHTML = result;
+    el.innerHTML = result;
 
-        // restoring the selection position
-        if (pos >= 0) {
-            sel.removeAllRanges();
+    // restoring the selection position
+    // same as if (pos >= 0)
+    if (content.p+1) {
+        sel.removeAllRanges();
 
-            res = burrowNodes(el, pos);
+        res = burrowNodes(el, content.p);
 
-            var node = res.n[childNodes] && res.n[childNodes][res.p];
-            if (!res.n[length] && node && /(br)/i[test](node.nodeName)) {
-                // between the nodes, next node is <br/>
+        node = res.n[childNodes] && res.n[childNodes][res.p];
+        if (!res.n[length] && node && /(br)/i[test](node.nodeName)) {
+            // between the nodes, next node is <br/>
 
-                // replacing next node with '\n' and putting the
-                // selection there (otherwise chorme treats it wrong)
-                ran.setStartBefore(node);
-                var newNode = _document.createTextNode('\n');
-                ran.insertNode(newNode);
-                ran.setStartBefore(node);
-                ran.setEndAfter(node);
-                ran.deleteContents();
-
-                res = {n:newNode, p:0};
-            }
-
-            ran.setStart(res.n,res.p);
-            ran.setEnd(res.n,res.p);
-            sel.addRange(ran);
+            // replacing next node with '\n' and putting the
+            // selection there (otherwise chorme treats it wrong)
+            el.replaceChild(
+                (res = {n:_document.createTextNode('\n'), p:0}).n,
+                node
+            );
         }
+
+
+        ran.setStart(res.n,res.p);
+        ran.setEnd(res.n,res.p);
+        sel.addRange(ran);
+    }
 
 
     el.ml.observe(el, mutationObserveOptions);
