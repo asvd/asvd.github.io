@@ -131,7 +131,10 @@
                     // (otherwise redefined in inner loop)
                     if (resultNode = !pos) {
                         // point right before the node, resultPos == 0
-                        while ((resultNode = node.parentNode)[childNodes][++resultPos] != node);
+                        while (node.parentNode[childNodes][++resultPos] != node);
+                        // if not <br>, then it's the highlighted
+                        // element itself (but with empty content)
+                        resultNode = brtr[test](node.nodeName) ? node.parentNode : node;
                     }
                 }
             }
@@ -159,7 +162,6 @@
                 if (!el.ml) {
                     (el.ml = new MutationObserver(cb =
 function(){
-
     var result     = '',
 
         // selection data
@@ -220,7 +222,7 @@ function(){
     content = burrowNodes(el, selOffset, selEl);
 
     text = content.t;
-    
+
     next1 = text[0];
 
     // tokenizing the content

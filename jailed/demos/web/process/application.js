@@ -311,7 +311,31 @@ function init_keypress() {
                 e.preventDefault();
             }
         }
+
+
     }
+
+    var obs = new MutationObserver(function() {
+        var sel = window.getSelection();
+        var select = sel.rangeCount;
+        if (select) {
+            var ran = sel.getRangeAt(0);
+        }
+        var code = extractTextContent(el('code')).text;
+        if (code == '') {
+            el('code').innerHTML = '\n';
+            if (select) {
+                ran.setStart(el('code'), 0);
+                sel.removeAllRanges();
+                sel.addRange(ran);
+            }
+        }
+    });
+    obs.observe(el('code'), {
+        characterData : 1,
+        subtree       : 1,
+        childList     : 1
+    });
 
     el('code').addEventListener('keypress', handle_keypress, false);
 }
