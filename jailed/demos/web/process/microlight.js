@@ -22,6 +22,7 @@
     var replace   = 'replace';
     var length    = 'length';
     var childNodes = 'childNodes';
+    var brtr = /(br|tr)/i;
     var mutationObserveOptions = {
         characterData : 1,
         subtree       : 1,
@@ -135,7 +136,7 @@
                 }
             }
 
-            if (/(br|tr)/i[test](node.nodeName)) {
+            if (brtr[test](node.nodeName)) {
                 resultText += '\n';
             }
         }
@@ -191,7 +192,7 @@ function(){
         // 10: single-line comment starting with two slashes //         
         // 11: single-line comment starting with a hash #               
         type = 0,
-        lastType,
+        lastType = 0,
 
         text,
         j          = 0,        // current character position
@@ -341,7 +342,7 @@ function(){
         res = burrowNodes(el, content.p);
 
         node = res.n[childNodes] && res.n[childNodes][res.p];
-        if (!res.n[length] && node && /(br)/i[test](node.nodeName)) {
+        if (!res.n[length] && node && brtr[test](node.nodeName)) {
             // between the nodes, next node is <br/>
 
             // replacing next node with '\n' and putting the
@@ -360,7 +361,6 @@ function(){
 
 
     el.ml.observe(el, mutationObserveOptions);
-
 
 }
                 )).observe(el, mutationObserveOptions);
