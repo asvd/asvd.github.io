@@ -145,7 +145,7 @@ function fill_code() {
         '        for (var i = 1; i < input.length; i++) {  ',
         '            switched |= switchEls(i);             ',
         '        }                                         ',
-        '    } while(switched);                            ',
+        '    } while (switched);                           ',
         '                                                  ',
         '    return input;                                 ',
         '}                                                 ',
@@ -315,7 +315,8 @@ function init_keypress() {
 
     }
 
-    var obs = new MutationObserver(function() {
+    /*
+     var obs = new MutationObserver(function() {
         var sel = window.getSelection();
         var select = sel.rangeCount;
         if (select) {
@@ -331,13 +332,15 @@ function init_keypress() {
             }
         }
     });
+
     obs.observe(el('code'), {
         characterData : 1,
         subtree       : 1,
         childList     : 1
     });
+     */
 
-    el('code').addEventListener('keypress', handle_keypress, false);
+//    el('code').addEventListener('keypress', handle_keypress, false);
 }
 
 
