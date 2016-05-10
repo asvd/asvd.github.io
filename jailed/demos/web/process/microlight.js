@@ -422,8 +422,8 @@ function(){
                 // otherwise tokenType == 4, (key)word
                 /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ? 3 : 1
 
-            // comments and whitespaces skipped
-            if (tokenType && tokenType < 8) {
+            // comments, whitespaces and newlines skipped
+            if (tokenType > 1 && tokenType < 8) {
                 lastTokenType = tokenType;
             }
 
@@ -515,25 +515,6 @@ function(){
 
     }
 
-    
-
-//    console.log('=====================================');
-    
-
-
-    var childDump = [];
-    for (var i = 0; i < el.childNodes.length; i++) {
-        if (/(br)/i.test(el.childNodes[i].nodeName)) {
-            childDump.push('$');
-        } else {
-            childDump.push(el.childNodes[i].textContent);
-        }
-    }
-//    console.log(childDump.join('|'));
-
-
-//    console.log(formatted);
-
 
 
 
@@ -546,7 +527,7 @@ function(){
         endSubstituted++;
     }
 
-    console.log(start + ' - ' + endExisting + ' => ' + start + ' - ' + endSubstituted);
+//    console.log(start + ' - ' + endExisting + ' => ' + start + ' - ' + endSubstituted);
 
 
     // removing modified nodes
@@ -592,15 +573,6 @@ function(){
         el.insertBefore(node, referenceNode);
     }
     
-    var childDump = [];
-    for (var i = 0; i < el.childNodes.length; i++) {
-        if (/(br)/i.test(el.childNodes[i].nodeName)) {
-            childDump.push('$');
-        } else {
-            childDump.push(el.childNodes[i].textContent);
-        }
-    }
-//    console.log(childDump.join('|'));
 
 
 
@@ -621,12 +593,11 @@ function(){
 
             // replacing next node with '\n' and putting the
             // selection there (otherwise Chorme treats it wrong)
-            var newnode = _document.createTextNode('\n');
-            res.n = newnode;
-            res.p = 0;
-            res.E = newnode;
-            res.e = 0;
-            el.replaceChild(newnode, node);
+            res.p = res.e = 0;
+            el.replaceChild(
+                res.n = res.E = _document.createTextNode('\n'),
+                node
+            );
         }
 
 
