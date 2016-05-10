@@ -278,7 +278,7 @@
                     (el.ml = new MutationObserver(cb =
 function(){
     var result     = '',
-        // set of formatted types and content
+        // set of formatting types and content
         //
         // each element is an array which will be converted to
         // formatted a node
@@ -287,7 +287,7 @@ function(){
         // second element is a text content of the node
         // third element is boolean which is true when token is marked
         //
-        // possible types:
+        // possible formatting types:
         //  0: newline (represented with <br/>)
         //  1: not formatted
         //  2: punctuation (operators, braces)
@@ -295,7 +295,7 @@ function(){
         //  4: strings and regexps
         //  5: comments
         formatted = [],
-        currentFormattedType,
+        currentFormattingType,
         lastFormattedEntry,
 
         // selection data
@@ -327,8 +327,8 @@ function(){
         //  9: multiline comment /* */
         // 10: single-line comment starting with two slashes //
         // 11: single-line comment starting with a hash #
-        type = 0,
-        lastType = 0,
+        tokenType = 0,
+        lastTokenType = 0,
 
         text,
         j          = 0,        // current character position
@@ -380,7 +380,7 @@ function(){
            // pervious character will not be
            // therefore recognized as a token
            // finalize condition
-           prev1 = type < 8 && prev1 == '\\' ? 1 : chr
+           prev1 = tokenType < 8 && prev1 == '\\' ? 1 : chr
     ) {
         chr = next1;
         next1=text[++j];
@@ -390,10 +390,10 @@ function(){
             // types 0-1 (whitespace and newline), types 2-3
             // (operators and braces) always consist of a single
             // character
-            type < 4 ||
+            tokenType < 4 ||
             // types 10-11 (single-line comments) end with a
             // newline
-            (type > 9 && chr == '\n') ||
+            (tokenType > 9 && chr == '\n') ||
             [ // finalize condition for other token types
                 !/[$\w]/[test](chr), // 4: (key)word
                                      // 5: regex
@@ -405,41 +405,41 @@ function(){
                                      // 8: xml comment
                 text[j-4]+prev2+prev1 == '-->',
                 prev2+prev1 == '*/'  // 9: multiline comment
-            ][type-4]
+            ][tokenType-4]
         ) {
             // appending the token to the result
-            if (type) {
-                currentFormattedType =
+            if (tokenType) {
+                currentFormattingType =
                     // newline
-                    type == 1 ? 0 :
+                    tokenType == 1 ? 0 :
                     // punctuation
-                    type < 4  ? 2 :
+                    tokenType < 4  ? 2 :
                     // comments
-                    type > 7  ? 5 :
+                    tokenType > 7  ? 5 :
                     // regex and strings
-                    type > 4  ? 4 :
-                    // otherwise type == 4, (key)word
+                    tokenType > 4  ? 4 :
+                    // otherwise tokenType == 4, (key)word
                     /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ? 3 : 1
-                if (type < 8) { // not a comment
-                    lastType = type;
+                if (tokenType < 8) { // not a comment
+                    lastTokenType = tokenType;
                 }
             } else {
                 // not formatted
-                currentFormattedType = 1;
+                currentFormattingType = 1;
             }
 
             lastFormattedEntry = formatted[formatted[length]-1]||null;
             // merging similarry formatted tokens to reduce node amount
             if (lastFormattedEntry &&
-                // matching type, or a whitespace
-                (lastFormattedEntry[0] == currentFormattedType || /^\s$/[test](token)) &&
+                // same formatting type, or a whitespace
+                (lastFormattedEntry[0] == currentFormattingType || /^\s$/[test](token)) &&
                 lastFormattedEntry[0] &&  // not a newline
-                currentFormattedType      // not a newline
+                currentFormattingType      // not a newline
             ) {
                 lastFormattedEntry[1] += token;
                 lastFormattedEntry[2] |= markedToken;
             } else if (token) {
-                formatted.push([currentFormattedType, token, markedToken]);
+                formatted.push([currentFormattingType, token, markedToken]);
             }
 
 
@@ -453,7 +453,7 @@ function(){
 
             // going down until matching a
             // token type start condition
-            type = 13;
+            tokenType = 13;
             while (![
                 1,                   //  0: whitespace
                 chr == '\n',         //  1: newline
@@ -466,7 +466,7 @@ function(){
                     // opening brace or an
                     // operator (otherwise
                     // division, not a regex)
-                    lastType < 3 &&
+                    lastTokenType < 3 &&
                     // workaround for xml
                     // closing tags
                     prev1 != '<',
@@ -477,7 +477,7 @@ function(){
                 chr+next1 == '/*',   //  9: multiline comment
                 chr+next1 == '//',   // 10: single-line comment
                 chr == '#'           // 11: hash-style comment
-            ][--type]);
+            ][--tokenType]);
         }
 
         token += chr;
