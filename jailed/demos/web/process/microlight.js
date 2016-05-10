@@ -295,7 +295,7 @@ function(){
         //  4: strings and regexps
         //  5: comments
         formatted = [],
-        currentFormattingType,
+        formattingType,
         lastFormattedEntry,
 
         // selection data
@@ -372,7 +372,7 @@ function(){
 
     next1 = text[0];
 
-    var markedToken;
+    var tokenMarked;
 
     // tokenizing the content
     while (prev2 = prev1,
@@ -408,48 +408,48 @@ function(){
             ][tokenType-4]
         ) {
             // appending the token to the result
-            if (tokenType) {
-                currentFormattingType =
-                    // newline
-                    tokenType == 1 ? 0 :
-                    // punctuation
-                    tokenType < 4  ? 2 :
-                    // comments
-                    tokenType > 7  ? 5 :
-                    // regex and strings
-                    tokenType > 4  ? 4 :
-                    // otherwise tokenType == 4, (key)word
-                    /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ? 3 : 1
-                if (tokenType < 8) { // not a comment
-                    lastTokenType = tokenType;
-                }
-            } else {
+            formattingType =
                 // not formatted
-                currentFormattingType = 1;
+                !tokenType ? 1 :
+                // newline
+                tokenType == 1 ? 0 :
+                // punctuation
+                tokenType < 4 ? 2 :
+                // comments
+                tokenType > 7 ? 5 :
+                // regex and strings
+                tokenType > 4 ? 4 :
+                // otherwise tokenType == 4, (key)word
+                /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ? 3 : 1
+
+            // comments and whitespaces skipped
+            if (tokenType && tokenType < 8) {
+                lastTokenType = tokenType;
             }
 
             lastFormattedEntry = formatted[formatted[length]-1]||null;
+
             // merging similarry formatted tokens to reduce node amount
-            if (lastFormattedEntry &&
-                // same formatting type, or a whitespace
-                (lastFormattedEntry[0] == currentFormattingType || /^\s$/[test](token)) &&
-                lastFormattedEntry[0] &&  // not a newline
-                currentFormattingType      // not a newline
+            if (// there is a previous entry to merge into
+                lastFormattedEntry &&
+                (// current token is a whitespace...
+                 /^\s$/[test](token) ||
+                 // ...or has a matching formatting type
+                 formattingType == lastFormattedEntry[0]) &&
+                // both previous and current entries are not newlines
+                lastFormattedEntry[0] && formattingType
             ) {
                 lastFormattedEntry[1] += token;
-                lastFormattedEntry[2] |= markedToken;
+                lastFormattedEntry[2] |= tokenMarked;
             } else if (token) {
-                formatted.push([currentFormattingType, token, markedToken]);
+                formatted.push([formattingType, token, tokenMarked]);
             }
 
 
             // initializing a new token
             token = '';
-            markedToken = 0;
-            if (j-1 == content.m || j-1 == content.M) {
-                // change marker
-                markedToken = 1;
-            }
+            // do we have change marker on the newly created token?
+            tokenMarked = j-1 == content.m || j-1 == content.M;
 
             // going down until matching a
             // token type start condition
