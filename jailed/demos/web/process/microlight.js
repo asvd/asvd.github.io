@@ -537,8 +537,9 @@ function(){
 
 
 
-    // taking one node before and after, as those might be modified by typing
-    if (start > 0) start--;
+    // taking two nodes before and one after
+    // (as those might be modified by typing)
+    start = Math.max(start-2, 0);
 
     if (endSubstituted < formatted.length - 1) {
         endExisting++;
@@ -614,16 +615,20 @@ function(){
         res = burrowNodes(el, content.p, 0, content.e);
 
         node = res.n[childNodes] && res.n[childNodes][res.p];
+
         if (!res.n[length] && node && brtr[test](node.nodeName)) {
             // between the nodes, next node is <br/>
 
             // replacing next node with '\n' and putting the
-            // selection there (otherwise chorme treats it wrong)
+            // selection there (otherwise Chorme treats it wrong)
             var newnode = _document.createTextNode('\n');
             res.n = newnode;
             res.p = 0;
+            res.E = newnode;
+            res.e = 0;
             el.replaceChild(newnode, node);
         }
+
 
         ran.setStart(res.n,res.p);
         ran.setEnd(res.E,res.e);
