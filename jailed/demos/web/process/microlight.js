@@ -432,7 +432,7 @@ function(){
             // merging similarry formatted tokens to reduce node amount
             if (lastFormattedEntry &&
                 // matching type, or a whitespace
-                (lastFormattedEntry[0] == currentFormattedType || /\s/[test](token)) &&
+                (lastFormattedEntry[0] == currentFormattedType || /^\s$/[test](token)) &&
                 lastFormattedEntry[0] &&  // not a newline
                 currentFormattedType      // not a newline
             ) {
