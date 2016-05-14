@@ -18,15 +18,21 @@
         factory((root.microlight = {}));
     }
 }(this, function (exports) {
-    var _window   = window;
-    var _document = document;
-    var test      = 'test';
-    var replace   = 'replace';
-    var length    = 'length';
-    var childNodes = 'childNodes';
-    var brtr = /(br|tr)/i;
-    var spanSample = _document.createElement('span');
-    var brSample = _document.createElement('br');
+    var _window        = window;
+    var _document      = document;
+    var test           = 'test';
+    var length         = 'length';
+    var nodeName       = 'nodeName';
+    var childNodes     = 'childNodes';
+    var parentNode     = 'parentNode';
+    var startContainer = 'startContainer';
+    var endContainer   = 'endContainer';
+    var startOffset    = 'startOffset';
+    var endOffset      = 'endOffset';
+    var createElement  = 'createElement';
+    var spanSample     = _document[createElement]('span');
+    var brSample       = _document[createElement]('br');
+    var brtr           = /(br|tr)/i;
 
     var mutationObserveOptions = {
         characterData : 1,
@@ -223,23 +229,23 @@
                     // (otherwise redefined in inner loop)
                     if (resultNode = !pos) {
                         // point right before the node, resultPos == 0
-                        while (node.parentNode[childNodes][++resultPos] != node);
+                        while (node[parentNode][childNodes][++resultPos] != node);
                         // if not <br>, then it's the highlighted
                         // element itself (but with empty content)
-                        resultNode = brtr[test](node.nodeName) ? node.parentNode : node;
+                        resultNode = brtr[test](node[nodeName]) ? node[parentNode] : node;
                     }
 
                     if (resultNodeEnd = !posEnd) {
                         // point right before the node, resultPos == 0
-                        while (node.parentNode[childNodes][++resultPosEnd] != node);
+                        while (node[parentNode][childNodes][++resultPosEnd] != node);
                         // if not <br>, then it's the highlighted
                         // element itself (but with empty content)
-                        resultNodeEnd = brtr[test](node.nodeName) ? node.parentNode : node;
+                        resultNodeEnd = brtr[test](node[nodeName]) ? node[parentNode] : node;
                     }
                 }
             }
 
-            if (brtr[test](node.nodeName)) {
+            if (brtr[test](node[nodeName])) {
                 resultText += '\n';
             }
         }
@@ -263,17 +269,17 @@
      * change will be recognized after tokenizing, even despite the
      * content could partially match to what was on that place
      */
-    var markSelection = function(ev) {
+    var markSelection = function() {
         var sel = window.getSelection();
         var ran = sel.getRangeAt(0);
-        ran.startContainer.m = Math.min(
-            ran.startContainer.m||ran.startOffset+1,
-            ran.startOffset+1
+        ran[startContainer].m = Math.min(
+            ran[startContainer].m||ran[startOffset]+1,
+            ran[startOffset]+1
         );
         
-        ran.endContainer.M = Math.max(
-            ran.endContainer.M||ran.endOffset+1,
-            ran.endOffset+1
+        ran[endContainer].M = Math.max(
+            ran[endContainer].M||ran[endOffset]+1,
+            ran[endOffset]+1
         );
     }
 
@@ -288,7 +294,7 @@
                 if (!el.ml) {
                     (el.ml = new MutationObserver(cb =
 function(){
-    var result     = '',
+    var
         // set of formatting types and content
         //
         // each element is an array which will be converted to
@@ -363,10 +369,10 @@ function(){
     if (sel.rangeCount) {
         markSelection();
         ran = sel.getRangeAt(0);
-        selNode = ran.startContainer;
-        selOffset = ran.startOffset;
-        selNodeEnd = ran.endContainer;
-        selOffsetEnd = ran.endOffset;
+        selNode      = ran[startContainer];
+        selOffset    = ran[startOffset];
+        selNodeEnd   = ran[endContainer];
+        selOffsetEnd = ran[endOffset];
     }
 
     // temporarily disconnecting the observer for changing the dom
@@ -596,7 +602,7 @@ function(){
 
         node = res.n[childNodes] && res.n[childNodes][res.p];
 
-        if (!res.n[length] && node && brtr[test](node.nodeName)) {
+        if (!res.n[length] && node && brtr[test](node[nodeName])) {
             // between the nodes, next node is <br/>
 
             // replacing next node with '\n' and putting the
