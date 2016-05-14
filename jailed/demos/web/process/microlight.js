@@ -364,7 +364,8 @@ function(){
         selNodeEnd = 1,
         selOffsetEnd = 0,
         content,
-        node; // used when restoring selection
+        node, // used when restoring selection
+        tokenMarked;
 
     if (sel.rangeCount) {
         markSelection();
@@ -387,7 +388,6 @@ function(){
 
     next1 = text[0];
 
-    var tokenMarked;
 
     // tokenizing the content
     while (prev2 = prev1,
@@ -499,20 +499,19 @@ function(){
         token += chr;
     }
 
-    var start = 0;
+    var startSubstituted = 0;
+    var i = -1;
+    var item;
     var endExisting = el.childNodes.length;
     var endSubstituted = formatted.length;
     if (previouslyFormatted) {
-        var i = -1;
-        var item;
-        // TODO move to the main loop
         while ((item = formatted[++i]) &&
                !item[2]  && // not marked for changes
                previouslyFormatted[i] &&
                item[0] == previouslyFormatted[i][0] &&
                item[1] == previouslyFormatted[i][1]
         ) {
-            start++;
+            startSubstituted++;
         }
 
         i = 1;
@@ -535,24 +534,24 @@ function(){
 
     // taking two nodes before and one after
     // (as those might be modified by typing)
-    start = Math.max(start-2, 0);
+    startSubstituted = Math.max(startSubstituted-2, 0);
 
     if (endSubstituted < formatted.length - 1) {
         endExisting++;
         endSubstituted++;
     }
 
-//    console.log(start + ' - ' + endExisting + ' => ' + start + ' - ' + endSubstituted);
+    console.log(startSubstituted + ' - ' + endExisting + ' => ' + startSubstituted + ' - ' + endSubstituted);
 
 
     // removing modified nodes
-    for (var i = start; i < endExisting; i++) {
-        el.removeChild(el.childNodes[start]);
+    for (i = startSubstituted; i < endExisting; i++) {
+        el.removeChild(el.childNodes[startSubstituted]);
     }
-    var referenceNode = el.childNodes[start];
+    var referenceNode = el.childNodes[startSubstituted];
 
     // inserting newly formatted nodes
-    for (var i = start; i < endSubstituted; i++) {
+    for (i = startSubstituted; i < endSubstituted; i++) {
         item = formatted[i];
         if (item[0]) {
             // formatted node
