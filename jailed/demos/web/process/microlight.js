@@ -367,6 +367,9 @@ function(){
         node, // used when restoring selection
         tokenMarked;
 
+    // temporarily disconnecting the observer for changing the dom
+    el.ml.disconnect();
+
     if (sel.rangeCount) {
         markSelection();
         ran = sel.getRangeAt(0);
@@ -375,9 +378,6 @@ function(){
         selNodeEnd   = ran[endContainer];
         selOffsetEnd = ran[endOffset];
     }
-
-    // temporarily disconnecting the observer for changing the dom
-    el.ml.disconnect();
 
     content = burrowNodes(
         el, selOffset, selNode, selOffsetEnd, selNodeEnd
@@ -541,7 +541,7 @@ function(){
         endSubstituted++;
     }
 
-    console.log(startSubstituted + ' - ' + endExisting + ' => ' + startSubstituted + ' - ' + endSubstituted);
+//    console.log(startSubstituted + ' - ' + endExisting + ' => ' + startSubstituted + ' - ' + endSubstituted);
 
 
     // removing modified nodes
