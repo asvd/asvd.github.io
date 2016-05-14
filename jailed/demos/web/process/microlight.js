@@ -25,6 +25,8 @@
     var length    = 'length';
     var childNodes = 'childNodes';
     var brtr = /(br|tr)/i;
+    var spanSample = _document.createElement('span');
+    var brSample = _document.createElement('br');
 
     var mutationObserveOptions = {
         characterData : 1,
@@ -367,7 +369,6 @@ function(){
         selOffsetEnd = ran.endOffset;
     }
 
-    // TODO suppress observation in the element property
     // temporarily disconnecting the observer for changing the dom
     el.ml.disconnect();
 
@@ -535,7 +536,7 @@ function(){
         endSubstituted++;
     }
 
-    console.log(start + ' - ' + endExisting + ' => ' + start + ' - ' + endSubstituted);
+//    console.log(start + ' - ' + endExisting + ' => ' + start + ' - ' + endSubstituted);
 
 
     // removing modified nodes
@@ -546,11 +547,10 @@ function(){
 
     // inserting newly formatted nodes
     for (var i = start; i < endSubstituted; i++) {
- // TODO remake nodes creation to cloning
         item = formatted[i];
         if (item[0]) {
             // formatted node
-            node = _document.createElement('span');
+            node = spanSample.cloneNode(false);
             node.setAttribute('style',[
                 // 1: not formatted
                 '',
@@ -575,7 +575,7 @@ function(){
             node.appendChild(_document.createTextNode(item[1]));
         } else {
             // newline
-            node =  _document.createElement('br');
+            node = brSample.cloneNode(false);
         }
 
         el.insertBefore(node, referenceNode);
@@ -615,9 +615,8 @@ function(){
     }
 
 
-    // TODO suppress observation in the element property
+    // connecting the observer back again
     el.ml.observe(el, mutationObserveOptions);
-
 }
                 )).observe(el, mutationObserveOptions);
 
