@@ -1,9 +1,11 @@
 /**
  * @fileoverview microlight - syntax highlightning library
  * @version 0.0.1
- * 
+ *
  * @license MIT, see http://github.com/asvd/microlight
- * @copyright 2015 asvd <heliosframework@gmail.com> 
+ * @copyright 2015 asvd <heliosframework@gmail.com>
+ *
+ * Code structure aims at minimizing the compressed library size
  */
 
 
@@ -23,10 +25,6 @@
     var length    = 'length';
     var childNodes = 'childNodes';
     var brtr = /(br|tr)/i;
-
-    // TODO mark position in the node itself as a property
-    // (in order to avoid changing the DOM)
-    var nullChr = '\0';
 
     var mutationObserveOptions = {
         characterData : 1,
@@ -84,17 +82,22 @@
             resultNodeEnd = 0,
             resultPos = selNode?-1:pos,
             resultPosEnd = selNode?-1:posEnd,
-            resultMarker1 = -1,
-            resultMarker2 = -1,
-            i = 0, result, len;
+            i = 0, result, len,
+
+            // Reading change markers if present
+            // (owerwritten in case of node with subnodes)
+            //
+            // In order to save some space on conditions:
+            // m == 0 means no marker set
+            // m > 0 means marker at position m-1
+            resultMarker1 = node.m||0,
+            resultMarker2 = node.M||0;
+
+            
         if (len = node[length]) {
             // text node
-            if (node.textContent == nullChr) {
-                // cahnge marker
-                resultMarker1 = 0;
-            } else {
-                resultText = node.textContent;
-            }
+
+            resultText = node.textContent;
 
             if (selNode) {
                 if (selNode == node) {
@@ -120,7 +123,10 @@
         } else {
             if (node[childNodes][length]) {
                 // node with subnodes
-                for (i = 0; i < node[childNodes][length]; i++) {
+                resultMarker1 = node.m == 1 ? 1 : 0;
+                resultMarker2 = node.M == 1 ? 1 : 0;
+
+                for (i = 0; i < node[childNodes][length];i++) {
                     result = burrowNodes(
                         node[childNodes][i],
                         selNode ? pos : resultPos,
@@ -128,6 +134,19 @@
                         selNode ? posEnd : resultPosEnd,
                         selNodeEnd
                     );
+
+                    // assigning the first marker from the subnode
+                    // (if not yet set)
+                    resultMarker1 = resultMarker1 ||
+                                    (result.m ?
+                                     resultText[length] + result.m :
+                                     0);
+
+                    // assigning the second marker from the subnode
+                    // (if present)
+                    resultMarker2 = result.M ?
+                                    resultText[length] + result.M :
+                                    resultMarker2;
 
                     if (selNode) {
                         if (selNode == node && pos == i) {
@@ -146,21 +165,6 @@
                             resultPosEnd = resultText[length] + result.e;
                         }
 
-                        if (result.m+1) {
-                            if (!(resultMarker2+1)) {
-                                resultMarker2 = resultMarker1;
-                            } // otherwise first marker already set
-
-                            resultMarker1 = resultText[length] + result.m;
-                        }
-
-                        if (result.M+1) {
-                            if (!(resultMarker2+1)) {
-                                resultMarker2 = resultMarker1;
-                            } // otherwise first marker already set
-
-                            resultMarker1 = resultText[length] + result.M;
-                        }
                     } else {
                         if (!resultNode) {
                             resultPos = result.p;
@@ -180,6 +184,19 @@
                     }
 
                     resultText += result.t;
+
+                    // assigning the first marker from between the nodes
+                    // (if not yet set)
+                    resultMarker1 = resultMarker1 ||
+                                    (node.m+1 == i+2 ?
+                                     resultText[length]+1 :
+                                     0);
+
+                    // assigning the second marker from between the nodes
+                    // (if present)
+                    resultMarker2 = node.M == i+2 ?
+                                    resultText[length] + 1 :
+                                    resultMarker2;
                 }
             } else {
                 // node without subnodes
@@ -225,6 +242,8 @@
             }
         }
 
+        node.m = node.M = 0;
+
         return {
             t : resultText,
             n : resultNode,
@@ -243,27 +262,17 @@
      * content could partially match to what was on that place
      */
     var markSelection = function(ev) {
-        // TODO suppress observation in the element property
-        if (ev && ev.currentTarget) {
-            ev.currentTarget.ml.disconnect();
-        }
-
         var sel = window.getSelection();
         var ran = sel.getRangeAt(0);
-        var marker1 = _document.createTextNode(nullChr);
-        var marker2 = _document.createTextNode(nullChr);
-        ran.insertNode(marker1);
-        ran.setStart(ran.endContainer, ran.endOffset);
-        ran.insertNode(marker2);
-        ran.setStartAfter(marker1);
-        ran.setEndBefore(marker2);
-        sel.removeAllRanges();
-        sel.addRange(ran);
-
-        // TODO suppress observation in the element property
-        if (ev && ev.currentTarget) {
-            ev.currentTarget.ml.observe(ev.currentTarget, mutationObserveOptions);
-        }
+        ran.startContainer.m = Math.min(
+            ran.startContainer.m||ran.startOffset+1,
+            ran.startOffset+1
+        );
+        
+        ran.endContainer.M = Math.max(
+            ran.endContainer.M||ran.endOffset+1,
+            ran.endOffset+1
+        );
     }
 
 
@@ -367,7 +376,6 @@ function(){
     );
 
 
-
     text = content.t;
 
     next1 = text[0];
@@ -448,8 +456,7 @@ function(){
 
             // initializing a new token
             token = '';
-            // do we have change marker on the newly created token?
-            tokenMarked = j-1 == content.m || j-1 == content.M;
+            tokenMarked = 0;
 
             // going down until matching a
             // token type start condition
@@ -480,9 +487,10 @@ function(){
             ][--tokenType]);
         }
 
+        // do we have change marker on the newly created token?
+        tokenMarked |= j == content.m || j == content.M;
         token += chr;
     }
-
 
     var start = 0;
     var endExisting = el.childNodes.length;
@@ -497,7 +505,7 @@ function(){
                item[0] == previouslyFormatted[i][0] &&
                item[1] == previouslyFormatted[i][1]
         ) {
-            start++;            
+            start++;
         }
 
         i = 1;
@@ -527,7 +535,7 @@ function(){
         endSubstituted++;
     }
 
-//    console.log(start + ' - ' + endExisting + ' => ' + start + ' - ' + endSubstituted);
+    console.log(start + ' - ' + endExisting + ' => ' + start + ' - ' + endSubstituted);
 
 
     // removing modified nodes
