@@ -5,7 +5,10 @@
  * @license MIT, see http://github.com/asvd/microlight
  * @copyright 2015 asvd <heliosframework@gmail.com>
  *
- * Code structure aims at minimizing the compressed library size
+ * Code structure aims at following points in the given priority:
+ *  1. performance
+ *  2. compressed library size
+ *  3. readability
  */
 
 
@@ -270,7 +273,7 @@
      * content could partially match to what was on that place
      */
     var markSelection = function() {
-        var sel = window.getSelection();
+        var sel = _window.getSelection();
         var ran = sel.getRangeAt(0);
         ran[startContainer].m = Math.min(
             ran[startContainer].m||ran[startOffset]+1,
@@ -294,6 +297,7 @@
                 if (!el.ml) {
                     (el.ml = new MutationObserver(cb =
 function(){
+    var timestamp = (new Date).getTime();
     var
         // set of formatting types and content
         //
@@ -410,7 +414,8 @@ function(){
             // newline
             (tokenType > 9 && chr == '\n') ||
             [ // finalize condition for other token types
-                !/[$\w]/[test](chr), // 4: (key)word
+//                '{}])[(-+*=<>:;|\\.,?!&@~/ \n"\'#'.indexOf(chr) != -1 ||
+                    !/[$\w]/[test](chr), // 4: (key)word
                                      // 5: regex
                 (prev1 == '/' || prev1 == '\n') && token[length] > 1,
                                      // 6: string with "
@@ -447,10 +452,10 @@ function(){
             // merging similarry formatted tokens to reduce node amount
             if (// there is a previous entry to merge into
                 lastFormattedEntry &&
-                (// current token is a whitespace...
-                 /^\s$/[test](token) ||
-                 // ...or has a matching formatting type
-                 formattingType == lastFormattedEntry[0]) &&
+                (// current token has a matching formatting type...
+                 formattingType == lastFormattedEntry[0] ||
+                 // ...or is a whitespace
+                 token == ' ' || /^\s$/[test](token)) &&
                 // both previous and current entries are not newlines
                 lastFormattedEntry[0] && formattingType
             ) {
@@ -465,33 +470,51 @@ function(){
             token = '';
             tokenMarked = 0;
 
-            // going down until matching a
-            // token type start condition
-            tokenType = 13;
-            while (![
-                1,                   //  0: whitespace
-                chr == '\n',         //  1: newline
-                                     //  2: operator or braces
-                /[{}\[\(\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
-                /[\]\)]/[test](chr), //  3: closing brace
-                /[$\w]/[test](chr),  //  4: word,
-                chr == '/' &&        //  7: regex
-                    // previous token was an
-                    // opening brace or an
-                    // operator (otherwise
-                    // division, not a regex)
-                    lastTokenType < 3 &&
-                    // workaround for xml
-                    // closing tags
-                    prev1 != '<',
-                chr == '"',          //  6: string with "
-                chr == "'",          //  7: string with '
-                                     //  8: xml comment
-                chr+next1+text[j+1]+text[j+2] == '<!--',
-                chr+next1 == '/*',   //  9: multiline comment
-                chr+next1 == '//',   // 10: single-line comment
-                chr == '#'           // 11: hash-style comment
-            ][--tokenType]);
+       // TODO avoiding regexps makes faster
+            if (chr == ' ') {
+                tokenType = 0;
+            } else if (chr == '\n') {
+                tokenType = 1;
+            } else if (chr == ']' || chr == ')') {
+                tokenType = 3;
+            } else if ('{}[(-+*=<>:;|\\.,?!&@~'.indexOf(chr) != -1) {
+                // slash checked later, can be a comment or a regex
+                tokenType = 2;
+            } else {
+                // going down until matching a
+                // token type start condition
+                tokenType = 13;
+                while (![
+                    1,                   //  0: whitespace
+                    chr == '\n',         //  1: newline
+                                         //  2: operator or braces
+//                    /[{}\[\(\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
+//                    '{}[(-+*/=<>:;|\.,?!&@~'.indexOf(chr) != -1,
+
+                    chr == '/',
+
+                        
+                    chr == ']' || chr == ')', //  3: closing brace
+//                    '{}])[(-+*=<>:;|\\.,?!&@~/ \n"\'#'.indexOf(chr) == -1&&
+                    /[$\w]/[test](chr),  //  4: word
+                    chr == '/' &&        //  7: regex
+                        // previous token was an
+                        // opening brace or an
+                        // operator (otherwise
+                        // division, not a regex)
+                        lastTokenType < 3 &&
+                        // workaround for xml
+                        // closing tags
+                        prev1 != '<',
+                    chr == '"',          //  6: string with "
+                    chr == "'",          //  7: string with '
+                                         //  8: xml comment
+                    chr+next1+text[j+1]+text[j+2] == '<!--',
+                    chr+next1 == '/*',   //  9: multiline comment
+                    chr+next1 == '//',   // 10: single-line comment
+                    chr == '#'           // 11: hash-style comment
+                ][--tokenType]);
+            }
         }
 
         // do we have change marker on the newly created token?
@@ -622,6 +645,7 @@ function(){
 
     // connecting the observer back again
     el.ml.observe(el, mutationObserveOptions);
+    console.log((new Date).getTime() - timestamp);
 }
                 )).observe(el, mutationObserveOptions);
 
