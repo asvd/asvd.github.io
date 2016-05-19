@@ -153,6 +153,8 @@ function fill_code() {
         '                                                  '
     ].join('\n'));
 
+//    code = 'aaa=bbb;';
+
 
     el('code').innerHTML = code;
 }

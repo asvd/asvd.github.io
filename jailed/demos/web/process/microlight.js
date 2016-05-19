@@ -199,7 +199,7 @@
                     // assigning the first marker from between the nodes
                     // (if not yet set)
                     resultMarker1 = resultMarker1 ||
-                                    (node.m+1 == i+2 ?
+                                    (node.m == i+2 ?
                                      resultText[length]+1 :
                                      0);
 
@@ -275,6 +275,56 @@
     var markSelection = function() {
         var sel = _window.getSelection();
         var ran = sel.getRangeAt(0);
+
+        var startNode = ran[startContainer];
+        var startMarker = Math.min(
+            ran[startContainer].m||ran[startOffset]+1,
+            ran[startOffset]+1
+        );
+
+        var endNode = ran[endContainer];
+        var endMarker = Math.max(
+            ran[endContainer].M||ran[endOffset]+1,
+            ran[endOffset]+1
+        );
+
+        if (startMarker>1) {
+            // putting marker on node
+            startNode.m = startMarker;
+        } else {
+            // node might be removed upon pasting
+            // putting marker on parent
+            var parent = startNode[parentNode];
+            for (var i = 0; i < parent[childNodes][length]; i++) {
+                if (parent[childNodes][i] == startNode) {
+                    parent.m = i+1;
+                    break;
+                }
+            }
+        }
+
+        if ( // text node
+            (endNode[length] && endNode[length] == endMarker-1) ||
+            // node with subnodes
+            (endNode[childNodes][length] && endNode[childNodes][length] == endMarker-1) ||
+            // node without subnodes
+            endMarker == 1
+        ) {
+            // node might be removed upon pasting
+            // putting marker on parent
+            var parent = endNode[parentNode];
+            for (var i = 0; i < parent[childNodes][length]; i++) {
+                if (parent[childNodes][i] == endNode) {
+                    parent.M = i+2;
+                    break;
+                }
+            }
+        } else {
+            // putting marker on node
+            endNode.M = endMarker;
+        }
+                
+/*        
         ran[startContainer].m = Math.min(
             ran[startContainer].m||ran[startOffset]+1,
             ran[startOffset]+1
@@ -284,6 +334,7 @@
             ran[endContainer].M||ran[endOffset]+1,
             ran[endOffset]+1
         );
+ */
     }
 
 
@@ -349,10 +400,9 @@ function(){
         // 10: single-line comment starting with two slashes //
         // 11: single-line comment starting with a hash #
         tokenType = 0,
-        lastTokenType = 0,
 
         text,
-        j          = 0,        // current character position
+        pos        = 0,        // current character position
 
         // particular characters from a parsed string of code
         prev2,                 // character before the previous
@@ -388,183 +438,235 @@ function(){
     );
 
 
+    // taking two characters before and one after the marker
+    // (neighbouring nodes might be modified by typing)
+    content.m = Math.max(content.m-2, 0);
+    if (content.M < content.t.length-1) {
+        content.M++;
+    }
+
+
     text = content.t;
 
-    next1 = text[0];
 
-
-    // tokenizing the content
-    while (prev2 = prev1,
-           // escaping if needed
-           // pervious character will not be
-           // therefore recognized as a token
-           // finalize condition
-           prev1 = tokenType < 8 && prev1 == '\\' ? 1 : chr
-    ) {
-        chr = next1;
-        next1=text[++j];
-
-        // checking if token should be finalized
-        if (!chr  || // end of content
-            // types 0-1 (whitespace and newline), types 2-3
-            // (operators and braces) always consist of a single
-            // character
-            tokenType < 4 ||
-            // types 10-11 (single-line comments) end with a
-            // newline
-            (tokenType > 9 && chr == '\n') ||
-            [ // finalize condition for other token types
-//                '{}])[(-+*=<>:;|\\.,?!&@~/ \n"\'#'.indexOf(chr) != -1 ||
-                    !/[$\w]/[test](chr), // 4: (key)word
-                                     // 5: regex
-                (prev1 == '/' || prev1 == '\n') && token[length] > 1,
-                                     // 6: string with "
-                prev1 == '"' && token[length] > 1,
-                                     // 7: string with '
-                prev1 == "'" && token[length] > 1,
-                                     // 8: xml comment
-                text[j-4]+prev2+prev1 == '-->',
-                prev2+prev1 == '*/'  // 9: multiline comment
-            ][tokenType-4]
-        ) {
-            // appending the token to the result
-            formattingType =
-                // not formatted
-                !tokenType ? 1 :
-                // newline
-                tokenType == 1 ? 0 :
-                // punctuation
-                tokenType < 4 ? 2 :
-                // comments
-                tokenType > 7 ? 5 :
-                // regex and strings
-                tokenType > 4 ? 4 :
-                // otherwise tokenType == 4, (key)word
-                /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ? 3 : 1
-
-            // comments, whitespaces and newlines skipped
-            if (tokenType > 1 && tokenType < 8) {
-                lastTokenType = tokenType;
-            }
-
-            lastFormattedEntry = formatted[formatted[length]-1]||null;
-
-            // merging similarry formatted tokens to reduce node amount
-            if (// there is a previous entry to merge into
-                lastFormattedEntry &&
-                (// current token has a matching formatting type...
-                 formattingType == lastFormattedEntry[0] ||
-                 // ...or is a whitespace
-                 token == ' ' || /^\s$/[test](token)) &&
-                // both previous and current entries are not newlines
-                lastFormattedEntry[0] && formattingType
-            ) {
-                lastFormattedEntry[1] += token;
-                lastFormattedEntry[2] |= tokenMarked;
-            } else if (token) {
-                formatted.push([formattingType, token, tokenMarked]);
-            }
-
-
-            // initializing a new token
-            token = '';
-            tokenMarked = 0;
-
-       // TODO avoiding regexps makes faster
-            if (chr == ' ') {
-                tokenType = 0;
-            } else if (chr == '\n') {
-                tokenType = 1;
-            } else if (chr == ']' || chr == ')') {
-                tokenType = 3;
-            } else if ('{}[(-+*=<>:;|\\.,?!&@~'.indexOf(chr) != -1) {
-                // slash checked later, can be a comment or a regex
-                tokenType = 2;
-            } else {
-                // going down until matching a
-                // token type start condition
-                tokenType = 13;
-                while (![
-                    1,                   //  0: whitespace
-                    chr == '\n',         //  1: newline
-                                         //  2: operator or braces
-//                    /[{}\[\(\-\+\*\/=<>:;|\.,?!&@~]/[test](chr),
-//                    '{}[(-+*/=<>:;|\.,?!&@~'.indexOf(chr) != -1,
-
-                    chr == '/',
-
-                        
-                    chr == ']' || chr == ')', //  3: closing brace
-//                    '{}])[(-+*=<>:;|\\.,?!&@~/ \n"\'#'.indexOf(chr) == -1&&
-                    /[$\w]/[test](chr),  //  4: word
-                    chr == '/' &&        //  7: regex
-                        // previous token was an
-                        // opening brace or an
-                        // operator (otherwise
-                        // division, not a regex)
-                        lastTokenType < 3 &&
-                        // workaround for xml
-                        // closing tags
-                        prev1 != '<',
-                    chr == '"',          //  6: string with "
-                    chr == "'",          //  7: string with '
-                                         //  8: xml comment
-                    chr+next1+text[j+1]+text[j+2] == '<!--',
-                    chr+next1 == '/*',   //  9: multiline comment
-                    chr+next1 == '//',   // 10: single-line comment
-                    chr == '#'           // 11: hash-style comment
-                ][--tokenType]);
-            }
-        }
-
-        // do we have change marker on the newly created token?
-        tokenMarked |= j == content.m || j == content.M;
-        token += chr;
-    }
-
+    var previouslyFormattedIdx = 0;
     var startSubstituted = 0;
-    var i = -1;
-    var item;
-    var endExisting = el.childNodes.length;
-    var endSubstituted = formatted.length;
-    if (previouslyFormatted) {
-        while ((item = formatted[++i]) &&
-               !item[2]  && // not marked for changes
-               previouslyFormatted[i] &&
-               item[0] == previouslyFormatted[i][0] &&
-               item[1] == previouslyFormatted[i][1]
+    var endExisting = el[childNodes][length];
+    var endSubstituted = 0;
+
+    var tailSearchStarted = 0;
+    var tailSearchInterrupted = 0;
+    var previousTokenPos;
+
+    while (pos < text[length]) {
+        var previousToken = previouslyFormatted[previouslyFormattedIdx]||null;
+        var previousText;
+        var len;
+
+        if (
+            // there is a previously formatted token for this position
+            previousToken &&
+            // text content matches to what was in the previous token
+            (previousText = previousToken[1]) == text.substr(pos, len = previousText[length]) &&
+            // and there is no change marker within the upcoming token
+            (content.M < pos + 1 || content.m > pos + len + 1)
         ) {
-            startSubstituted++;
+            // copying the token from the previously formatted content
+            formatted.push(previousToken);
+            
+            previouslyFormattedIdx++;
+            pos += len;
+        } else {
+            // no matching previously formatted token found
+            // (or a change marker detected)
+            // tokenizing the content from here
+
+            // taking one token before
+            // (as we might merge the upcoming token into it)
+            startSubstituted = Math.max(0, previouslyFormattedIdx-1);
+
+
+            next1 = text[pos];
+            while (prev2 = prev1,
+                   // escaping if needed
+                   // pervious character will not be
+                   // therefore recognized as a token
+                   // finalize condition
+                   prev1 = tokenType < 8 && prev1 == '\\' ? 1 : chr
+            ) {
+                chr = next1;
+                next1=text[pos+1];
+
+                // checking if token should be finalized
+                if (!chr  || // end of content
+                    // types 0-1 (whitespace and newline), types 2-3
+                    // (operators and braces) always consist of a single
+                    // character
+                    tokenType < 4 ||
+                    // types 10-11 (single-line comments) end with a
+                    // newline
+                    (tokenType > 9 && chr == '\n') ||
+                    [ // finalize condition for other token types
+                        !/[$\w]/[test](chr), // 4: (key)word
+                                             // 5: regex
+                        (prev1 == '/' || prev1 == '\n') && token[length] > 1,
+                                             // 6: string with "
+                        prev1 == '"' && token[length] > 1,
+                                             // 7: string with '
+                        prev1 == "'" && token[length] > 1,
+                                             // 8: xml comment
+                        text[pos-3]+prev2+prev1 == '-->',
+                        prev2+prev1 == '*/'  // 9: multiline comment
+                    ][tokenType-4]
+                ) {
+                    // appending the token to the result
+                    formattingType =
+                        // not formatted
+                        !tokenType ? 1 :
+                        // newline
+                        tokenType == 1 ? 0 :
+                        // punctuation
+                        tokenType < 4 ? 2 :
+                        // comments
+                        tokenType > 7 ? 5 :
+                        // regex and strings
+                        tokenType > 4 ? 4 :
+                        // otherwise tokenType == 4, (key)word
+                        /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token) ? 3 : 1
+                
+                    lastFormattedEntry = formatted[formatted[length]-1]||null;
+
+                    // merging similarry formatted tokens to reduce node amount
+                    if (token) {
+                        if (// there is a previous entry to merge into
+                            lastFormattedEntry &&
+                            (// current token has a matching formatting type...
+                             formattingType == lastFormattedEntry[0] ||
+                             // ...or is a whitespace
+                             token == ' ' || /^\s$/[test](token)) &&
+                            // both previous and current entries are not newlines
+                            lastFormattedEntry[0] && formattingType
+                        ) {
+                            lastFormattedEntry[1] += token;
+                            lastFormattedEntry[2] = tokenType;
+                        } else {
+                            formatted.push([formattingType, token, tokenType]);
+                        }
+                    }
+
+                    if (!tailSearchStarted && content.M &&
+                        // 'end of change' marker in the very beginning
+                        (content.M == 1 ||
+                        // 'end of change' marker passed
+                        content.M <= pos)
+                    ) {
+                        tailSearchStarted = 1;
+
+                        // restoring the tail position
+                        previousTokenPos = 0;
+                        previouslyFormattedIdx = previouslyFormatted[length];
+
+                        for(var i = pos; i < text[length]; i++) {
+                            if (!previousTokenPos) {
+                                if (!previouslyFormattedIdx) {
+                                    // reached the begenning
+                                    tailSearchInterrupted = 1;
+                                } else {
+                                    previouslyFormattedIdx--;
+                                    previousTokenPos = previouslyFormatted[previouslyFormattedIdx][1][length];
+                                }
+                            }
+
+                            previousTokenPos--;
+                        }
+                    }
+
+                    // checking if we should switch back to cloning tokens
+                    if (tailSearchStarted &&
+                        !tailSearchInterrupted &&
+                        // previous token just finalized as well
+                        previousTokenPos == 0 &&
+                        // previous token exactly matches the newly evaluated
+                        previouslyFormatted[previouslyFormattedIdx-1][0] == formattingType &&
+                        previouslyFormatted[previouslyFormattedIdx-1][1] == token &&
+                        previouslyFormatted[previouslyFormattedIdx-1][2] == tokenType
+                    ) {
+                        // switching back to copying from the
+                        // previously formatted tokens
+                        break;
+                    } else {
+                        // initializing a new token
+                        token = '';
+                        tokenMarked = 0;
+                        var lastToken = formatted[formatted[length]-1]||null;
+
+                        if (chr == ' ') {
+                            tokenType = 0;
+                        } else if (chr == '\n') {
+                            tokenType = 1;
+                        } else if (chr == ']' || chr == ')') {
+                            tokenType = 3;
+                        } else if ('{}[(-+*=<>:;|\\.,?!&@~'.indexOf(chr) != -1) {
+                            // slash checked later, can be a comment or a regex
+                            tokenType = 2;
+                        } else {
+                            // going down until matching a
+                            // token type start condition
+                            tokenType = 13;
+                            while (![
+                                1,                   //  0: whitespace
+                                chr == '\n',         //  1: newline
+                                chr == '/',          //  2: operator or braces
+                                                     // (others checked above)
+                                chr == ']' || chr == ')', //  3: closing brace
+                                /[$\w]/[test](chr),  //  4: word
+                                chr == '/' &&        //  7: regex
+                                    // previous token was an
+                                    // opening brace or an
+                                    // operator (otherwise
+                                    // division, not a regex)
+                                    (!lastToken || lastToken[2] < 3) &&
+                                    // workaround for xml
+                                    // closing tags
+                                    prev1 != '<',
+                                chr == '"',          //  6: string with "
+                                chr == "'",          //  7: string with '
+                                                     //  8: xml comment
+                                chr+next1+text[pos+1]+text[pos+2] == '<!--',
+                                chr+next1 == '/*',   //  9: multiline comment
+                                chr+next1 == '//',   // 10: single-line comment
+                                chr == '#'           // 11: hash-style comment
+                            ][--tokenType]);
+                        }
+                    }
+                }
+
+                token += chr;
+
+                if (tailSearchStarted && !tailSearchInterrupted &&
+                    ++previousTokenPos == previouslyFormatted[previouslyFormattedIdx][1][length]) {
+                    previousTokenPos = 0;
+                    previouslyFormattedIdx++;
+                }
+                    
+                pos++;
+            }
+
+
+
+            endSubstituted = formatted[length];
+            endExisting = Math.min(
+                              el[childNodes][length],
+                              el[childNodes][length] -
+                              previouslyFormatted[length] +
+                              previouslyFormattedIdx
+                );
         }
-
-        i = 1;
-        while (formatted[formatted[length]-i] && // end not yet reached
-               previouslyFormatted[previouslyFormatted[length]-i] &&
-               !formatted[formatted[length]-i][2] && // not marked for changes
-               formatted[formatted[length]-i][0] ==
-               previouslyFormatted[previouslyFormatted[length]-i][0] &&
-               formatted[formatted[length]-i][1] ==
-               previouslyFormatted[previouslyFormatted[length]-i][1]) {
-            i++;
-            endExisting--;
-            endSubstituted--;
-        }
-
     }
+    
 
 
-
-
-    // taking two nodes before and one after
-    // (as those might be modified by typing)
-    startSubstituted = Math.max(startSubstituted-2, 0);
-
-    if (endSubstituted < formatted.length - 1) {
-        endExisting++;
-        endSubstituted++;
-    }
-
-//    console.log(startSubstituted + ' - ' + endExisting + ' => ' + startSubstituted + ' - ' + endSubstituted);
+    console.log(startSubstituted + ' - ' + endExisting + ' => ' + startSubstituted + ' - ' + endSubstituted);
 
 
     // removing modified nodes
@@ -574,11 +676,12 @@ function(){
     var referenceNode = el.childNodes[startSubstituted];
 
     // inserting newly formatted nodes
+    var item;
     for (i = startSubstituted; i < endSubstituted; i++) {
         item = formatted[i];
         if (item[0]) {
             // formatted node
-            node = spanSample.cloneNode(false);
+            node = spanSample.cloneNode(0);
             node.setAttribute('style',[
                 // 1: not formatted
                 '',
@@ -603,7 +706,7 @@ function(){
             node.appendChild(_document.createTextNode(item[1]));
         } else {
             // newline
-            node = brSample.cloneNode(false);
+            node = brSample.cloneNode(0);
         }
 
         el.insertBefore(node, referenceNode);
