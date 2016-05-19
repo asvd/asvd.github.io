@@ -89,6 +89,7 @@
      * @returns {Object} containing .n, .p, and .t properties
      */
     var burrowNodes = function(node, pos, selNode, posEnd, selNodeEnd) {
+// TODO remove position restoration logic (!selNode), rename and refactor the function
         var resultText = '',
             resultNode = 0,
             resultNodeEnd = 0,
@@ -123,14 +124,6 @@
                 resultText += splitted[i];
             }
 
-
-            if (node.textContent == nullChr) {
-                // cahnge marker
-                resultMarker1 = 0;
-                resultMarker2 = 0;
-            } else {
-                resultText = node.textContent;
-            }
 
             if (selNode) {
                 if (selNode == node) {
@@ -383,6 +376,7 @@ function(){
         node, // used when restoring selection
         tokenMarked;
 
+
     // temporarily disconnecting the observer for changing the dom
     el.ml.disconnect();
 
@@ -394,6 +388,7 @@ function(){
         selNodeEnd   = ran[endContainer];
         selOffsetEnd = ran[endOffset];
     }
+
 
     content = burrowNodes(
         el, selOffset, selNode, selOffsetEnd, selNodeEnd
@@ -419,6 +414,16 @@ function(){
     var tailSearchStarted = 0;
     var tailSearchInterrupted = 0;
     var previousTokenPos;
+
+
+    // nodes and positions to restore selection onto
+    // assuming selection points are always re-tokenized
+    var nodeToSelectIdxStart = -1;
+    var nodeToSelectStart = 0;
+    var posToSelectStart = 0;
+    var nodeToSelectIdxEnd = -1;
+    var nodeToSelectEnd = 0;
+    var posToSelectEnd = 0;
 
     while (pos < text[length]) {
         var previousToken = previouslyFormatted[previouslyFormattedIdx]||null;
@@ -514,9 +519,26 @@ function(){
                             lastFormattedEntry[1] += token;
                             lastFormattedEntry[2] = tokenType;
                         } else {
-                            formatted.push([formattingType, token, tokenType]);
+                            formatted.push(lastFormattedEntry = [formattingType, token, tokenType]);
+                        }
+    
+                        // noting the selection points
+                        if (content.p &&
+                            content.p >= pos-lastFormattedEntry[1][length] &&
+                            content.p < pos) {
+
+                            nodeToSelectIdxStart = formatted[length]-1;
+                            posToSelectStart = content.p-pos+lastFormattedEntry[1].length;
+                        }
+
+                        if (content.e &&
+                            content.e >= pos-lastFormattedEntry[1][length] &&
+                            content.e < pos) {
+                            nodeToSelectIdxEnd = formatted[length]-1;
+                            posToSelectEnd = content.e-pos+lastFormattedEntry[1].length;
                         }
                     }
+
 
                     if (!tailSearchStarted && (content.M+1) &&
                         // 'end of change' marker in the very beginning
@@ -627,7 +649,7 @@ function(){
     
 
 
-    console.log(startSubstituted + ' - ' + endExisting + ' => ' + startSubstituted + ' - ' + endSubstituted);
+//    console.log(startSubstituted + ' - ' + endExisting + ' => ' + startSubstituted + ' - ' + endSubstituted);
 
 
     // removing modified nodes
@@ -635,6 +657,7 @@ function(){
         el.removeChild(el.childNodes[startSubstituted]);
     }
     var referenceNode = el.childNodes[startSubstituted];
+
 
     // inserting newly formatted nodes
     var item;
@@ -670,39 +693,62 @@ function(){
             node = brSample.cloneNode(0);
         }
 
+        if (i == nodeToSelectIdxStart) {
+            nodeToSelectStart = node.childNodes[0]||node;
+        }
+        if (i == nodeToSelectIdxEnd) {
+            nodeToSelectEnd = node.childNodes[0]||node;
+        }
+
         el.insertBefore(node, referenceNode);
     }
     
-
 
 
     previouslyFormatted = formatted;
 
 
     // restoring the selection position
-    // same as if (pos >= 0)
-    if (content.p+1) {
+    if (nodeToSelectStart||nodeToSelectEnd) {
         sel.removeAllRanges();
 
-        res = burrowNodes(el, content.p, 0, content.e);
+        if (nodeToSelectStart) {
+            if (brtr[test](nodeToSelectStart[nodeName])) {
+                // node to select is <br/>
+                // replacing next node with '\n' and putting the
+                // selection there (otherwise Chorme treats it wrong)
+                node = nodeToSelectStart;
+                posToSelectStart = 0;
+                el.replaceChild(
+                    nodeToSelectStart = _document.createTextNode('\n'),
+                    node
+                );
 
-        node = res.n[childNodes] && res.n[childNodes][res.p];
+                if (nodeToSelectEnd == node) {
+                    nodeToSelectEnd = nodeToSelectStart;
+                    posToSelectEnd = 0;
+                }
+            }
 
-        if (!res.n[length] && node && brtr[test](node[nodeName])) {
-            // between the nodes, next node is <br/>
-
-            // replacing next node with '\n' and putting the
-            // selection there (otherwise Chorme treats it wrong)
-            res.p = res.e = 0;
-            el.replaceChild(
-                res.n = res.E = _document.createTextNode('\n'),
-                node
-            );
+            ran.setStart(nodeToSelectStart, posToSelectStart);
         }
 
+        if (nodeToSelectEnd) {
+            if (brtr[test](nodeToSelectEnd[nodeName])) {
+                // node to select is <br/>
+                // replacing next node with '\n' and putting the
+                // selection there (otherwise Chorme treats it wrong)
+                node = nodeToSelectEnd;
+                posToSelectEnd = 0;
+                el.replaceChild(
+                    nodeToSelectEnd = _document.createTextNode('\n'),
+                    node
+                );
+            }
 
-        ran.setStart(res.n,res.p);
-        ran.setEnd(res.E,res.e);
+            ran.setEnd(nodeToSelectEnd, posToSelectEnd);
+        }
+
         sel.addRange(ran);
     }
 
