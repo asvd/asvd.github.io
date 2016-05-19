@@ -48,37 +48,19 @@
 
     /**
      * Recursively runs through (sub)nodes of the given element and
-     * performs one of two actions:
-     *
-     * - if selNode argument is given, the function extracts the text
-     *   content, replacing all <br> and <tr> tags with the newlines
-     *   (which are not recognized by the .textContent property of an
-     *   element). Additionally the function calculates the selection
-     *   offset mesaured in number of symbols in the resulted text; in
-     *   this case, selNode is the original element holding the
-     *   selection, and pos is the offset inside that element
-     *   (selNodeEnd and posEnd arguments then have the same meaning,
-     *   but are related to the selection end respectively). Reuslt
-     *   object contains the .t property with the resulted text, .p
-     *   property with the selection start offest (which is -1 in case
-     *   when the selection position is outside of the node), and .e
-     *   property holding the selection end position in the resulted
-     *   text;
-     *
-     * - if selNode argument is not provided, the function restores
-     *   the selection position in the generated highlited code
-     *   contained in the given node. In this case, pos stands for the
-     *   selection position inside the node, and posEnd is the
-     *   selection end position. The resulted object contans the .n
-     *   property, holding the element, where the selection should be
-     *   restored, and the .p property standing for the proper
-     *   selection position inisde that element; if the given
-     *   selection position (pos) is greater than the number of
-     *   characters in the given node, this means that the node
-     *   holding the selection is not yet reached; in latter case the
-     *   .n property of the returned object is 0, and .p is the
-     *   remaining number of characters before the selection is
-     *   reached.
+     * extracts the text content, replacing all <br> and <tr> tags
+     * with the newlines (which are not recognized by the .textContent
+     * property of an element). Additionally the function calculates
+     * the selection offset mesaured in number of symbols in the
+     * resulted text; in this case, selNode is the original element
+     * holding the selection, and pos is the offset inside that
+     * element (selNodeEnd and posEnd arguments then have the same
+     * meaning, but are related to the selection end
+     * respectively). Reuslt object contains the .t property with the
+     * resulted text, .p property with the selection start offest
+     * (which is -1 in case when the selection position is outside of
+     * the node), and .e property holding the selection end position
+     * in the resulted text;
      *
      * @param {Object} node to run through
      * @param {Numebr} pos
@@ -88,13 +70,10 @@
      *
      * @returns {Object} containing .n, .p, and .t properties
      */
-    var burrowNodes = function(node, pos, selNode, posEnd, selNodeEnd) {
-// TODO remove position restoration logic (!selNode), rename and refactor the function
+    var extractContent = function(node, pos, selNode, posEnd, selNodeEnd) {
         var resultText = '',
-            resultNode = 0,
-            resultNodeEnd = 0,
-            resultPos = selNode?-1:pos,
-            resultPosEnd = selNode?-1:posEnd,
+            resultPos = -1,
+            resultPosEnd = -1,
             i = 0, result, len,
 
             // Reading change markers if present
@@ -124,37 +103,22 @@
                 resultText += splitted[i];
             }
 
+            if (selNode == node) {
+                resultPos = pos;
+            }
 
-            if (selNode) {
-                if (selNode == node) {
-                    resultPos = pos;
-                }
-
-                if (selNodeEnd == node) {
-                    resultPosEnd = posEnd;
-                }
-            } else {
-                if (pos > len) {
-                    resultPos -= len;
-                } else {
-                    resultNode = node;
-                }
-
-                if (posEnd > len) {
-                    resultPosEnd -= len;
-                } else {
-                    resultNodeEnd = node;
-                }
+            if (selNodeEnd == node) {
+                resultPosEnd = posEnd;
             }
         } else {
             if (node[childNodes][length]) {
                 // node with subnodes
                 for (i = 0; i < node[childNodes][length];i++) {
-                    result = burrowNodes(
+                    result = extractContent(
                         node[childNodes][i],
-                        selNode ? pos : resultPos,
+                        pos,
                         selNode,
-                        selNode ? posEnd : resultPosEnd,
+                        posEnd,
                         selNodeEnd
                     );
 
@@ -172,79 +136,36 @@
                         resultMarker2 = resultText[length] + result.M;
                     }
 
-                    if (selNode) {
-                        if (selNode == node && pos == i) {
-                            resultPos = resultText[length];
-                        }
-
-                        if (result.p+1) { // same as if (result.p >= 0)
-                            resultPos = resultText[length] + result.p;
-                        }
-
-                        if (selNodeEnd == node && posEnd == i) {
-                            resultPosEnd = resultText[length];
-                        }
-
-                        if (result.e+1) { // same as if (result.e >= 0)
-                            resultPosEnd = resultText[length] + result.e;
-                        }
-
-                    } else {
-                        if (!resultNode) {
-                            resultPos = result.p;
-                            if (result.n) {
-                                // node found
-                                resultNode = result.n;
-                            }
-                        }
-
-                        if (!resultNodeEnd) {
-                            resultPosEnd = result.e;
-                            if (result.E) {
-                                // node found
-                                resultNodeEnd = result.E;
-                            }
-                        }
+                    if (selNode == node && pos == i) {
+                        resultPos = resultText[length];
                     }
+
+                    if (result.p+1) { // same as if (result.p >= 0)
+                        resultPos = resultText[length] + result.p;
+                    }
+
+                    if (selNodeEnd == node && posEnd == i) {
+                        resultPosEnd = resultText[length];
+                    }
+
+                    if (result.e+1) { // same as if (result.e >= 0)
+                        resultPosEnd = resultText[length] + result.e;
+                    }
+
 
                     resultText += result.t;
                 }
             } else {
                 // node without subnodes
-                if (selNode) {
-                    if (selNode == node) {
-                        // span with no children (happens on FF when removing
-                        // the contents)
-                        resultPos = 0;
-                    }
-                    if (selNodeEnd == node) {
-                        // span with no children (happens on FF when removing
-                        // the contents)
-                        resultPosEnd = 0;
-                    }
-                } else {
-                    // if point not reached, decreasing the pos one symbol,
-                    // otherwise stariting the loop with -1
-                    resultPos--;
-                    resultPosEnd--;
-
-                    // if point not yet reached, resultNode is set to false
-                    // (otherwise redefined in inner loop)
-                    if (resultNode = !pos) {
-                        // point right before the node, resultPos == 0
-                        while (node[parentNode][childNodes][++resultPos] != node);
-                        // if not <br>, then it's the highlighted
-                        // element itself (but with empty content)
-                        resultNode = brtr[test](node[nodeName]) ? node[parentNode] : node;
-                    }
-
-                    if (resultNodeEnd = !posEnd) {
-                        // point right before the node, resultPos == 0
-                        while (node[parentNode][childNodes][++resultPosEnd] != node);
-                        // if not <br>, then it's the highlighted
-                        // element itself (but with empty content)
-                        resultNodeEnd = brtr[test](node[nodeName]) ? node[parentNode] : node;
-                    }
+                if (selNode == node) {
+                    // span with no children (happens on FF when removing
+                    // the contents)
+                    resultPos = 0;
+                }
+                if (selNodeEnd == node) {
+                    // span with no children (happens on FF when removing
+                    // the contents)
+                    resultPosEnd = 0;
                 }
             }
 
@@ -255,8 +176,6 @@
 
         return {
             t : resultText,
-            n : resultNode,
-            E : resultNodeEnd,
             p : resultPos,
             e : resultPosEnd,
             m : resultMarker1,
@@ -365,7 +284,7 @@ function(){
         chr        = 1,        // current character
         next1,                 // next character
 
-        // should not be false when given to burrowNodes (so that it
+        // should not be false when given to extractContent (so that it
         // works in the proper mode of extracting text), but should
         // not also be recognized as any of existing nodes
         selNode = 1,
@@ -390,7 +309,7 @@ function(){
     }
 
 
-    content = burrowNodes(
+    content = extractContent(
         el, selOffset, selNode, selOffsetEnd, selNodeEnd
     );
 
