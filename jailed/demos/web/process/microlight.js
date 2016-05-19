@@ -36,6 +36,7 @@
     var spanSample     = _document[createElement]('span');
     var brSample       = _document[createElement]('br');
     var brtr           = /(br|tr)/i;
+    var nullChr = '\0';
 
     var mutationObserveOptions = {
         characterData : 1,
@@ -101,14 +102,35 @@
             // In order to save some space on conditions:
             // m == 0 means no marker set
             // m > 0 means marker at position m-1
-            resultMarker1 = node.m||0,
-            resultMarker2 = node.M||0;
+            resultMarker1 = -1,
+            resultMarker2 = -1;
 
             
         if (len = node[length]) {
             // text node
 
-            resultText = node.textContent;
+            // saving the content extracting the change markers
+            var splitted = node.textContent.split(nullChr);
+            for (var i = 0; i < splitted.length; i++) {
+                if (i == 1) {
+                    resultMarker1 = resultText.length;
+                }
+
+                if (i == splitted.length-1 && splitted.length > 1) {
+                    resultMarker2 = resultText.length;
+                }
+
+                resultText += splitted[i];
+            }
+
+
+            if (node.textContent == nullChr) {
+                // cahnge marker
+                resultMarker1 = 0;
+                resultMarker2 = 0;
+            } else {
+                resultText = node.textContent;
+            }
 
             if (selNode) {
                 if (selNode == node) {
@@ -134,9 +156,6 @@
         } else {
             if (node[childNodes][length]) {
                 // node with subnodes
-                resultMarker1 = node.m == 1 ? 1 : 0;
-                resultMarker2 = node.M == 1 ? 1 : 0;
-
                 for (i = 0; i < node[childNodes][length];i++) {
                     result = burrowNodes(
                         node[childNodes][i],
@@ -148,16 +167,17 @@
 
                     // assigning the first marker from the subnode
                     // (if not yet set)
-                    resultMarker1 = resultMarker1 ||
-                                    (result.m ?
-                                     resultText[length] + result.m :
-                                     0);
+                    if (resultMarker1<0 &&
+                        result.m+1
+                    ) {
+                        resultMarker1 = resultText[length] + result.m;
+                    }
 
                     // assigning the second marker from the subnode
                     // (if present)
-                    resultMarker2 = result.M ?
-                                    resultText[length] + result.M :
-                                    resultMarker2;
+                    if (result.M+1) {
+                        resultMarker2 = resultText[length] + result.M;
+                    }
 
                     if (selNode) {
                         if (selNode == node && pos == i) {
@@ -195,19 +215,6 @@
                     }
 
                     resultText += result.t;
-
-                    // assigning the first marker from between the nodes
-                    // (if not yet set)
-                    resultMarker1 = resultMarker1 ||
-                                    (node.m == i+2 ?
-                                     resultText[length]+1 :
-                                     0);
-
-                    // assigning the second marker from between the nodes
-                    // (if present)
-                    resultMarker2 = node.M == i+2 ?
-                                    resultText[length] + 1 :
-                                    resultMarker2;
                 }
             } else {
                 // node without subnodes
@@ -253,8 +260,6 @@
             }
         }
 
-        node.m = node.M = 0;
-
         return {
             t : resultText,
             n : resultNode,
@@ -272,69 +277,26 @@
      * change will be recognized after tokenizing, even despite the
      * content could partially match to what was on that place
      */
-    var markSelection = function() {
-        var sel = _window.getSelection();
+    var markSelection = function(ev) {
+        if (ev && ev.currentTarget) {
+            ev.currentTarget.ml.disconnect();
+        }
+
+        var sel = window.getSelection();
         var ran = sel.getRangeAt(0);
+        var marker1 = _document.createTextNode(nullChr);
+        var marker2 = _document.createTextNode(nullChr);
+        ran.insertNode(marker1);
+        ran.setStart(ran.endContainer, ran.endOffset);
+        ran.insertNode(marker2);
+        ran.setStartAfter(marker1);
+        ran.setEndBefore(marker2);
+        sel.removeAllRanges();
+        sel.addRange(ran);
 
-        var startNode = ran[startContainer];
-        var startMarker = Math.min(
-            ran[startContainer].m||ran[startOffset]+1,
-            ran[startOffset]+1
-        );
-
-        var endNode = ran[endContainer];
-        var endMarker = Math.max(
-            ran[endContainer].M||ran[endOffset]+1,
-            ran[endOffset]+1
-        );
-
-        if (startMarker>1) {
-            // putting marker on node
-            startNode.m = startMarker;
-        } else {
-            // node might be removed upon pasting
-            // putting marker on parent
-            var parent = startNode[parentNode];
-            for (var i = 0; i < parent[childNodes][length]; i++) {
-                if (parent[childNodes][i] == startNode) {
-                    parent.m = i+1;
-                    break;
-                }
-            }
+        if (ev && ev.currentTarget) {
+            ev.currentTarget.ml.observe(ev.currentTarget, mutationObserveOptions);
         }
-
-        if ( // text node
-            (endNode[length] && endNode[length] == endMarker-1) ||
-            // node with subnodes
-            (endNode[childNodes][length] && endNode[childNodes][length] == endMarker-1) ||
-            // node without subnodes
-            endMarker == 1
-        ) {
-            // node might be removed upon pasting
-            // putting marker on parent
-            var parent = endNode[parentNode];
-            for (var i = 0; i < parent[childNodes][length]; i++) {
-                if (parent[childNodes][i] == endNode) {
-                    parent.M = i+2;
-                    break;
-                }
-            }
-        } else {
-            // putting marker on node
-            endNode.M = endMarker;
-        }
-                
-/*        
-        ran[startContainer].m = Math.min(
-            ran[startContainer].m||ran[startOffset]+1,
-            ran[startOffset]+1
-        );
-        
-        ran[endContainer].M = Math.max(
-            ran[endContainer].M||ran[endOffset]+1,
-            ran[endOffset]+1
-        );
- */
     }
 
 
@@ -441,7 +403,7 @@ function(){
     // taking two characters before and one after the marker
     // (neighbouring nodes might be modified by typing)
     content.m = Math.max(content.m-2, 0);
-    if (content.M < content.t.length-1) {
+    if (content.M < content.t.length) {
         content.M++;
     }
 
@@ -469,7 +431,7 @@ function(){
             // text content matches to what was in the previous token
             (previousText = previousToken[1]) == text.substr(pos, len = previousText[length]) &&
             // and there is no change marker within the upcoming token
-            (content.M < pos + 1 || content.m > pos + len + 1)
+            (content.M < pos || content.m > pos + len)
         ) {
             // copying the token from the previously formatted content
             formatted.push(previousToken);
@@ -485,6 +447,8 @@ function(){
             // (as we might merge the upcoming token into it)
             startSubstituted = Math.max(0, previouslyFormattedIdx-1);
 
+            previousTokenPos = 0;
+            previouslyFormattedIdx = previouslyFormatted[length];
 
             next1 = text[pos];
             while (prev2 = prev1,
@@ -554,18 +518,15 @@ function(){
                         }
                     }
 
-                    if (!tailSearchStarted && content.M &&
+                    if (!tailSearchStarted && (content.M+1) &&
                         // 'end of change' marker in the very beginning
-                        (content.M == 1 ||
+                        (!content.M ||
                         // 'end of change' marker passed
-                        content.M <= pos)
+                        content.M < pos)
                     ) {
                         tailSearchStarted = 1;
 
                         // restoring the tail position
-                        previousTokenPos = 0;
-                        previouslyFormattedIdx = previouslyFormatted[length];
-
                         for(var i = pos; i < text[length]; i++) {
                             if (!previousTokenPos) {
                                 if (!previouslyFormattedIdx) {
