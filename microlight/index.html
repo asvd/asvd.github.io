@@ -1,0 +1,127 @@
+ <html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Microlight.js, code highlighting library</title>
+    <link href='https://fonts.googleapis.com/css?family=Droid+Sans+Mono' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript" src="microlight.js"></script>
+
+  </head>
+  <body>
+    <div class=wrapper>
+        <div class=content>
+          <h1>microlight.js (2.2k)</h1>
+          <p>
+            microlight.js is a micro library written in vanilla-js
+            (works everywhere), which highlights code in any
+            programming language (by itself, without attaching any
+            additional language-packages or styles):
+          </p>
+
+
+          <div class=microlight>&lt;html&gt;
+  &lt;head&gt;
+    &lt;title&gt;My page&lt;/title&gt;
+
+    &lt;!--  some embedded js --&gt;
+    &lt;script type="text/javascript"&gt;
+      /**
+       * Bubble-sorts the input array
+       */
+      function(input) {
+          // switches the two elems if needed
+          // returns true if switched
+          function switchEls(idx) {
+              var switched = false;
+
+              if (input[idx] &lt; input[idx-1]) {
+                  var tmp = input[idx];
+                  input[idx] = input[idx-1];
+                  input[idx-1] = tmp;
+                  switched = true;
+              }
+
+              return switched;
+          }
+
+          var switched;
+          do {
+              switched = false;
+              for (var i = 1; i &lt; input.length; i++) {
+                  switched |= switchEls(i);
+              }
+          } while (switched);
+
+          return input;
+      }
+    &lt;/script&gt;
+
+    &lt;!--  a little bit of css --&gt;
+    &lt;style&gt;
+      body {
+          background-color: black;
+      }
+
+      h1 {
+          color: white;
+          font-family: monospace;
+      } 
+    &lt;/style&gt;
+
+
+  &lt;/head&gt;
+  &lt;body&gt;
+    &lt;h1&gt;Welcome to my page&lt;/h1&gt;
+
+
+    &lt;!--  and finally php --&gt;
+    &lt;?php 
+       // write "Hello world!" 10 times
+       for($i = 1; $i &lt;=10; $i++) {
+           echo "Hello world!&lt;br/&gt;";
+       }
+    ?&gt;
+
+
+  &lt;/body&gt;
+&lt;/html&gt;
+</div>
+          <p>
+            Unlike other code-highlighting libraries, microlight.js
+            does not keep a set of rules for many languages. Instead
+            it uses a general highliting strategy providing a
+            reasonable highlight for most of programming languages. As
+            result:
+          </p>
+
+          <ul>
+            <li>library size is very compact;</li>
+            <li>you don't need to specify which language is that (and
+            you don't need to bother users with this as well);</li>
+            <li>the code can be mixed containing several languages
+            (just like in the example above)</li>
+          </ul>
+
+          <p>
+            In fact, microlight.js does not care neither about in
+            which language the code is written, nor about if the code
+            structure is correct. It just goes through the code and
+            highlights.
+          </p>
+
+          <p>
+            During the highliting, microlight.js does not change the
+            color - it only alters the font type and look. Therefore
+            you don't need to tune-up the CSS to make the highlight
+            match to the design of the page - it will always match. In
+            fact, there is no CSS shipped with microlight.js, only the
+            library itself, which contains everything needed.
+          </p>
+
+
+        </div>
+    </div>
+  </body>
+</html>
+
+

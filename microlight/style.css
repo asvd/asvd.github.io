@@ -1,0 +1,47 @@
+html {
+    height: 100%;
+    margin : 0px;
+    padding: 0px;
+}
+
+body {
+    background-color: #112228;
+    color: #aabbcc;
+    font-size: 14px;
+    font-family : sans;
+    cursor: default;
+    height: 100%;
+    padding: 0px;
+    margin : 0px;
+}
+
+.wrapper {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+}
+
+
+.content {
+    margin-left: auto;
+    margin-right: auto;
+    width : 500px;
+    height : 100px;
+}
+
+
+h1, h3 {
+    text-align: center;
+}
+
+
+.microlight {
+    font-family: 'Droid Sans Mono', monospace;
+    padding : 5px;
+    border : 1px solid #3C575B;
+    background-color: #111517;
+    color: #B5F7FF;
+    white-space: pre;
+    overflow: auto;
+    height : 300px;
+}
