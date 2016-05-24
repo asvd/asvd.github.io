@@ -5,8 +5,8 @@ html {
 }
 
 body {
-    background-color: #112228;
-    color: #aabbcc;
+    background-color: rgb(41, 60, 65);
+    color: #C1DEE6;
     font-size: 14px;
     font-family : sans;
     cursor: default;
@@ -39,7 +39,7 @@ h1, h3 {
     font-family: 'Droid Sans Mono', monospace;
     padding : 5px;
     border : 1px solid #3C575B;
-    background-color: #111517;
+    background-color: #181F22;
     color: #B5F7FF;
     white-space: pre;
     overflow: auto;
