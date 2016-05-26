@@ -130,12 +130,12 @@ h1 .size {
 
 
 a {
-    color: #B0F2E8;
+    color: #CCFDF5;
     text-shadow: 0px 0px 7px rgba(156, 255, 237, 0.5);
 }
 
 a:hover {
-    color: #ECFFFC;
+    color: #EDFFFC;
     text-shadow: 0px 0px 12px rgba(156, 255, 237, 0.9);
 }
 
