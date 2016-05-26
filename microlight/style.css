@@ -8,7 +8,7 @@ body {
     background-color: rgb(41, 60, 65);
     color: #C1DEE6;
     font-size: 14px;
-    font-family : sans;
+    font-family: 'PT Sans', sans;
     cursor: default;
     height: 100%;
     padding: 0px;
@@ -35,6 +35,7 @@ p {
 
 
 h1, h3 {
+    font-family: 'PT Sans Caption', sans;
     font-weight: normal;
     text-align: center;
     padding-top: 15px;
@@ -126,5 +127,37 @@ a {
 a:hover {
     color: #ECFFFC;
     text-shadow: 0px 0px 12px rgba(156, 255, 237, 0.9);
+}
+
+
+
+.browsers {
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom : 50px;
+    margin-top : 20px;
+    width: 340px;
+    height: 80px;
+}
+
+.browser {
+    float : left;
+    padding: 4px;
+    width: 40px;
+}
+
+.browser img {
+    width: 40px;
+    height: 40px;
+    opacity : .9;
+}
+
+.browser div {
+    margin-top : -5px;
+    margin-bottom: 0px;
+    text-align: center;
+    padding-left: 4px;
+    width: 40px;
+    font-family: sans;
 }
 
