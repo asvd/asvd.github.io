@@ -70,6 +70,7 @@ h3 {
 .microlight.example {
     margin-bottom: 5px;
     border : 1px solid #3C575B;
+    overflow-wrap: break-word;
 }
 
 .microlight.example2 {
