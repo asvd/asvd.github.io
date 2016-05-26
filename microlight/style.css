@@ -70,13 +70,21 @@ h3 {
 .microlight.example {
     margin-bottom: 5px;
     border : 1px solid #3C575B;
-    overflow-wrap: break-word;
 }
 
 .microlight.example2 {
     margin-bottom: 5px;
     background-color: #C4E4E8;
     color:#052C36;    
+}
+
+
+.microlight.example3 {
+    margin-bottom: 5px;
+    border : 1px solid #3C575B;
+    white-space : normal;
+    word-break : break-all;
+    overflow-wrap: break-word;
 }
 
 
