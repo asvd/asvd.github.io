@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />    
     <title>Microlight.js, code highlighting library</title>
 
-    <meta property="og:title" content="microlight.js, code-highlighting library (2.2k)" />
+    <meta property="og:title" content="microlight.js 2.2k" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://asvd.github.io/microlight/" />
     <meta property="og:image" content="https://asvd.github.io/microlight/microlight-preview.png" />
@@ -60,6 +60,7 @@
           function switchEls(idx) {
               var switched = false;
 
+              // checking if we need to switch the elements
               if (input[idx] &lt; input[idx-1]) {
                   var tmp = input[idx];
                   input[idx] = input[idx-1];
