@@ -164,7 +164,7 @@
 
                     // determining the new token type (going down
                     // until matching a token type start condition)
-                    tokenType = 12;
+                    tokenType = 11;
                     while (![
                         1,                   //  0: whitespace
                                              //  1: operator or braces

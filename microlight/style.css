@@ -15,6 +15,10 @@ body {
     margin : 0px;
 }
 
+p {
+    text-align: justify;
+}
+
 .wrapper {
     width: 100%;
     height: 100%;
@@ -69,8 +73,8 @@ h3 {
 
 .microlight.example2 {
     margin-bottom: 5px;
-    background-color: #8CAEBB;
-    color: #000000;    
+    background-color: #C4E4E8;
+    color:#052C36;    
 }
 
 
@@ -115,12 +119,12 @@ h1 .size {
 
 
 a {
-    color: #48D7E9;
-    text-shadow: 0px 0px 3px #133153;
+    color: #B0F2E8;
+    text-shadow: 0px 0px 7px rgba(156, 255, 237, 0.5);
 }
 
 a:hover {
-    color: #72EDFD;
-    text-shadow: 0px 0px 8px #3F638B;
+    color: #ECFFFC;
+    text-shadow: 0px 0px 12px rgba(156, 255, 237, 0.9);
 }
 

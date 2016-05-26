@@ -516,6 +516,8 @@ function(){
                             // going down until matching a
                             // token type start condition
                             tokenType = 13;
+
+ // TODO regexps-array is recalculated on every step, assign to a variable
                             while (![
                                 1,                   //  0: whitespace
                                 chr == '\n',         //  1: newline
