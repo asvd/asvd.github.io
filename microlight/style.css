@@ -33,7 +33,15 @@ body {
 h1, h3 {
     font-weight: normal;
     text-align: center;
+    padding-top: 15px;
 }
+
+h3 {
+    color : #FAFEFF;
+    text-shadow: 0px 0px 9px rgba(181, 247, 255,0.5),
+                 0px 0px 2px rgba(181, 247, 255,0.4);
+}
+
 
 .intence {
     overflow: hidden;
@@ -59,6 +67,12 @@ h1, h3 {
     border : 1px solid #3C575B;
 }
 
+.microlight.example2 {
+    margin-bottom: 5px;
+    background-color: #8CAEBB;
+    color: #000000;    
+}
+
 
 .logo {
     color : #FAFEFF;
@@ -68,6 +82,11 @@ h1, h3 {
 
 h1 .size {
     font-size: 12pt;
+}
+
+.footer {
+    font-size: 8pt;
+    line-height: 1.8;
 }
 
 

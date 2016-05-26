@@ -125,7 +125,7 @@
                             textShadow + _0px_0px+7+pxColor + alpha / 4 + '),' +
                                          _0px_0px+3+pxColor + alpha / 4 + brace,
                             // 2: keywords
-                            textShadow + _0px_0px+9+pxColor + alpha * .5 + '),' +
+                            textShadow + _0px_0px+9+pxColor + alpha * .7 + '),' +
                                          _0px_0px+2+pxColor + alpha * .4 + brace,
                             // 3: strings and regexps
                             opacity + 7 +

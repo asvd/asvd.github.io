@@ -14,10 +14,10 @@
         <div class=content>
           <h1><span class=logo>microlight.js</span> <span class=size>2.2k</span></h1>
           <p>
-            <span class=logo>microlight.js</span> is a micro library written in vanilla-js,
-            which highlights code in any programming language (by
-            itself, without attaching any additional language-packages
-            or styles):
+            <span class=logo>microlight.js</span> is an open-source
+            micro-library which highlights code in any programming
+            language (by itself, without attaching any additional
+            language-packages or styles):
           </p>
 
 
@@ -119,17 +119,31 @@
             highliting, <span class=logo>microlight.js</span> does not
             change the color - it only alters the font type and
             look. Therefore you don't need to tune-up the CSS to make
-            the highlight match to the design of the page - it will
+            the color theme match to the design of the page - it will
             always match. In fact, there is no CSS shipped
             with <span class=logo>microlight.js</span>, only the
             library itself, which contains everything needed, all in
             2.2k!
           </p>
 
+          <h3>Compatibility</h3>
+
+          <p>
+            <span class=logo>microlight.js</span> is written in
+            vanilla-js and is shipped as an UMD-module, so it should
+            work in any reasonable environment.
+          </p>
+
+
+
+
+
+
+
           <h3>Setting-up</h3>
 
           <p>
-            Download the and unpack
+            Download and unpack
             the <a href="https://github.com/asvd/microlight/releases/download/v0.0.1/microlight-0.0.1.tar.gz">distribution</a>,
             or install it using Bower / npm:
           </p>
@@ -139,7 +153,7 @@
 
           <p>
             Load the <span class=logo>microlight.js</span> in a
-            preferable way (that is an UMD module):
+            preferable way:
           </p>
 
           <div class="microlight inline">&lt;script src="path/to/microlight.js"&gt;&lt;/script&gt;</div>
@@ -148,33 +162,70 @@
             Create an element with code content to be highlighted, and
             assign to it the <span class=logo>microlight</span>
             class. Don't forget to mask the html-related characters,
-            and apply the monospace css:
+            and apply the monospace style:
           </p>
 
-          <div class="microlight inline">&lt;div class=microlight&gt;
-     for (var i = 0; i&amp;lt;=10; i++) echo("hello");
-&lt;/div&gt;</div>
+          <div class="microlight inline">&lt;div class=microlight&gt;for (var i = 0; i&amp;lt;=10; i++) {
+    // say hello
+    echo("hello");
+}&lt;/div&gt;</div>
           <div class="microlight inline">.microlight {
     font-family : monospace;
     white-space : pre;
 }</div>
 
           <p>
-            Here is the result of the code above:
+            The result will look like this:
           </p>
 
-<div class="microlight example">for (var i = 0; i&lt;=10; i++) echo("hello");
-</div>
+<div class="microlight example">for (var i = 0; i&lt;=10; i++) {
+    // say hello
+    echo("hello");
+}</div>
+
+          <p>
+            Tune-up the element style according to your kinky taste:
+          </p>
+
+          <div class="microlight inline">.microlight {
+    font-family : monospace;
+    white-space : pre;
+    background-color : #8CAEBB;
+    color            : #000000;    
+}</div>
+          <p>
+            &mdash; looks like this:
+          </p>
+
+<div class="microlight example2">for (var i = 0; i&lt;=10; i++) {
+    // say hello
+    echo("hello");
+}</div>
+          
+
 
           <p>
             If you change the content on the fly, switch the style of
             an element with the highlighted code, or add
             the <span class=logo>microlight</span> class to the new
-            nodes, invoke <span class=logo>microlight.reset();</span>
-            to re-apply the highlight:
+            nodes, invoke the following to re-apply the highlight:
           </p>
 
           <div class="microlight inline">microlight.reset();</div>
+
+          <br/>
+
+          <p>
+            Have fun!
+          </p>
+
+          <br/>
+
+          <p class=footer>
+            <a href="https://github.com/asvd/microlight">github.com/asvd/microlight</a>
+            <br/>
+            Spring of 2016, Munich
+          </p>
 
           <br/>
           <br/>
