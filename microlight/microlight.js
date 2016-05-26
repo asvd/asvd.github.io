@@ -18,20 +18,19 @@
         factory((root.microlight = {}));
     }
 }(this, function (exports) {
-    // aliases for a better compression
+    // for better compression
     var _window       = window,
         _document     = document,
         appendChild   = 'appendChild',
         test          = 'test',
+        // style and color templates
+        textShadow    = ';text-shadow:',
+        opacity       = 'opacity:.',
+        _0px_0px      = ' 0px 0px ',
+        _3px_0px_5    = '3px 0px 5',
+        brace         = ')',
 
         el,  // current microlighted element to run through
-
-        // style and color templates
-        textShadow = ';text-shadow:',
-        opacity    = 'opacity:.',
-        _0px_0px   = ' 0px 0px ',
-        _3px_0px_5 = '3px 0px 5',
-        brace = ')',
 
         // dynamic set of nodes to highlight
         microlighted = _document.getElementsByClassName('microlight');
@@ -42,11 +41,11 @@
             var text  = el.textContent,
                 pos   = 0,       // current position
                 next1 = text[0], // next character
-                chr,             // current character
+                chr   = 1,       // current character
                 prev1,           // previous character
                 prev2,           // the one before the previous
-                                 // content of the current token
-                token = el.innerHTML = '',
+                token =          // current token content
+                el.innerHTML = '',  // (and cleaning the node)
                 
                 // current token type:
                 //  0: anything else (whitespaces / newlines)
@@ -64,15 +63,16 @@
 
                 // kept to determine between regex and division
                 lastTokenType,
+                // flag determining if token is multi-character
+                multichar,
                 node,
 
                 // calculating the colors for the style templates
                 colorArr = /(\d*\, \d*\, \d*)(, ([.\d]*))?/g.exec(
                     _window.getComputedStyle(el).color
                 ),
-                pxColor  = 'px rgba('+colorArr[chr=1]+',',
-                alpha  = colorArr[3]||1,
-                multichar;  // flag determining if token is multi-character
+                pxColor = 'px rgba('+colorArr[1]+',',
+                alpha = colorArr[3]||1;
 
             // running through characters and highlighting
             while (prev2 = prev1,
@@ -87,15 +87,16 @@
 
                 // checking if current token should be finalized
                 if (!chr  || // end of content
-                    // whitespaces are merged together
-                    (!tokenType && /\S/[test](chr)) ||
-                    // types 1-2 (operators and braces) always consist
-                    // of a single character
-                    (tokenType && tokenType < 3) ||
                     // types 9-10 (single-line comments) end with a
                     // newline
                     (tokenType > 8 && chr == '\n') ||
                     [ // finalize conditions for other token types
+                        // 0: whitespaces
+                        /\S/[test](chr),  // merged together
+                        // 1: operators
+                        1,                // consist of a single character
+                        // 2: braces
+                        1,                // consist of a single character
                         // 3: (key)word
                         !/[$\w]/[test](chr),
                         // 4: regex
@@ -108,7 +109,7 @@
                         text[pos-4]+prev2+prev1 == '-->',
                         // 8: multiline comment
                         prev2+prev1 == '*/'
-                    ][tokenType-3]
+                    ][tokenType]
                 ) {
                     // appending the token to the result
                     if (token) {
@@ -146,7 +147,7 @@
                             tokenType > 3 ? 3 :
                             // otherwise tokenType == 3, (key)word
                             // (2 if regexp matches, 0 otherwise)
-                            2 * /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|module|mutable|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token)
+                            2 * /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|m(icrolight|odule|utable)|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/[test](token)
                         ]);
 
                         node[appendChild](_document.createTextNode(token));
