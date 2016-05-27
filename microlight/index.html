@@ -136,19 +136,19 @@
           </p>
 
           <ul>
-            <li>library size is extremely compact (2.2k, seriously,
-            can you imagine!);</li>
-            <li>you don't need to specify which language is that (and
-            you don't need to bother users with this as well);</li>
-            <li>the code can be mixed containing several languages
-            (just like in the example above)</li>
+            <li>library size is extremely compact<div class=comment>2.2k, seriously,
+            can you imagine!</div></li>
+            <li>you don't need to specify which language is that <div class=comment>and
+            you don't need to bother users with this as well</div></li>
+            <li>code can be mixed containing several languages
+            <div class=comment>just like in the example above</div></li>
           </ul>
 
           <p>
             In fact, <span class=logo>microlight.js</span> does not
-            care neither about in which language the code is written,
+            care neither about which language the code is written in,
             nor about if the code structure is correct. It just goes
-            through the code and highlights.
+            through the code and <span class=logo>highlights</span>.
           </p>
 
           <p>
@@ -159,8 +159,8 @@
             to make it match to the design of the page &mdash; it will
             always match. In fact, there is no CSS shipped
             with <span class=logo>microlight.js</span> at all, only
-            the library itself, which contains everything needed, all
-            in 2.2k!
+            the library itself, containing everything needed, all in
+            2.2k!
           </p>
 
           <h3>Compatibility</h3>
@@ -192,7 +192,7 @@
           <p>
             Download and unpack
             the <a href="https://github.com/asvd/microlight/releases/download/v0.0.1/microlight-0.0.1.tar.gz">distribution</a>,
-            or install it using Bower / npm:
+            or install it using bower / npm:
           </p>
 
           <div class="microlight inline">$ bower install microlight</div>
@@ -200,16 +200,16 @@
 
           <p>
             Load the <span class=logo>microlight.js</span> in a
-            preferable way:
+            preferable way (that is an UMD-module):
           </p>
 
           <div class="microlight inline">&lt;script src="path/to/microlight.js"&gt;&lt;/script&gt;</div>
 
           <p>
             Create an element with code content to be highlighted, and
-            assign to it the <span class=logo>microlight</span>
-            class. Don't forget to mask the html-related characters,
-            and apply the monospace style:
+            add the <span class=logo>microlight</span> class. Don't
+            forget to mask the html-related characters, and apply the
+            monospace style:
           </p>
 
           <div class="microlight inline">&lt;div class=microlight&gt;for (var i = 0; i&amp;lt;=10; i++) {

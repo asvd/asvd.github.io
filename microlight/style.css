@@ -104,6 +104,10 @@ h1 .size {
     text-align: right;
 }
 
+li {
+    padding-bottom: 8px;
+}
+
 
 
 ::selection {
@@ -126,6 +130,11 @@ h1 .size {
     cursor : -moz-grabbing;
     cursor : -o-grabbing;
     cursor : grabbing;
+}
+
+.comment {
+    color : #60A6A5;
+    font-style: italic;
 }
 
 
