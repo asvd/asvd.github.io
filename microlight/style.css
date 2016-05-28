@@ -63,14 +63,24 @@ h3 {
 .intence {
     overflow: hidden;
     height : 300px;
+}
+
+.intence, .microlight.example, .microlight.example3 {
     border : 1px solid #3C575B;
+    margin-bottom: 5px;
+    background-image: url('bg.png');
+}
+
+
+.intence, .microlight.example, .microlight.example3, .microlight.example2 {
+    border-radius: 1px;
+    box-shadow: 2px 2px 20px -7px rgba(0, 0, 0, .6);
 }
 
 .microlight {
     font-family: 'Droid Sans Mono', monospace;
     white-space: pre;
     padding : 5px;
-    background-color: #181F22;
     color: #B5F7FF;
 }
 
@@ -80,11 +90,10 @@ h3 {
 }
 
 .microlight.example {
-    margin-bottom: 5px;
-    border : 1px solid #3C575B;
 }
 
 .microlight.example2 {
+    border : 1px solid #C4E4E8;
     margin-bottom: 5px;
     background-color: #C4E4E8;
     color:#052C36;    
@@ -93,8 +102,6 @@ h3 {
 
 
 .microlight.example3 {
-    margin-bottom: 5px;
-    border : 1px solid #3C575B;
     white-space : normal;
     word-break : break-all;
     overflow-wrap: break-word;
