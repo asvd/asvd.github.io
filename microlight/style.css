@@ -29,6 +29,7 @@ body {
 
 p {
     text-align: justify;
+    padding-top: 4px;
 }
 
 .wrapper {
@@ -50,7 +51,7 @@ h1, h3 {
     font-family: 'PT Sans Caption', sans;
     font-weight: normal;
     text-align: center;
-    padding-top: 15px;
+    padding-top: 20px;
 }
 
 h3 {
@@ -121,7 +122,8 @@ h1 .size {
 .footer {
     font-size: 8pt;
     line-height: 1.5;
-    text-align: right;
+    text-align: center;
+    padding-top: 40px;
 }
 
 li {
@@ -136,6 +138,7 @@ li {
     cursor: -moz-grab;
     cursor: -o-grab;
     cursor: grab;
+    margin-bottom: 24px;
 }
 
 .dragscroll:active {
