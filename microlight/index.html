@@ -222,9 +222,12 @@
 
           <p>
             Create an element with code content to be highlighted, and
-            add the <span class=logo>microlight</span> class. Don't
-            forget to mask the html-related characters, and apply the
-            monospace style:
+            add the <span class=logo>microlight</span> class (if you
+            prefer to use another class name for the code elements to
+            highlight, provide it to
+            the <span class=logo>reset()</span> method as described
+            below). Don't forget to mask the html-related characters,
+            and apply the monospace style:
           </p>
 
           <div class="microlight inline">&lt;div class=microlight&gt;for (var i = 0; i&amp;lt;=10; i++) {
@@ -274,6 +277,19 @@
           </p>
 
           <div class="microlight inline">microlight.reset();</div>
+
+          <p>
+            You can also use this method to specify a custom class
+            name instead of <span class=logo>microlight</span> for the
+            elements containing code:
+          </p>
+
+          <div class="microlight inline">microlight.reset("code");</div>
+
+            <div class=comment>
+              &mdash; will highlight the content inside elements
+              having class=code
+            </div>
 
           <p>
             Have fun!
