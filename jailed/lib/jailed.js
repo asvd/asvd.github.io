@@ -1,6 +1,6 @@
 /**
  * @fileoverview Jailed - safe yet flexible sandbox
- * @version 0.2.0
+ * @version 0.3.0
  * 
  * @license MIT, see http://github.com/asvd/jailed
  * Copyright (c) 2014 asvd <heliosframework@gmail.com> 
@@ -13,7 +13,8 @@
  *  _JailedSite.js    loaded into both applicaiton and plugin sites
  *  _frame.html       sandboxed frame (web)
  *  _frame.js         sandboxed frame code (web)
- *  _pluginWeb.js     platform-dependent plugin routines (web)
+ *  _pluginWebWorker.js  platform-dependent plugin routines (web / worker)
+ *  _pluginWebIframe.js  platform-dependent plugin routines (web / iframe)
  *  _pluginNode.js    platform-dependent plugin routines (Node.js)
  *  _pluginCore.js    common plugin site protocol implementation
  */
@@ -43,8 +44,9 @@ if (typeof window == 'undefined') {
         factory((root.jailed = {}));
     }
 }(this, function (exports) {
-    var isNode = typeof window == 'undefined';
-      
+    var isNode = ((typeof process !== 'undefined') &&
+                  (!process.browser) &&
+                  (process.release.name.search(/node|io.js/) !== -1));
 
     /**
      * A special kind of event:
@@ -79,8 +81,8 @@ if (typeof window == 'undefined') {
             }
         }
     }
-     
-     
+
+
     /**
      * Saves the provided function as a handler for the Whenable
      * event. This handler will then be called upon the event emission
@@ -98,7 +100,7 @@ if (typeof window == 'undefined') {
         }
     }
 
-     
+
     /**
      * Checks if the provided object is suitable for being subscribed
      * to the event (= is a function), throws an exception if not
@@ -121,9 +123,9 @@ if (typeof window == 'undefined') {
 
         return handler;
     }
-      
-      
-      
+
+
+
     /**
      * Initializes the library site for Node.js environment (loads
      * _JailedSite.js)
@@ -131,8 +133,8 @@ if (typeof window == 'undefined') {
     var initNode = function() {
         require('./_JailedSite.js');
     }
-      
-      
+
+
     /**
      * Initializes the library site for web environment (loads
      * _JailedSite.js)
@@ -198,27 +200,11 @@ if (typeof window == 'undefined') {
          * For Node.js the plugin is created as a forked process
          */
         BasicConnection = function() {
+            // in Node.js always has a subprocess
+            this.dedicatedThread = true;
             this._disconnected = false;
             this._messageHandler = function(){};
             this._disconnectHandler = function(){};
-            
-/*            
-var child = require('child_process');
-var debug = process.execArgv.indexOf('--debug') !== -1;
-if(debug) {   
-    //Set an unused port number.    
-    process.execArgv.push('--debug=' + (40894));    
-}    
-child.fork(__dirname + '/task.js');
-*/
-
-
-var debug = process.execArgv.indexOf('--debug-brk') !== -1;
-if(debug) {
-    console.log("DEBUG");
-    process.execArgv.push('--debug-brk=' + 40894);
-}
-
 
             this._process = childProcess.fork(
                 __jailed__path__+'_pluginNode.js'
@@ -340,9 +326,10 @@ if(debug) {
                     document.body.appendChild(me._frame);
 
                     window.addEventListener('message', function (e) {
-                        if (e.origin === "null" &&
-                            e.source === me._frame.contentWindow) {
+                        if (e.source === me._frame.contentWindow) {
                             if (e.data.type == 'initialized') {
+                                me.dedicatedThread =
+                                    e.data.dedicatedThread;
                                 me._init.emit();
                             } else {
                                 me._messageHandler(e.data);
@@ -360,8 +347,8 @@ if(debug) {
          * 
          * For the web-browser environment, the handler is issued when
          * the plugin worker successfully imported and executed the
-         * _pluginWeb.js, and replied to the application site with the
-         * initImprotSuccess message.
+         * _pluginWebWorker.js or _pluginWebIframe.js, and replied to
+         * the application site with the initImprotSuccess message.
          * 
          * @param {Function} handler to be called upon connection init
          */
@@ -466,6 +453,17 @@ if(debug) {
                 break;
             }
         });
+    }
+
+
+    /**
+     * @returns {Boolean} true if a connection obtained a dedicated
+     * thread (subprocess in Node.js or a subworker in browser) and
+     * therefore will not hang up on the infinite loop in the
+     * untrusted code
+     */
+    Connection.prototype.hasDedicatedThread = function() {
+        return this._platformConnection.dedicatedThread;
     }
 
 
@@ -599,9 +597,9 @@ if(debug) {
         this._path = url;
         this._initialInterface = _interface||{};
         this._connect();
-    }
-      
-      
+    };
+
+
     /**
      * DynamicPlugin constructor, represents a plugin initialized by a
      * string containing the code to be executed
@@ -613,9 +611,9 @@ if(debug) {
         this._code = code;
         this._initialInterface = _interface||{};
         this._connect();
-    }
-      
-      
+    };
+
+
     /**
      * Creates the connection to the plugin site
      */
@@ -742,6 +740,17 @@ if(debug) {
         });
 
         this._site.requestRemote();
+    }
+
+
+    /**
+     * @returns {Boolean} true if a plugin runs on a dedicated thread
+     * (subprocess in Node.js or a subworker in browser) and therefore
+     * will not hang up on the infinite loop in the untrusted code
+     */
+    DynamicPlugin.prototype.hasDedicatedThread =
+           Plugin.prototype.hasDedicatedThread = function() {
+        return this._connection.hasDedicatedThread();
     }
 
     
