@@ -1,6 +1,6 @@
 /**
  * @fileoverview Jailed - safe yet flexible sandbox
- * @version 0.2.0
+ * @version 0.3.1
  * 
  * @license MIT, see http://github.com/asvd/jailed
  * Copyright (c) 2014 asvd <heliosframework@gmail.com> 
@@ -21,7 +21,10 @@
 
 
 var __jailed__path__;
-if (typeof window == 'undefined') {
+var __is__node__ = ((typeof process !== 'undefined') &&
+                    (!process.browser) &&
+                    (process.release.name.search(/node|io.js/) !== -1));
+if (__is__node__) {
     // Node.js
     __jailed__path__ = __dirname + '/';
 } else {
@@ -44,10 +47,6 @@ if (typeof window == 'undefined') {
         factory((root.jailed = {}));
     }
 }(this, function (exports) {
-    var isNode = ((typeof process !== 'undefined') &&
-                  (!process.browser) &&
-                  (process.release.name.search(/node|io.js/) !== -1));
-
     /**
      * A special kind of event:
      *  - which can only be emitted once;
@@ -403,7 +402,7 @@ if (typeof window == 'undefined') {
     }
 
 
-    if (isNode) {
+    if (__is__node__) {
         initNode();
         basicConnectionNode();
     } else {
