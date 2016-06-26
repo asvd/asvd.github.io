@@ -65,7 +65,7 @@ m : function() {
         startNode,
         endNode,
         item,
-        toBeAdded = 1,
+        added = 0,
         // keeps merged list, will replace the .l
         newList = [];
 
@@ -75,23 +75,38 @@ m : function() {
         el.contains(startNode = (ran = sel.getRangeAt(0)).startContainer) &&
         el.contains(endNode = ran.endContainer)
     ) {
-        // replacing with the subnode preceeding the selection point
+        // picking the respective child of el
         startNode = startNode.childNodes[ran.startOffset-1]||startNode;
-        if (startNode.parentNode == el) {
-            // taking preivously highlighted token, or the begenning
+        if (startNode == el) {
+            // 0 stands for 'the very beginning'
+            startNode = 0;
+        } else {
+            while (startNode.parentNode != el) {
+                startNode = startNode.parentNode;
+            }
+
             startNode = startNode.previousSibling || 0;
         }
 
-        // replacing with the subnode preceeding the selection point 
-        endNode   = endNode.childNodes[ran.endOffset-1]||endNode;
-        if (endNode.parentNode == el) {
-            // taking the following highlighted token, or the end
-            endNode = endNode.nextSibling || 0;
+        // same with end node
+        endNode = endNode.childNodes[ran.endOffset-1]||endNode;
+        if (endNode == el) {
+            // end of selection in the very beginning
+            endNode = el.childNodes[0];
         }
 
+        // 0 stands for 'until the end'
+        endNode = endNode.nextSibling || 0;
+    
+        // replacing with the subnode preceeding the selection point
         while (item = el[wavelight].l.shift()) {
-            if (!toBeAdded ||  // already added, or...
-                // ...startNode comes after item[1]
+            // if a node was detached, it was somwhere inside
+            // current selection
+            item[0] = item[0] ? el.contains(item[0]) ? item[0] : startNode : 0;
+            item[1] = item[1] ? el.contains(item[1]) ? item[1] : endNode : 0;
+
+            if (added ||
+                // startNode comes after item[1]
                 // (i.e. selection not reached)
                 (item[1] && item[1][compareDocumentPosition](startNode) & 4)
             ) {
@@ -102,7 +117,7 @@ m : function() {
                 // adding both
                 newList.push([startNode, endNode]);
                 newList.push(item);
-                toBeAdded = 0;
+                added = 1;
             } else {
                 // intersection, merging item and selection
                 startNode =
@@ -119,11 +134,12 @@ m : function() {
             }
         }
 
-        if (toBeAdded) {
+        if (!added) {
             newList.push([startNode, endNode]);
         }
 
         el[wavelight].l = newList;
+
     } // else selection outside of container
 },
 
@@ -133,6 +149,27 @@ m : function() {
  * if not started yet
  */
 c : function() {
+
+
+
+return
+
+
+    // converting selection into plain text (selection exists upon
+    // change only when content was dragged into)
+    /*
+                    var sel = window.getSelection();
+                    if (sel.rangeCount) {
+                        var ran = sel.getRangeAt(0);
+                        var part = ran.extractContents();
+                        document.getElementById('target').appendChild(part);
+                    }
+    */
+
+
+
+    
+    
     var highlightRunning = el[wavelight].l.length;
 
     // updating dirty ranges
@@ -234,8 +271,23 @@ t : function() {
 
                     };
 
-                    // marks the dirty state before pasting
-                    el.addEventListener('paste', el[wavelight].m, 0);
+                    document.addEventListener('selectionchange', function(e) {
+                        console.log('a');
+                    }, 0);
+
+
+                    el.addEventListener('paste', function(e) {
+                        // marks the dirty state before pasting
+                        el[wavelight].m();
+
+                        // force pasting as a plain-text
+                        e.preventDefault();
+                        document.execCommand(
+                            "insertText",
+                            0,
+                            e.clipboardData.getData("text/plain")
+                        );
+                    }, 0);
 
                 }
 
@@ -257,6 +309,10 @@ t : function() {
                     subtree       : 1,
                     childList     : 1
                 });
+
+
+
+                
             })(el);
         }
     }

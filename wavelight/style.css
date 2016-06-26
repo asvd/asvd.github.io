@@ -6,7 +6,10 @@ body {
     -khtml-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
-    user-select: none; 
+    user-select: none;
+
+    color: #aabbcc;
+    background-color: #112233;
 }
 
 .wavelight {
