@@ -28,6 +28,11 @@
     var _document  = document;
     var wavelight = 'wavelight';
     var compareDocumentPosition = 'compareDocumentPosition';
+    var observerOptions = {
+        characterData : 1,
+        subtree       : 1,
+        childList     : 1
+    }
 
 
     var reset = function(
@@ -58,84 +63,102 @@ l : [],
  * everything within the current selection will be re-highlighted.
  * Merges the dirty range with existing dirty ranges stored in the .l
  * array.
+ *
+ * optional params for marking selection as suspicous:
+ * @param {Object} startContainer
+ * @param {Number} startOffset
  */
-m : function() {
+m : function(startContainer, startOffset) {
     var sel = _window.getSelection(),
         ran,
-        startNode,
-        endNode,
+        endContainer,
+        endOffset,
         item,
         added = 0,
         // keeps merged list, will replace the .l
         newList = [];
 
+    if (startContainer) {
+        endContainer = startContainer;
+        endOffset = startOffset;
+    } else {
+        if (sel.rangeCount) {
+            // there is a selection
+            ran = sel.getRangeAt(0);
+            startContainer = ran.startContainer;
+            endContainer = ran.endContainer;
+            startOffset = ran.startOffset;
+            endOffset = ran.endOffset;
+        }
+    }
+
     if (// there is a selection
-        sel.rangeCount &&
+        startContainer &&
         // element contains selection start and end
-        el.contains(startNode = (ran = sel.getRangeAt(0)).startContainer) &&
-        el.contains(endNode = ran.endContainer)
+        el.contains(startContainer) &&
+        el.contains(endContainer)
     ) {
         // picking the respective child of el
-        startNode = startNode.childNodes[ran.startOffset-1]||startNode;
-        if (startNode == el) {
+        startContainer = startContainer.childNodes[ran.startOffset-1]||startContainer;
+        if (startContainer == el) {
             // 0 stands for 'the very beginning'
-            startNode = 0;
+            startContainer = 0;
         } else {
-            while (startNode.parentNode != el) {
-                startNode = startNode.parentNode;
+            while (startContainer.parentNode != el) {
+                startContainer = startContainer.parentNode;
             }
 
-            startNode = startNode.previousSibling || 0;
+            startContainer = startContainer.previousSibling || 0;
         }
 
         // same with end node
-        endNode = endNode.childNodes[ran.endOffset-1]||endNode;
-        if (endNode == el) {
+        endContainer = endContainer.childNodes[ran.endOffset-1]||endContainer;
+        if (endContainer == el) {
             // end of selection in the very beginning
-            endNode = el.childNodes[0];
+            endContainer = el.childNodes[0];
         }
 
         // 0 stands for 'until the end'
-        endNode = endNode.nextSibling || 0;
+        endContainer = endContainer.nextSibling || 0;
     
         // replacing with the subnode preceeding the selection point
         while (item = el[wavelight].l.shift()) {
             // if a node was detached, it was somwhere inside
             // current selection
-            item[0] = item[0] ? el.contains(item[0]) ? item[0] : startNode : 0;
-            item[1] = item[1] ? el.contains(item[1]) ? item[1] : endNode : 0;
+            item[0] = item[0] ? el.contains(item[0]) ? item[0] : startContainer : 0;
+            item[1] = item[1] ? el.contains(item[1]) ? item[1] : endContainer : 0;
 
             if (added ||
-                // startNode comes after item[1]
+                // startContainer comes after item[1]
                 // (i.e. selection not reached)
-                (item[1] && item[1][compareDocumentPosition](startNode) & 4)
+                (item[1] && item[1][compareDocumentPosition](startContainer) & 4)
             ) {
                 newList.push(item);
             } else if (item[0] &&
-                       endNode[compareDocumentPosition](item[0]) & 4) {
+                       endContainer[compareDocumentPosition](item[0]) & 4) {
                 // selection fully before the item
                 // adding both
-                newList.push([startNode, endNode]);
+                newList.push([startContainer, endContainer]);
                 newList.push(item);
                 added = 1;
             } else {
                 // intersection, merging item and selection
-                startNode =
+                startContainer =
                     !item[0] ?
                      item[0] :
-                     item[0][compareDocumentPosition](startNode) & 4 ?
-                     item[0] : startNode;
+                     item[0][compareDocumentPosition](startContainer) & 4 ?
+                     item[0] : startContainer;
 
-                endNode =
+                endContainer =
                     !item[1] ?
                      item[1] :
-                     item[1][compareDocumentPosition](endNode) & 4 ?
-                     endNode : item[1];
+                     item[1][compareDocumentPosition](endContainer) & 4 ?
+                     endContainer : item[1];
             }
         }
 
         if (!added) {
-            newList.push([startNode, endNode]);
+            newList.push([startContainer, endContainer]);
         }
 
         el[wavelight].l = newList;
@@ -149,10 +172,33 @@ m : function() {
  * if not started yet
  */
 c : function() {
+    // disconnecting the observer
+    el[wavelight].o.disconnect();
+
+    var sel = window.getSelection();
+    if (sel.rangeCount) {
+        var ran = sel.getRangeAt(0);
+        if (el.contains(ran.startContainer) &&
+            el.contains(ran.endContainer)
+        ) {
+            var content = ran.extractContents();
+            var text = '';
+            var node = content;
+            var pos = 0;
+            var out = {n: node, p: pos};
+
+            do {
+                text += (out = el[wavelight].r(out.n, out.p, content)).c;
+            } while (out.c);
+            ran.insertNode(document.createTextNode(text));
+        }
+    }
 
 
+    el[wavelight].o.observe(el, observerOptions);
 
-return
+    return;
+
 
 
     // converting selection into plain text (selection exists upon
@@ -190,6 +236,7 @@ return
  *
  * @param {Object} node to start burrowing from
  * @param {Number} pos of a sub-element inside that node
+ * @param {Object} limitEl not to exceed
  * @param {Object} startNode of the selection
  * @param {Number} startPos of the selection
  * @param {Object} endNode of the selection
@@ -202,7 +249,7 @@ return
  *  .S - true if selection start is right before the point
  *  .E - true if selection end is right before the point
  */
-r : function(node, pos, startNode, startPos, endNode, endPos) {
+r : function(node, pos, limitEl, startNode, startPos, endNode, endPos) {
     var chr = '', newNode, newPos;
     var selStart = 0, selEnd = 0;
 
@@ -217,7 +264,10 @@ r : function(node, pos, startNode, startPos, endNode, endPos) {
             if (pos < node.length) {
                 chr = node.textContent[pos];
                 newNode = node;
-                newPos = pos++;
+                newPos = ++pos;
+            } else if (node == (limitEl||el)) {
+                // end of content
+                break;
             } else {
                 nodeIsOver = true;
             }
@@ -227,7 +277,7 @@ r : function(node, pos, startNode, startPos, endNode, endPos) {
                 // switching into the node
                 node = node.childNodes[pos];
                 pos = 0;
-            } else if (node == el) {
+            } else if (node == (limitEl||el)) {
                 // end of content
                 break;
             } else if (/(br|tr)/i.test(node.nodeName)) {
@@ -271,8 +321,16 @@ t : function() {
 
                     };
 
-                    document.addEventListener('selectionchange', function(e) {
-                        console.log('a');
+                    el.addEventListener('mousedown', function(e, s) {
+                        if ((s = window.getSelection()).rangeCount) {
+                            s = s.getRangeAt(0);
+                            if (s.startNode != s.endNode ||
+                                s.startOffset != s.endOffset
+                            ) {
+                                // selection non-epmty, marking as suspicious
+                                el[wavelight].m(s.startNode, s.startOffset);
+                            }
+                        }
                     }, 0);
 
 
@@ -303,12 +361,7 @@ t : function() {
                 }  // otherwise already scheduled
 
                 // subscribing to the node change event
-                var observer = new MutationObserver(el[wavelight].c);
-                observer.observe(el, {
-                    characterData : 1,
-                    subtree       : 1,
-                    childList     : 1
-                });
+                (el[wavelight].o = new MutationObserver(el[wavelight].c)).observe(el, observerOptions);
 
 
 
