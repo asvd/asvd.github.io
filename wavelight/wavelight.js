@@ -34,7 +34,6 @@
         childList     : 1
     }
 
-
     var reset = function(
         cls,  // element class to highlight, defaults to 'wavelight'
         // locals
@@ -42,128 +41,72 @@
         i,
         el
     ) {
-        // dynamic set of elements to highlight
         wavelighted = _document.getElementsByClassName(cls||wavelight);
 
         for (i = 0; el = wavelighted[i++];) {
-            // fixing the el in the closure
-            (function(el, highlightRunning) {
-                // highlighted element state object
-                if (!el[wavelight]) {
-                    el[wavelight] =  {
+            if (!el[wavelight]) {
+                // fixing the el in the closure
+                (function(el) {
+
+var
+
 /**
- * Ordered list of dirty ranges (without intersections) which should
- * be rehighlighted within the element
+ * True if highlight is currently in progress
  */
-l : [],
+highlightRunning,
+
 
 
 /**
- * Marks the points around current selection as a dirty range, so that
- * everything within the current selection will be re-highlighted.
- * Merges the dirty range with existing dirty ranges stored in the .l
- * array.
+ * Start and end nodes suspicious for changes in between. The
+ * mentioned nodes are certainly properly formatted tokens, everything
+ * in-between the nodes is suspicious and should be rechecked.
  *
- * optional params for marking selection as suspicous:
- * @param {Object} startContainer
- * @param {Number} startOffset
+ * After the end node is reached, the tail might be reformatted.
  */
-m : function(startContainer, startOffset) {
-    var sel = _window.getSelection(),
-        ran,
-        endContainer,
-        endOffset,
-        item,
-        added = 0,
-        // keeps merged list, will replace the .l
-        newList = [];
+redrawStart,
+redrawEnd,
 
-    if (startContainer) {
-        endContainer = startContainer;
-        endOffset = startOffset;
-    } else {
-        if (sel.rangeCount) {
-            // there is a selection
-            ran = sel.getRangeAt(0);
-            startContainer = ran.startContainer;
-            endContainer = ran.endContainer;
-            startOffset = ran.startOffset;
-            endOffset = ran.endOffset;
-        }
+// keeps mutation observer
+observer,
+
+
+/**
+ * Extends the redraw range to include the given point. Just like as
+ * with selection borders, the point is determined by anode and offest
+ *
+ * @param {Object} node must be el, or a (sub)child
+ * @param {Object} offset
+ */
+extendRedrawRange = function(node, offset) {
+    // moving to the top until we reach the element
+    while (node != el && node.parentNode != el) {
+        node = node.parentNode;
+        offset = 0;
     }
 
-    if (// there is a selection
-        startContainer &&
-        // element contains selection start and end
-        el.contains(startContainer) &&
-        el.contains(endContainer)
-    ) {
-        // picking the respective child of el
-        startContainer = startContainer.childNodes[ran.startOffset-1]||startContainer;
-        if (startContainer == el) {
-            // 0 stands for 'the very beginning'
-            startContainer = 0;
+    if (redrawStart) {
+        // existing existing redraw range
+        redrawStart =
+            // 1 if redrawStart precedes node
+            redrawStart[compareDocumentPosition](node) & 4 ?
+            redrawStart : node;
+
+        redrawEnd =
+            // 1 if redrawEnd follows node
+            redrawEnd[compareDocumentPosition](node) & 2 ?
+            redrawEnd : node;
+    } else {
+        // creating new redraw range
+        if (node == el) {
+            // position between the nodes
+            redrawStart = el.childNodes[offset-1] || el.firstChild;
+            redrawEnd   = el.childNodes[offset]   || el.lastChild;
         } else {
-            while (startContainer.parentNode != el) {
-                startContainer = startContainer.parentNode;
-            }
-
-            startContainer = startContainer.previousSibling || 0;
+            redrawStart = node.previousSibling || el.firstChild;
+            redrawEnd   = node.nextSibling     || el.lastChild;
         }
-
-        // same with end node
-        endContainer = endContainer.childNodes[ran.endOffset-1]||endContainer;
-        if (endContainer == el) {
-            // end of selection in the very beginning
-            endContainer = el.childNodes[0];
-        }
-
-        // 0 stands for 'until the end'
-        endContainer = endContainer.nextSibling || 0;
-    
-        // replacing with the subnode preceeding the selection point
-        while (item = el[wavelight].l.shift()) {
-            // if a node was detached, it was somwhere inside
-            // current selection
-            item[0] = item[0] ? el.contains(item[0]) ? item[0] : startContainer : 0;
-            item[1] = item[1] ? el.contains(item[1]) ? item[1] : endContainer : 0;
-
-            if (added ||
-                // startContainer comes after item[1]
-                // (i.e. selection not reached)
-                (item[1] && item[1][compareDocumentPosition](startContainer) & 4)
-            ) {
-                newList.push(item);
-            } else if (item[0] &&
-                       endContainer[compareDocumentPosition](item[0]) & 4) {
-                // selection fully before the item
-                // adding both
-                newList.push([startContainer, endContainer]);
-                newList.push(item);
-                added = 1;
-            } else {
-                // intersection, merging item and selection
-                startContainer =
-                    !item[0] ?
-                     item[0] :
-                     item[0][compareDocumentPosition](startContainer) & 4 ?
-                     item[0] : startContainer;
-
-                endContainer =
-                    !item[1] ?
-                     item[1] :
-                     item[1][compareDocumentPosition](endContainer) & 4 ?
-                     endContainer : item[1];
-            }
-        }
-
-        if (!added) {
-            newList.push([startContainer, endContainer]);
-        }
-
-        el[wavelight].l = newList;
-
-    } // else selection outside of container
+    }
 },
 
 
@@ -171,16 +114,21 @@ m : function(startContainer, startOffset) {
  * Listens for the changes on the element, initiates the highlighting
  * if not started yet
  */
-c : function() {
-    // disconnecting the observer
-    el[wavelight].o.disconnect();
-
+changeListener = function(a, b) {
+    return
     var sel = window.getSelection();
     if (sel.rangeCount) {
         var ran = sel.getRangeAt(0);
-        if (el.contains(ran.startContainer) &&
+
+        if (
+            // element contains selection start and end
+            // (.contains() method works wrong at least in IE9)
+            el.contains(ran.startContainer) &&
             el.contains(ran.endContainer)
         ) {
+            // converting the selection into plain text
+            observer.disconnect();
+
             var content = ran.extractContents();
             var text = '';
             var node = content;
@@ -188,41 +136,16 @@ c : function() {
             var out = {n: node, p: pos};
 
             do {
-                text += (out = el[wavelight].r(out.n, out.p, content)).c;
+                text += (out = getChr(out.n, out.p, content)).c;
             } while (out.c);
             ran.insertNode(document.createTextNode(text));
+
+            observer.observe(el, observerOptions);
+
+            if (!highlightRunning) {
+                drawToken();
+            }
         }
-    }
-
-
-    el[wavelight].o.observe(el, observerOptions);
-
-    return;
-
-
-
-    // converting selection into plain text (selection exists upon
-    // change only when content was dragged into)
-    /*
-                    var sel = window.getSelection();
-                    if (sel.rangeCount) {
-                        var ran = sel.getRangeAt(0);
-                        var part = ran.extractContents();
-                        document.getElementById('target').appendChild(part);
-                    }
-    */
-
-
-
-    
-    
-    var highlightRunning = el[wavelight].l.length;
-
-    // updating dirty ranges
-    el[wavelight].m();
-
-    if (!highlightRunning) {
-        el[wavelight].t();
     }
 },
 
@@ -249,11 +172,13 @@ c : function() {
  *  .S - true if selection start is right before the point
  *  .E - true if selection end is right before the point
  */
-r : function(node, pos, limitEl, startNode, startPos, endNode, endPos) {
-    var chr = '', newNode, newPos;
+getChr = function(
+    node, pos, limitEl, startNode, startPos, endNode, endPos
+) {
+    var chr = '';
     var selStart = 0, selEnd = 0;
 
-    var nodeIsOver = false;
+    var nodeIsOver = 0;
 
     while (!chr) {
         selStart |= (startNode == node) && (startPos == pos);
@@ -263,13 +188,12 @@ r : function(node, pos, limitEl, startNode, startPos, endNode, endPos) {
             // text node
             if (pos < node.length) {
                 chr = node.textContent[pos];
-                newNode = node;
-                newPos = ++pos;
+                pos++;
             } else if (node == (limitEl||el)) {
                 // end of content
                 break;
             } else {
-                nodeIsOver = true;
+                nodeIsOver = 1;
             }
         } else {
             // normal node
@@ -280,31 +204,33 @@ r : function(node, pos, limitEl, startNode, startPos, endNode, endPos) {
             } else if (node == (limitEl||el)) {
                 // end of content
                 break;
-            } else if (/(br|tr)/i.test(node.nodeName)) {
-                chr = '\n';
-                newNode = node;
-                newPos = 0;
             } else {
-                nodeIsOver = true;
+                if (/(br|tr)/i.test(node.nodeName)) {
+                    chr = '\n';
+                }
+
+                nodeIsOver = 1;
             }
         }
 
         if (nodeIsOver) {
+            nodeIsOver = 0;
+            
             if (node.nextSibling) {
                 node = node.nextSibling;
                 pos = 0;
             } else {
                 // going to the end of parent node
                 node = node.parentNode;
-                pos = node.parentNode.childNodes.length;
+                pos = node.childNodes.length;
             }
         }
     }
 
     return {
         c : chr,
-        n : newNode,
-        p : newPos,
+        n : node,
+        p : pos,
         S : selStart,
         E : selEnd
     };
@@ -315,66 +241,83 @@ r : function(node, pos, limitEl, startNode, startPos, endNode, endPos) {
  * Scans the first dirty range, generates a single token and schedules
  * itself, in case there is something dirty still left
  */
-t : function() {
-//    debugger
+drawToken = function() {
+    observer.disconnect();
+
+    highlightRunning = 1;
+
+
+    observer.observe(el, observerOptions);
+
+    // TODO if finished, highlightRunning = 0
+};
+
+
+/**
+ * Resets the highlight for the whole element
+ *
+ * Stored as the element method to be accessible from outside
+ */
+el[wavelight] = function() {
+    redrawStart = redrawEnd = 0;
+    if (!highlightRunning) {
+        drawToken();
+    }
 }
 
-                    };
+el.addEventListener('paste', function(e) {
+    var sel = window.getSelection(), ran;
+    if (sel.rangeCount) {
+        ran = sel.getRangeAt(0);
+        extendRedrawRange(ran.startContainer, ran.startOffset);
+        extendRedrawRange(ran.endContainer,   ran.endOffset);
+    }
 
-                    el.addEventListener('mousedown', function(e, s) {
-                        if ((s = window.getSelection()).rangeCount) {
-                            s = s.getRangeAt(0);
-                            if (s.startNode != s.endNode ||
-                                s.startOffset != s.endOffset
-                            ) {
-                                // selection non-epmty, marking as suspicious
-                                el[wavelight].m(s.startNode, s.startOffset);
-                            }
-                        }
-                    }, 0);
+    e.preventDefault();
+    document.execCommand(
+        "insertText",
+        0,
+        e.clipboardData.getData("text/plain")
+    );
+});
 
+// subscribing to the node change event
+(observer = new MutationObserver(
+    changeListener
+)).observe(el, observerOptions);
 
-                    el.addEventListener('paste', function(e) {
-                        // marks the dirty state before pasting
-                        el[wavelight].m();
-
-                        // force pasting as a plain-text
-                        e.preventDefault();
-                        document.execCommand(
-                            "insertText",
-                            0,
-                            e.clipboardData.getData("text/plain")
-                        );
-                    }, 0);
-
-                }
-
-                highlightRunning = el[wavelight].l.length;
-
-                // resetting the list of dirty ranges
-                el[wavelight].l = [
-                    [0,0]  // means 'everything is dirty'
-                ];
-
-                if (!highlightRunning) {
-                    el[wavelight].t();
-                }  // otherwise already scheduled
-
-                // subscribing to the node change event
-                (el[wavelight].o = new MutationObserver(el[wavelight].c)).observe(el, observerOptions);
+document.addEventListener(
+    'selectionchange',
+    function() {
+    // TODO mark last selected node (for IE)
+        console.log('SELECTION');
+    }
+);
 
 
+el.addEventListener(
+    'drop',
+    function(e) {
+        e.preventDefault();
+        var text = 
+    }
+);
 
-                
-            })(el);
+
+                })(el);
+            }
+
+            // reset highlight for the element
+            el[wavelight]();
         }
+
     }
 
 
     if (_document.readyState == 'complete') {
         reset();
     } else {
-        _window.addEventListener('load', function(){reset()}, 0);
+        _window.addEventListener('load', function(){reset()});
     }
 
     exports.reset = reset;
