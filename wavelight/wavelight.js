@@ -110,41 +110,82 @@ extendRedrawRange = function(node, offset) {
 },
 
 
+// keeps drop coordinates if change caused by content drop
+dropCoord,
+
+
 /**
  * Listens for the changes on the element, initiates the highlighting
  * if not started yet
  */
 changeListener = function(a, b) {
-    return
+    console.log('change');
     var sel = window.getSelection();
+    var caret;
     if (sel.rangeCount) {
         var ran = sel.getRangeAt(0);
+        var comp;
 
         if (
             // element contains selection start and end
-            // (.contains() method works wrong at least in IE9)
-            el.contains(ran.startContainer) &&
-            el.contains(ran.endContainer)
+            // (.contains() method works wrong at least in IE11)
+            ((!(comp = ran.startContainer[compareDocumentPosition](el))) ||
+                comp & 8) &&
+            ((!(comp = ran.endContainer[compareDocumentPosition](el))) ||
+                comp & 8)
         ) {
-            // converting the selection into plain text
-            observer.disconnect();
+            if (dropCoord) {
+                // firefox does not select the dropped content
+                // moving selection to the pointer position
+                if (document.caretPositionFromPoint) {
+                    caret = document.caretPositionFromPoint(
+                        dropCoord.x, dropCoord.y
+                    );
 
-            var content = ran.extractContents();
-            var text = '';
-            var node = content;
-            var pos = 0;
-            var out = {n: node, p: pos};
+                    ran.setStart(caret.offsetNode, caret.offset);
+                    // selection end is normally somwhere
+                    // after the pasted content
+                }
+            }
+            dropCoord = 0;
 
-            do {
-                text += (out = getChr(out.n, out.p, content)).c;
-            } while (out.c);
-            ran.insertNode(document.createTextNode(text));
+            if (ran.startOffset != ran.endOffset ||
+                ran.startNode != ran.endNode
+            ) {
 
-            observer.observe(el, observerOptions);
+                // converting the selection into plain text
+                observer.disconnect();
+
+                var content = ran.extractContents();
+                var text = '';
+                var node = content;
+                var pos = 0;
+                var out = {n: node, p: pos};
+
+                do {
+                    text += (out = getChr(out.n, out.p, content)).c;
+                } while (out.c);
+                var newNode = document.createTextNode(text);
+                ran.insertNode(newNode);
+                
+                if (caret) {
+                    // FF leaves without selection
+                    // (as has it in a wrong place)
+                    ran.setStart(newNode, newNode.length);
+                    ran.setEnd(newNode, newNode.length);
+                }
+
+                sel.removeAllRanges();
+                sel.addRange(ran);
+
+                observer.observe(el, observerOptions);
+            }
 
             if (!highlightRunning) {
                 drawToken();
             }
+        } else {
+        debugger
         }
     }
 },
@@ -205,7 +246,10 @@ getChr = function(
                 // end of content
                 break;
             } else {
-                if (/(br|tr)/i.test(node.nodeName)) {
+                if (/(br|tr)/i.test(node.nodeName) &&
+                    // mozilla adds <br>'s when it wants
+                    node.getAttribute('type') != '_moz'
+                ) {
                     chr = '\n';
                 }
 
@@ -274,6 +318,8 @@ el.addEventListener('paste', function(e) {
     }
 
     e.preventDefault();
+
+    // throws IndexSizeError on FF, but works
     document.execCommand(
         "insertText",
         0,
@@ -286,20 +332,14 @@ el.addEventListener('paste', function(e) {
     changeListener
 )).observe(el, observerOptions);
 
-document.addEventListener(
-    'selectionchange',
-    function() {
-    // TODO mark last selected node (for IE)
-        console.log('SELECTION');
-    }
-);
-
 
 el.addEventListener(
     'drop',
     function(e) {
-        e.preventDefault();
-        var text = 
+        dropCoord = {
+            x : e.clientX,
+            y : e.clientY
+        };
     }
 );
 
