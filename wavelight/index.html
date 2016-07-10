@@ -27,8 +27,12 @@
   &lt;head&gt;
     &lt;title&gt;My page&lt;/title&gt;
 
- <span style="font-weight:bold;"><span style="-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;pointer-events:none; font-style:italic; overflow: hidden; position:absolute;" contenteditable=false>hello</span>hello</span>
-
+    &lt;?php 
+       // write "Hello world!" 10 times
+       for ($i = 1; $i &lt;=10; $i++) {
+           echo "Hello world!&lt;br/&gt;";
+       }
+    ?&gt;
 
     &lt;!--  some embedded js --&gt;
     &lt;script type="text/javascript"&gt;
