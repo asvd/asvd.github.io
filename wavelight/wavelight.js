@@ -99,23 +99,28 @@ extendRedrawRange = function(node, offset) {
     }
 
     if (redrawStart) {
-        // existing existing redraw range
-
         // redrawEnd can be before redrawStart, fixing
         redrawEnd =
             // 1 if redrawEnd follows redrawEnd
             redrawEnd[compareDocumentPosition](redrawStart) & 2 ?
             redrawEnd : redrawStart;
 
+        var node1 = node;
+        var node2 = node;
+        if (node == el) {
+            node1 = el.childNodes[offset-1] || el.firstChild;
+            node2 = el.childNodes[offset]   || el.lastChild;
+        }
+
         redrawStart =
             // 1 if redrawStart precedes node
-            redrawStart[compareDocumentPosition](node) & 4 ?
-            redrawStart : node;
+            redrawStart[compareDocumentPosition](node1) & 4 ?
+            redrawStart : node1;
 
         redrawEnd =
             // 1 if redrawEnd follows node
-            redrawEnd[compareDocumentPosition](node) & 2 ?
-            redrawEnd : node;
+            redrawEnd[compareDocumentPosition](node2) & 2 ?
+            redrawEnd : node2;
     } else {
         // creating new redraw range
         if (node == el) {
@@ -126,6 +131,7 @@ extendRedrawRange = function(node, offset) {
             redrawStart = redrawEnd = node;
         }
     }
+
 },
 
 
@@ -444,56 +450,7 @@ drawToken = function() {
                 (tokenIncomplete = 1)
             ))
         ) {
-            // rendering the token
-            var tokenWholeNode  = spanSample.cloneNode(0);
-            var tokenShadowNode = spanSample.cloneNode(0);
-            var tokenContentNode;
-            var tokenWrapperNode = spanSample.cloneNode(0);
-
-            if (tokenType == 1) {
-                // newline, represented with a <br/> element
-                tokenContentNode = brSample.cloneNode(0);
-            } else {
-                // normal node, inline <span> element
-                tokenContentNode = spanSample.cloneNode(0);
-                tokenContentNode.appendChild(
-                    document.createTextNode(tokenText)
-                );
-
-                tokenContentNode.setAttribute('style', [
-                    // 0: not formatted
-                    '',
-                    // 1: keywords
-                    textShadow + _0px_0px+9+pxColor + alpha * .7 + '),' +
-                                 _0px_0px+2+pxColor + alpha * .4 + brace,
-                    // 2: punctuation
-                    opacity + 6 +
-                    textShadow + _0px_0px+7+pxColor + alpha / 4 + '),' +
-                                 _0px_0px+3+pxColor + alpha / 4 + brace,
-                    // 3: strings and regexps
-                    opacity + 7 +
-                    textShadow + _3px_0px_5+pxColor + alpha / 5 + '),-' +
-                                 _3px_0px_5+pxColor + alpha / 5 + brace,
-                    // 4: comments
-                    'font-style:italic;'+
-                    opacity + 5 +
-                    textShadow + _3px_0px_5+pxColor + alpha / 4 + '),-' +
-                                 _3px_0px_5+pxColor + alpha / 4 + brace
-                ][
-                    // not formatted
-                    tokenType < 3 ? 0 :
-                    // punctuation
-                    tokenType < 5 ? 2 :
-                    // comments
-                    tokenType > 8 ? 4 :
-                    // regex and strings
-                    tokenType > 5 ? 3 :
-                    // otherwise tokenType == 5, (key)word
-                    // (1 if regexp matches, 0 otherwise)
-                    + /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|m(icrolight|odule|utable)|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/.test(tokenText)
-                ]);
-            }
-
+            // marking uncompleted token type
             var uncompletedTokenType = 0;
 
             if (tokenType == 1 && lastUncompletedTokenType) {
@@ -530,56 +487,110 @@ drawToken = function() {
             }
 
             if (highlightRunning) {
-                // removing the original content and storing it as a shadow
+                // extracting the originas contents
+                var contents;
                 sel.removeAllRanges();
                 ran = document.createRange();
                 ran.setStart(changeStartNode, changeStartPos);
                 ran.setEnd(node, pos);  // current parsing point
                 sel.addRange(ran);
-                
 
-                tokenShadowNode.appendChild(ran.extractContents());
-                tokenShadowNode.setAttribute(
-                    'style',
-                    '-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;pointer-events:none;overflow: hidden; position:absolute;'
-                );
-//                tokenShadowNode.style.backgroundColor = '#000000';
-                tokenShadowNode.wavelightShadow = 1;
+                contents = ran.extractContents();                
+
+                // rendering the token
+                var tokenWholeNode, tokenTextNode;
+
+                if (tokenType == 1) {
+                    // newline, represented with a <br/> element
+                    tokenTextNode = 
+                        tokenWholeNode = brSample.cloneNode(0);
+                } else {
+                    // normal node, inline <span> element
+                    tokenWholeNode  = spanSample.cloneNode(0);
+                    var tokenShadowNode = spanSample.cloneNode(0);
+                    var tokenWrapperNode = spanSample.cloneNode(0);
+                    var tokenContentNode = spanSample.cloneNode(0);
+                    tokenTextNode = document.createTextNode(tokenText);
+
+                    tokenContentNode.appendChild(tokenTextNode);
+
+                    tokenContentNode.setAttribute('style', [
+                        // 0: not formatted
+                        '',
+                        // 1: keywords
+                        textShadow + _0px_0px+9+pxColor + alpha * .7 + '),' +
+                                     _0px_0px+2+pxColor + alpha * .4 + brace,
+                        // 2: punctuation
+                        opacity + 6 +
+                        textShadow + _0px_0px+7+pxColor + alpha / 4 + '),' +
+                                     _0px_0px+3+pxColor + alpha / 4 + brace,
+                        // 3: strings and regexps
+                        opacity + 7 +
+                        textShadow + _3px_0px_5+pxColor + alpha / 5 + '),-' +
+                                     _3px_0px_5+pxColor + alpha / 5 + brace,
+                        // 4: comments
+                        'font-style:italic;'+
+                        opacity + 5 +
+                        textShadow + _3px_0px_5+pxColor + alpha / 4 + '),-' +
+                                     _3px_0px_5+pxColor + alpha / 4 + brace
+                    ][
+                        // not formatted
+                        tokenType < 3 ? 0 :
+                        // punctuation
+                        tokenType < 5 ? 2 :
+                        // comments
+                        tokenType > 8 ? 4 :
+                        // regex and strings
+                        tokenType > 5 ? 3 :
+                        // otherwise tokenType == 5, (key)word
+                        // (1 if regexp matches, 0 otherwise)
+                        + /^(a(bstract|lias|nd|rguments|rray|s(m|sert)?|uto)|b(ase|egin|ool(ean)?|reak|yte)|c(ase|atch|har|hecked|lass|lone|ompl|onst|ontinue)|de(bugger|cimal|clare|f(ault|er)?|init|l(egate|ete)?)|do|double|e(cho|ls?if|lse(if)?|nd|nsure|num|vent|x(cept|ec|p(licit|ort)|te(nds|nsion|rn)))|f(allthrough|alse|inal(ly)?|ixed|loat|or(each)?|riend|rom|unc(tion)?)|global|goto|guard|i(f|mp(lements|licit|ort)|n(it|clude(_once)?|line|out|stanceof|t(erface|ernal)?)?|s)|l(ambda|et|ock|ong)|m(icrolight|odule|utable)|NaN|n(amespace|ative|ext|ew|il|ot|ull)|o(bject|perator|r|ut|verride)|p(ackage|arams|rivate|rotected|rotocol|ublic)|r(aise|e(adonly|do|f|gister|peat|quire(_once)?|scue|strict|try|turn))|s(byte|ealed|elf|hort|igned|izeof|tatic|tring|truct|ubscript|uper|ynchronized|witch)|t(emplate|hen|his|hrows?|ransient|rue|ry|ype(alias|def|id|name|of))|u(n(checked|def(ined)?|ion|less|signed|til)|se|sing)|v(ar|irtual|oid|olatile)|w(char_t|hen|here|hile|ith)|xor|yield)$/.test(tokenText)
+                    ]);
 
 
-    /*
-                tokenWrapperNode.setAttribute(
-                    'style',
-                    'transition-property: opacity; transition-duration: '+delay+'s;'
-                );
-    */
+                    tokenShadowNode.appendChild(contents);
+                    tokenShadowNode.setAttribute(
+                        'style',
+                        '-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;pointer-events:none;overflow: hidden; position:absolute;'
+                    );
+
+                    // indicator
+//                    tokenShadowNode.style.textDecoration = 'line-through';
+//                  tokenShadowNode.style.backgroundColor = '#000000';
+//                    tokenShadowNode.style.textShadow =  '0px 0px 9px rgba(124, 255, 0, 0.7), 0px 0px 2px rgba(0, 255, 142, 0.6)';
 
 
-                tokenWholeNode.appendChild(tokenShadowNode);
-                tokenWrapperNode.appendChild(tokenContentNode);
-                tokenWholeNode.appendChild(tokenWrapperNode);
+                    tokenShadowNode.wavelightShadow = 1;
+
+                    tokenWholeNode.appendChild(tokenShadowNode);
+                    tokenWrapperNode.appendChild(tokenContentNode);
+                    tokenWholeNode.appendChild(tokenWrapperNode);
+                }
+
 
                 ran.insertNode(tokenWholeNode);
 
-                // setting-up the animation
-                var duration = .3;
-                setTimeout(
-                    function() {
-                        observer.disconnect();
-                        tokenShadowNode.parentNode.removeChild(tokenShadowNode);
-                        observer.observe(el, observerOptions);
-                    }, duration*1000
-                );
-                tokenWrapperNode.style.opacity = 0;
-                tokenShadowNode.style.opacity = 1;
-                tokenWholeNode.offsetHeight;            // force redraw
-                tokenWrapperNode.style.transitionProperty = 'opacity';
-                tokenWrapperNode.style.transitionDuration = duration + 's';
-                tokenShadowNode.style.transitionProperty = 'opacity';
-                tokenShadowNode.style.transitionDuration = duration + 's';
-                tokenShadowNode.style.transitionDelay = duration/4 + 's';
-                tokenWrapperNode.style.opacity = 1;
-                tokenShadowNode.style.opacity = 0;
+                if (tokenType != 1) {
+                    // setting-up the animation
+                    var duration = .3;
+                    setTimeout(
+                        function() {
+                            observer.disconnect();
+                            tokenShadowNode.parentNode.removeChild(tokenShadowNode);
+                            observer.observe(el, observerOptions);
+                        }, duration*1000
+                    );
+                    tokenWrapperNode.style.opacity = 0;
+                    tokenShadowNode.style.opacity = 1;
+                    tokenWholeNode.offsetHeight;            // force redraw
+                    tokenWrapperNode.style.transitionProperty = 'opacity';
+                    tokenWrapperNode.style.transitionDuration = duration + 's';
+                    tokenShadowNode.style.transitionProperty = 'opacity';
+                    tokenShadowNode.style.transitionDuration = duration + 's';
+                    tokenShadowNode.style.transitionDelay = duration/4 + 's';
+                    tokenWrapperNode.style.opacity = 1;
+                    tokenShadowNode.style.opacity = 0;
+                }
 
 
                 // storing token info
@@ -594,13 +605,14 @@ drawToken = function() {
                 tokenWholeNode.uncompletedTokenType = uncompletedTokenType;
 
                 // fixing selection range before restoratino
+// TODO properly set between the nodes of el
                 if (selStart >= 0) {
-                    startNode = tokenContentNode.firstChild;
+                    startNode = tokenTextNode;
                     startPos  = selStart;
                 }
 
                 if (selEnd >= 0) {
-                    endNode = tokenContentNode.firstChild;
+                    endNode = tokenTextNode;
                     endPos  = selEnd;
                 }
 
@@ -618,8 +630,6 @@ drawToken = function() {
                 redrawStart = tokenWholeNode.nextSibling;
                 setTimeout(drawToken, 0);
             } else {
-                // removing old token tail
-                redrawStart.parentNode.removeChild(redrawStart);
                 redrawStart = redrawEnd = 0;
             }
 
