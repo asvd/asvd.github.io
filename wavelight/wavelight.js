@@ -81,6 +81,9 @@ redrawEnd,
 observer,
 
 
+
+// TODO Where did I forgot to run through mutation observer events?
+                    
 /**
  * Extends the redraw range to include the given point. Just like as
  * with selection borders, the point is determined by anode and offest
@@ -97,6 +100,13 @@ extendRedrawRange = function(node, offset) {
 
     if (redrawStart) {
         // existing existing redraw range
+
+        // redrawEnd can be before redrawStart, fixing
+        redrawEnd =
+            // 1 if redrawEnd follows redrawEnd
+            redrawEnd[compareDocumentPosition](redrawStart) & 2 ?
+            redrawEnd : redrawStart;
+
         redrawStart =
             // 1 if redrawStart precedes node
             redrawStart[compareDocumentPosition](node) & 4 ?
@@ -246,6 +256,9 @@ drawToken = function() {
         ),
         pxColor = 'px rgba('+colorArr[1]+',',
         alpha = colorArr[3]||1;
+
+
+// TODO add strings with `
 
     // token types:
     //  0: anything else (not highlighted)
@@ -481,121 +494,137 @@ drawToken = function() {
                 ]);
             }
 
+            var uncompletedTokenType = 0;
+
+            if (tokenType == 1 && lastUncompletedTokenType) {
+                // newline
+                uncompletedTokenType = lastUncompletedTokenType;
+            } else if (tokenIncomplete) {
+                // normal token
+                uncompletedTokenType = tokenType;
+            }
+
+
+
             // checking if we should finish the highlight
             if (!chrData.c) {
                 highlightRunning = 0;
             } else {
-                if (
-                    (
-                     // redrawEnd was dropped
-                     el[compareDocumentPosition](redrawEnd) & 1 ||
-                     // redrawEnd passed
-                     redrawStart[compareDocumentPosition](redrawEnd) & 2
-                    ) &&
-                    // and generated token maches already existing
-                    redrawStart.nextSibling.tokenText == tokenText
+               // finding the topmost node at change position
+               var currentTokenNode = node;
+               while (currentTokenNode.parentNode != el) {
+                   currentTokenNode = currentTokenNode.parentNode;
+               }
+
+                if (el[compareDocumentPosition](redrawEnd) & 1 ||
+                    // redrawEnd passed
+                    currentTokenNode[compareDocumentPosition](redrawEnd) & 2
                 ) {
-                    highlightRunning = 0;
+                    // generated token maches already existing
+                    if (currentTokenNode.tokenText == tokenText &&
+                        currentTokenNode.uncompletedTokenType == uncompletedTokenType
+                       ) {
+                        highlightRunning = 0;
+                    }
                 }
             }
 
-            // removing the original content and storing it as a shadow
-            sel.removeAllRanges();
-            ran = document.createRange();
-            ran.setStart(changeStartNode, changeStartPos);
-            ran.setEnd(node, pos);  // current parsing point
-            sel.addRange(ran);
-            
-
-            tokenShadowNode.appendChild(ran.extractContents());
-            tokenShadowNode.setAttribute(
-                'style',
-                '-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;pointer-events:none;overflow: hidden; position:absolute;'
-            );
-//            tokenShadowNode.style.backgroundColor = '#ccbbaa';
-            tokenShadowNode.wavelightShadow = 1;
-
-
-
-/*
-            tokenWrapperNode.setAttribute(
-                'style',
-                'transition-property: opacity; transition-duration: '+delay+'s;'
-            );
-*/
-
-
-            tokenWholeNode.appendChild(tokenShadowNode);
-            tokenWrapperNode.appendChild(tokenContentNode);
-            tokenWholeNode.appendChild(tokenWrapperNode);
-
-            ran.insertNode(tokenWholeNode);
-
-            // setting-up the animation
-            var duration = .3;
-            setTimeout(
-                function() {
-                    observer.disconnect();
-                    tokenWholeNode.removeChild(tokenShadowNode);
-                    observer.observe(el, observerOptions);
-                }, duration*1000
-            );
-            tokenWrapperNode.style.opacity = 0;
-            tokenShadowNode.style.opacity = 1;
-            tokenWholeNode.offsetHeight;            // force redraw
-            tokenWrapperNode.style.transitionProperty = 'opacity';
-            tokenWrapperNode.style.transitionDuration = duration + 's';
-            tokenShadowNode.style.transitionProperty = 'opacity';
-            tokenShadowNode.style.transitionDuration = duration + 's';
-            tokenShadowNode.style.transitionDelay = duration/4 + 's';
-            tokenWrapperNode.style.opacity = 1;
-            tokenShadowNode.style.opacity = 0;
-
-
-            // storing token info
-            tokenWholeNode.tokenText = tokenText;
-
-            // skipping whitespaces and comments
-            tokenWholeNode.tokenType =
-                (tokenType > 2 && tokenType < 9) ?
-                tokenType :
-                lastTokenType;
-
-            if (tokenType == 1 && lastUncompletedTokenType) {
-                // newline
-                tokenWholeNode.uncompletedTokenType = lastUncompletedTokenType;
-            } else if (tokenIncomplete) {
-                // normal token
-                tokenWholeNode.uncompletedTokenType = tokenType;
-            }
-
-            // fixing selection range before restoratino
-            if (selStart >= 0) {
-                startNode = tokenContentNode;
-                startPos  = selStart;
-            }
-
-            if (selEnd >= 0) {
-                endNode = tokenContentNode;
-                endPos  = selEnd;
-            }
-
-            // restoring the selection
-            sel.removeAllRanges();
-            if (startNode) {
-                ran.setStart(startNode, startPos);
-                ran.setEnd(endNode, endPos);
+            if (highlightRunning) {
+                // removing the original content and storing it as a shadow
+                sel.removeAllRanges();
+                ran = document.createRange();
+                ran.setStart(changeStartNode, changeStartPos);
+                ran.setEnd(node, pos);  // current parsing point
                 sel.addRange(ran);
+                
+
+                tokenShadowNode.appendChild(ran.extractContents());
+                tokenShadowNode.setAttribute(
+                    'style',
+                    '-webkit-user-select: none;-moz-user-select: none;-ms-user-select: none;user-select: none;pointer-events:none;overflow: hidden; position:absolute;'
+                );
+//                tokenShadowNode.style.backgroundColor = '#000000';
+                tokenShadowNode.wavelightShadow = 1;
+
+
+    /*
+                tokenWrapperNode.setAttribute(
+                    'style',
+                    'transition-property: opacity; transition-duration: '+delay+'s;'
+                );
+    */
+
+
+                tokenWholeNode.appendChild(tokenShadowNode);
+                tokenWrapperNode.appendChild(tokenContentNode);
+                tokenWholeNode.appendChild(tokenWrapperNode);
+
+                ran.insertNode(tokenWholeNode);
+
+                // setting-up the animation
+                var duration = .3;
+                setTimeout(
+                    function() {
+                        observer.disconnect();
+                        tokenShadowNode.parentNode.removeChild(tokenShadowNode);
+                        observer.observe(el, observerOptions);
+                    }, duration*1000
+                );
+                tokenWrapperNode.style.opacity = 0;
+                tokenShadowNode.style.opacity = 1;
+                tokenWholeNode.offsetHeight;            // force redraw
+                tokenWrapperNode.style.transitionProperty = 'opacity';
+                tokenWrapperNode.style.transitionDuration = duration + 's';
+                tokenShadowNode.style.transitionProperty = 'opacity';
+                tokenShadowNode.style.transitionDuration = duration + 's';
+                tokenShadowNode.style.transitionDelay = duration/4 + 's';
+                tokenWrapperNode.style.opacity = 1;
+                tokenShadowNode.style.opacity = 0;
+
+
+                // storing token info
+                tokenWholeNode.tokenText = tokenText;
+
+                // skipping whitespaces and comments
+                tokenWholeNode.tokenType =
+                    (tokenType > 2 && tokenType < 9) ?
+                    tokenType :
+                    lastTokenType;
+
+                tokenWholeNode.uncompletedTokenType = uncompletedTokenType;
+
+                // fixing selection range before restoratino
+                if (selStart >= 0) {
+                    startNode = tokenContentNode.firstChild;
+                    startPos  = selStart;
+                }
+
+                if (selEnd >= 0) {
+                    endNode = tokenContentNode.firstChild;
+                    endPos  = selEnd;
+                }
+
+                // restoring the selection
+                sel.removeAllRanges();
+                if (startNode) {
+                    try {
+                    ran.setStart(startNode, startPos);
+                    } catch(e) {debugger}
+                    ran.setEnd(endNode, endPos);
+                    sel.addRange(ran);
+                }
+
+
+                redrawStart = tokenWholeNode.nextSibling;
+                setTimeout(drawToken, 0);
+            } else {
+                // removing old token tail
+                redrawStart.parentNode.removeChild(redrawStart);
+                redrawStart = redrawEnd = 0;
             }
 
             observer.observe(el, observerOptions);
 
-            if (highlightRunning) {
-                redrawStart = tokenWholeNode.nextSibling;
-                setTimeout(drawToken, 0);
-            } else {
-                redrawStart = redrawEnd = 0;
-            }
             break;
         }
         
