@@ -273,6 +273,39 @@ drawToken = function() {
         startPos  = ran.startOffset;
         endNode   = ran.endContainer;
         endPos    = ran.endOffset;
+        
+        // node count may change, moving selection inside nodes
+        if (startNode == el) {
+            if (el.firstChild) {
+                if (startPos < el.childNodes.length) {
+                    // taking the node right after the point
+                    startNode = el[startPos];
+                    startPos = 0;
+                } else {
+                    // taking the end of the last node
+                    startNode = el.lastChild;
+                    startPos =
+                        startNode.length ||
+                        startNode.childNodes.length;
+                }
+            }  // otherwise el has no children
+        }
+
+        if (endNode == el) {
+            if (el.firstChild) {
+                if (endPos < el.childNodes.length) {
+                    // taking the node right after the point
+                    endNode = el[endPos];
+                    endPos = 0;
+                } else {
+                    // taking the end of the last node
+                    endNode = el.lastChild;
+                    endPos =
+                        endNode.length ||
+                        endNode.childNodes.length;
+                }
+            }  // otherwise el has no children
+        }
     }
 
     while (1) {
@@ -332,12 +365,12 @@ drawToken = function() {
         );
 
         // noting the selection poistion
-        if (chrData.selStart) {
+        if (chrData.S) {
             // selection start right before the scanned character
             selStart = tokenText.length;
         }
 
-        if (chrData.selEnd) {
+        if (chrData.E) {
             // selection end right before the scanned character
             selEnd = tokenText.length;
         }
@@ -452,11 +485,15 @@ drawToken = function() {
             if (!chrData.c) {
                 highlightRunning = 0;
             } else {
-
-                if ( // redrawEnd passed
-                    redrawStart[compareDocumentPosition](redrawEnd) & 2 &&
+                if (
+                    (
+                     // redrawEnd was dropped
+                     el[compareDocumentPosition](redrawEnd) & 1 ||
+                     // redrawEnd passed
+                     redrawStart[compareDocumentPosition](redrawEnd) & 2
+                    ) &&
                     // and generated token maches already existing
-                    redrawStart.tokenText == tokenText
+                    redrawStart.nextSibling.tokenText == tokenText
                 ) {
                     highlightRunning = 0;
                 }
@@ -498,7 +535,9 @@ drawToken = function() {
             var duration = .3;
             setTimeout(
                 function() {
+                    observer.disconnect();
                     tokenWholeNode.removeChild(tokenShadowNode);
+                    observer.observe(el, observerOptions);
                 }, duration*1000
             );
             tokenWrapperNode.style.opacity = 0;
@@ -514,7 +553,6 @@ drawToken = function() {
 
 
             // storing token info
-// TODO store last token type skipping whitespaces
             tokenWholeNode.tokenText = tokenText;
 
             // skipping whitespaces and comments
