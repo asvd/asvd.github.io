@@ -555,7 +555,7 @@ drawToken = function() {
                     );
 
                     // indicator
-//                    tokenShadowNode.style.textDecoration = 'line-through';
+                    tokenShadowNode.style.textDecoration = 'line-through';
 //                  tokenShadowNode.style.backgroundColor = '#000000';
 //                    tokenShadowNode.style.textShadow =  '0px 0px 9px rgba(124, 255, 0, 0.7), 0px 0px 2px rgba(0, 255, 142, 0.6)';
 
@@ -619,6 +619,7 @@ drawToken = function() {
                 // restoring the selection
                 sel.removeAllRanges();
                 if (startNode) {
+// TODO fails if selection inside modified token - maybe put a marker node
                     try {
                     ran.setStart(startNode, startPos);
                     } catch(e) {debugger}
