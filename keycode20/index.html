@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>keycode20.js demo</title>
+    <link
+       href='http://fonts.googleapis.com/css?family=PT+Sans&subset=latin,cyrillic'
+       rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <script type="text/javascript" src="keycode20.js"></script>
+    <script type="text/javascript" src="application.js"></script>
+  </head>
+  <body>
+    <div class=title>
+      demo page for the <a href="https://github.com/asvd/keycode20">keycode20.js</a></div>
+
+    <div class=left>
+      <div>
+        With keycode20.js the state of the CapsLock key is disregarded
+        &mdash; it does not change the registry of typed characters
+        any longer. You can check it by switching the CapsLock on and
+        off on your keyboard, and trying to enter some text into the
+        fields below:
+      </div>
+      <input></input>
+      <br/>
+      <input type=password id=password></input>
+      <div id=password_result></div>
+      <br/>
+      <textarea></textarea>
+      <br/>
+      <div contenteditable=true class=editable_area>
+        test
+      </div>
+      <br/>
+    </div>
+
+    <div class=right>
+      <div>
+        Since the CapsLock state does not affect the input, you can
+        make use of the button in your application as a hotkey or a
+        modifier. CapsLock is located in the home row and is therefore
+        easily accessible and convenient to use. As shown below, the
+        CapsLock press and release events are still fired in the
+        normal way with the key code == 20:
+      </div>
+
+      <div id=caps_indicator class=caps_released>CapsLock</div>
+    </div>
+
+
+  </body>
+</html>
