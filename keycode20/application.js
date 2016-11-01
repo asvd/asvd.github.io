@@ -28,7 +28,65 @@ window.addEventListener('load', function() {
 
     password.addEventListener('input', update);
 
-    password.addEventListener('change', function(e) {
-        console.log('CHANGE');
-    });
+    var control = {
+        keydown : [
+            'code',
+            'charCode',
+            'ctrlKey',
+            'shiftKey',
+            'key',
+            'keyCode',
+            'which'
+        ],
+
+        keyup : [
+            'code',
+            'charCode',
+            'ctrlKey',
+            'shiftKey',
+            'key',
+            'keyCode',
+            'which'
+        ],
+
+        keypress : [
+            'code',
+            'charCode',
+            'ctrlKey',
+            'shiftKey',
+            'key',
+            'keyCode',
+            'which'
+        ],
+
+        input : [
+            'type'
+        ],
+
+        change : [
+            'type'
+        ]
+    }
+
+    var show = [
+        'keypress',
+//        'keyup'
+    ];
+
+    for (var i = 0; i < show.length; i++) {
+        var name = show[i];
+        window.addEventListener(name, function(name) {
+            return function(e) {
+                var result = name + ' FIRED:';
+                for (var i = 0; i < control[name].length; i++) {
+                    var key = control[name][i];
+                    result += '\n  ' + key + ' : ' + e[key];
+                }
+                result += '\n';
+                console.log(result);
+            }
+        }(name));
+    }
+
+
 });

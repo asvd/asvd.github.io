@@ -118,6 +118,7 @@
                 if (capslock) {
                     e.preventDefault();
                     e.stopPropagation(); 
+                    e.stopImmediatePropagation(); 
 
                     var key = e.key[shift ? 'toUpperCase' : 'toLowerCase']();
                     var code = key.charCodeAt(0);
@@ -148,10 +149,11 @@
                     });
 
                     Object.defineProperty(keypressEvent, 'charCode', {get:function(){return this.charCodeVal;}}); 
-                    Object.defineProperty(keypressEvent, 'code', {get:function(){return this.charCodeVal;}}); 
+                    Object.defineProperty(keypressEvent, 'code', {get:function(){return this.codeVal;}}); 
                     Object.defineProperty(keypressEvent, 'keyCode', {get:function(){return this.charCodeVal;}}); 
                     Object.defineProperty(keypressEvent, 'which', {get:function(){return this.charCodeVal;}}); 
                     keypressEvent.charCodeVal = code;
+                    keypressEvent.codeVal = e.code;
 
 
                     e.target.dispatchEvent(keypressEvent);
