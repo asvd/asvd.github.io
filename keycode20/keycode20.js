@@ -1,8 +1,8 @@
 /**
  * @fileoverview keycode20 - ignores capslock state
- * @version 0.0.1
+ * @version 0.0.0
  * 
- * @license MIT, see http://github.com/asvd/fuckcapslock
+ * @license MIT, see http://github.com/asvd/keycode20
  * @copyright 2015 asvd <heliosframework@gmail.com> 
  */
 
@@ -10,12 +10,10 @@
 (function (root, factory) {
     if (typeof define === 'function' && define.amd) {
         define(['exports'], factory);
-    } else if (typeof exports !== 'undefined') {
-        factory(exports);
     } else {
-        factory((root.keycode20 = {}));
+        factory();
     }
-}(this, function (exports) {
+}(this, function () {
     var printKey = function(key) {
         var sel = window.getSelection();
         if (sel.rangeCount) {
@@ -58,8 +56,8 @@
 
             var endnode = ran.endContainer;
             if (editable &&
-                // editable node contains endnode
                 (endnode == node ||
+                 // editable node contains endnode
                  endnode.compareDocumentPosition(node) & 8)
             ) {
                 // selection fully inside editable area
@@ -98,7 +96,8 @@
 
     }
 
-    var events = ['keypress'];
+// TODO handle keydown differently (keycode messes)
+    var events = ['keypress', 'keydown'];
 
     for (var i = 0; i < events.length; i++) {
         var event = events[i];

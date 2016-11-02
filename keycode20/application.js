@@ -69,7 +69,8 @@ window.addEventListener('load', function() {
     }
 
     var show = [
-        'keypress',
+//        'keypress',
+        'keydown',
 //        'keyup'
     ];
 
