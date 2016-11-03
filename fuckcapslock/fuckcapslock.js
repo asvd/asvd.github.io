@@ -1,8 +1,8 @@
 /**
- * @fileoverview keycode20 - ignores capslock state
+ * @fileoverview fuckcapslock - ignores capslock state
  * @version 0.0.0
  * 
- * @license MIT, see http://github.com/asvd/keycode20
+ * @license MIT, see http://github.com/asvd/fuckcapslock
  * @copyright 2015 asvd <heliosframework@gmail.com> 
  */
 
@@ -97,7 +97,110 @@
     }
 
 // TODO handle keydown differently (keycode messes)
-    var events = ['keypress', 'keydown'];
+    var events = [
+        'keypress',
+        'keydown',
+        'keyup'
+    ];
+
+    for (var i = 0; i < events.length; i++) {
+        var event = events[i];
+        var handler = function(name) {
+            return function(e) {
+//                if (name=='keydown')debugger
+                var shift = false;
+                if (e.shiftKey) {
+                    shift = e.shiftKey;
+                } else if (e.modifiers) {
+                    shift = !!(e.modifiers & 4);
+                }
+
+                var key = false;
+                if (e.key && e.key.length == 1) {
+                    key = e.key;
+                } else if (e.which) {
+                    key = String.fromCharCode(e.which);
+                } else if (e.keyCode) {
+                    key = String.fromCharCode(e.keyCode);
+                }
+
+                var capslock = 
+                   ((key != key.toLowerCase() && !shift) ||
+                    (key != key.toUpperCase() && shift));
+
+                if (capslock) {
+                    if (name != 'keydown') {
+                        e.preventDefault();
+                    }
+                    e.stopPropagation(); 
+                    e.stopImmediatePropagation(); 
+                    key = key[shift ? 'toUpperCase' : 'toLowerCase']();
+                    var code =
+                            name == 'keypress' ?
+                            key.charCodeAt(0) :
+                            key.toUpperCase().charCodeAt(0);
+
+
+                    var keypressEvent = new KeyboardEvent(name, {
+                        bubbles     : e.bubbles,
+                        cancelable  : e.cancelable,
+                        scoped      : e.scoped,
+                        composed    : e.composed,
+
+                        detail      : e.detail,
+                        view        : e.view,
+                        sourceCapabilites : e.sourceCapabilites,
+
+                        isTrusted : e.isTrusted,
+                        sourceCapabilites : e.sourceCapabilites,
+                        
+                        key         : key,
+                        code        : code,
+                        location    : e.location,
+                        ctrlKey     : e.ctlKey,
+                        shiftKey    : e.shiftKey,
+                        altKey      : e.altKey,
+                        metaKey     : e.metaKey,
+                        repeat      : e.repeat,
+                        isComposing : e.isComposing,
+                        charCode    : e.charCode,
+                        keyCode     : code,
+                        which       : code
+                    }); 
+
+                    if (name == 'keypress') {
+                        Object.defineProperty(keypressEvent, 'charCode', {get:function(){return this.charCodeVal;}}); 
+                    }
+
+                    Object.defineProperty(keypressEvent, 'keyCode', {get:function(){return this.charCodeVal;}}); 
+                    Object.defineProperty(keypressEvent, 'which', {get:function(){return this.charCodeVal;}}); 
+                    Object.defineProperty(keypressEvent, 'code', {get:function(){return this.codeVal;}}); 
+                    Object.defineProperty(keypressEvent, 'key', {get:function(){return this.keyVal;}}); 
+                    keypressEvent.charCodeVal = code;
+                    keypressEvent.codeVal = e.code;
+                    keypressEvent.keyVal = key;
+
+
+                    e.target.dispatchEvent(keypressEvent);
+
+                    if (name == 'keydown') {
+                        printKey(key);
+                    }
+                }
+
+
+            }
+            
+        }
+        window.addEventListener(event, handler(event), 0);
+
+    }
+
+
+/*
+
+    var events = [
+    ];
 
     for (var i = 0; i < events.length; i++) {
         var event = events[i];
@@ -110,17 +213,25 @@
                     shift = !!(e.modifiers & 4);
                 }
 
-                var capslock = e.key.length == 1 &&
-                   ((e.key != e.key.toLowerCase() && !shift) ||
-                    (e.key != e.key.toUpperCase() && shift));
+                var key = false;
+                if (e.key && e.key.length == 1) {
+                    key = e.key;
+                } else if (e.which) {
+                    key = String.fromCharCode(e.which);
+                } else if (e.keyCode) {
+                    key = String.fromCharCode(e.keyCode);
+                }
+
+                var capslock = 
+                   ((key != key.toLowerCase() && !shift) ||
+                    (key != key.toUpperCase() && shift));
 
                 if (capslock) {
-                    e.preventDefault();
+//                    e.preventDefault();
                     e.stopPropagation(); 
                     e.stopImmediatePropagation(); 
-
-                    var key = e.key[shift ? 'toUpperCase' : 'toLowerCase']();
-                    var code = key.charCodeAt(0);
+                    key = key[shift ? 'toUpperCase' : 'toLowerCase']();
+                    var code = key.toUpperCase().charCodeAt(0);
 
 
                     var keypressEvent = new KeyboardEvent(name, {
@@ -142,17 +253,18 @@
                         metaKey     : e.metaKey,
                         repeat      : e.repeat,
                         isComposing : e.isComposing,
-                        charCode    : code,
+                        charCode    : e.charCode,
                         keyCode     : code,
                         which       : code
                     });
 
-                    Object.defineProperty(keypressEvent, 'charCode', {get:function(){return this.charCodeVal;}}); 
                     Object.defineProperty(keypressEvent, 'code', {get:function(){return this.codeVal;}}); 
                     Object.defineProperty(keypressEvent, 'keyCode', {get:function(){return this.charCodeVal;}}); 
                     Object.defineProperty(keypressEvent, 'which', {get:function(){return this.charCodeVal;}}); 
+                    Object.defineProperty(keypressEvent, 'key', {get:function(){return this.keyVal;}}); 
                     keypressEvent.charCodeVal = code;
                     keypressEvent.codeVal = e.code;
+                    keypressEvent.keyVal = key;
 
 
                     e.target.dispatchEvent(keypressEvent);
@@ -165,7 +277,8 @@
             
         }
         window.addEventListener(event, handler(event), 0);
-
     }    
+*/
+
     
 }));

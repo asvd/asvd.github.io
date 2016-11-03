@@ -21,7 +21,7 @@ window.addEventListener('load', function() {
     var password_result = document.getElementById('password_result');
 
     var update = function() {
-        password_result.innerText = 'password typed: ' +password.value;
+        password_result.innerText = 'value: ' +password.value;
     };
 
     update();
@@ -70,7 +70,7 @@ window.addEventListener('load', function() {
 
     var show = [
 //        'keypress',
-        'keydown',
+//        'keydown',
 //        'keyup'
     ];
 
@@ -78,13 +78,23 @@ window.addEventListener('load', function() {
         var name = show[i];
         window.addEventListener(name, function(name) {
             return function(e) {
-                var result = name + ' FIRED:';
-                for (var i = 0; i < control[name].length; i++) {
-                    var key = control[name][i];
-                    result += '\n  ' + key + ' : ' + e[key];
+                if (e.charCode != 20 && e.which != 20) {
+                    var result = name + ' FIRED:';
+                    for (var i = 0; i < control[name].length; i++) {
+                        var key = control[name][i];
+                        result += '\n  ' + key + ' : ' + e[key];
+                    }
+                    result += '\n';
+
+                    console.log(result);
+
+                    result += '\n\n';
+
+                    result = result.replace(/\\n/g, '<br/>');
+                    var log = document.getElementById('log');
+//                    log.innerText += result;
+                    log.scrollTop = log.scrollHeight;
                 }
-                result += '\n';
-                console.log(result);
             }
         }(name));
     }
