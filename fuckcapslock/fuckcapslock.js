@@ -25,6 +25,7 @@
                 var el = null;
                 var tagname = ran.startContainer.nodeName.toLowerCase();
                 if (tagname == 'input' || tagname == 'textarea') {
+                    // in FF startContainer points to input element
                     el = ran.startContainer;
                 }
 
@@ -33,6 +34,7 @@
                     tagname = child.nodeName.toLowerCase();
                     
                     if (tagname == 'input' || tagname == 'textarea') {
+                        // in Chrome input element is the given subchild
                         el = child;
                     }
                 }
