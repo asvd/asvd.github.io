@@ -19,25 +19,35 @@
         if (sel.rangeCount) {
             var ran = sel.getRangeAt(0);
 
-            if (ran.startContainer.firstChild) {
-                var child = ran.startContainer.childNodes[ran.startOffset];
-                
-                var tagname = child.nodeName.toLowerCase();
-                var basic_input = 
-                        ran.startContainer == ran.endContainer &&
-                        ran.startOffset == ran.endOffset &&
-                        (tagname == 'input' || tagname == 'textarea');
-                if (basic_input) {
-                    var value = child.value;
-                    var selStart = child.selectionStart;
-                    var selEnd = child.selectionEnd;
-                    child.value = value.substr(0, selStart) + key + value.substr(selEnd, value.length-selEnd);
-                    child.setSelectionRange(selStart+1, selStart+1);
+            if (ran.startContainer == ran.endContainer &&
+                ran.startOffset == ran.endOffset
+            ) {
+                var el = null;
+                var tagname = ran.startContainer.nodeName.toLowerCase();
+                if (tagname == 'input' || tagname == 'textarea') {
+                    el = ran.startContainer;
+                }
+
+                if (ran.startContainer.firstChild) {
+                    var child = ran.startContainer.childNodes[ran.startOffset];
+                    tagname = child.nodeName.toLowerCase();
+                    
+                    if (tagname == 'input' || tagname == 'textarea') {
+                        el = child;
+                    }
+                }
+
+                if (el) {
+                    var value = el.value;
+                    var selStart = el.selectionStart;
+                    var selEnd = el.selectionEnd;
+                    el.value = value.substr(0, selStart) + key + value.substr(selEnd, value.length-selEnd);
+                    el.setSelectionRange(selStart+1, selStart+1);
 
                     var evt = new KeyboardEvent('input');
-                    child.dispatchEvent(evt);
+                    el.dispatchEvent(evt);
                     evt = new KeyboardEvent('change');
-                    child.dispatchEvent(evt);
+                    el.dispatchEvent(evt);
                 }
             } // otherwise element has no children
 
