@@ -21,7 +21,7 @@
         not affected any longer, and the whole page behaves as if
         CapsLock was never active.
       </div>
-      <textarea>You can try it yourself by switching the CapsLock on and off on your keyboard (if you have it, LOL), and entering some text into this textarea.</textarea>
+      <textarea>You can try it yourself by switching the CapsLock on and off on your keyboard (if you have it LOL), and entering some text into this textarea.</textarea>
 
     <div class=title>Why?</div>
 
@@ -47,13 +47,14 @@
         is disregarded. There is yet an opprotunity to handle its
         events and reuse the button as a convenient hotkey or a
         modifier. It exposes the keyboard events in the normal way and
-        can be identified by the key code 20, as reflected by this
-        indicator:
+        can be identified by the key code 20 or code 'CapsLock':
       </p>
 
 </div>
 
       <div id=caps_indicator class=caps_released>CapsLock</div>
+
+(pushing the CapsLock will be reflected by this indicator)
 
       <p>
         Besides you can inculcate your users the good manners so that
@@ -111,12 +112,18 @@
     <div class=title>What exactly does fuckcapslock.js</div>
 
     <p>
-      It tracks the state of the CapsLock, and if it is active, it
-      does the following:
+      It tracks the state of the CapsLock upon keyboard events, and if
+      the CapsLock is on, it does the following:
     <p>
 
     <ul>
 
+      <li>
+        Changing the content of the inputs, textareas and
+        content-editable divs is prevented, the library then inserts
+        the characters which would appear if the CapsLock was
+        inactive.
+      </li>
 
       <li>
         Keyboard events (keyup, keydown and keypress) are taken over,
@@ -124,19 +131,12 @@
         would be if the CapsLock was inactive;
       </li>
 
-      <li>
-        Changing the content of the inputs, textareas and
-        content-editable divs is prevented, the fuckcapslock.js
-        library then inserts the characters which would appear if
-        the CapsLock was inactive.
-      </li>
-
     </ul>
 
     <div class=title>Compatibility</div>
 
     <p>
-      Fuck CapsLock! Make use of it! Make the world a better place! <span style="text-decoration: line-through;">Make America great again!</span>
+      Fuck CapsLock! Make use of the button! Make the world a better place! <span style="text-decoration: line-through;">Make America great again!</span>
     </p>
 
 </body>

@@ -15,6 +15,9 @@
     }
 }(this, function () {
     var printKey = function(key) {
+        var basicInputEl = null;
+        var contenteditableEl = null;
+
         var sel = window.getSelection();
         if (sel.rangeCount) {
             var ran = sel.getRangeAt(0);
@@ -22,11 +25,10 @@
             if (ran.startContainer == ran.endContainer &&
                 ran.startOffset == ran.endOffset
             ) {
-                var el = null;
                 var tagname = ran.startContainer.nodeName.toLowerCase();
                 if (tagname == 'input' || tagname == 'textarea') {
                     // in FF startContainer points to input element
-                    el = ran.startContainer;
+                    basicInputEl = ran.startContainer;
                 }
 
                 if (ran.startContainer.firstChild) {
@@ -35,23 +37,10 @@
                     
                     if (tagname == 'input' || tagname == 'textarea') {
                         // in Chrome input element is the given subchild
-                        el = child;
+                        basicInputEl = child;
                     }
                 }
-
-                if (el) {
-                    var value = el.value;
-                    var selStart = el.selectionStart;
-                    var selEnd = el.selectionEnd;
-                    el.value = value.substr(0, selStart) + key + value.substr(selEnd, value.length-selEnd);
-                    el.setSelectionRange(selStart+1, selStart+1);
-
-                    var evt = new KeyboardEvent('input');
-                    el.dispatchEvent(evt);
-                    evt = new KeyboardEvent('change');
-                    el.dispatchEvent(evt);
-                }
-            } // otherwise element has no children
+            }
 
             var editable = false;
             var node = ran.startContainer;
@@ -66,11 +55,38 @@
                 node = node.parentNode;
             } while (node.parentNode);
 
+            if (editable) {
+                contenteditableEl = node;
+            }
+        } else {
+            // in FF focused inputs are sometimes not reflected in
+            // selection
+            var node = document.activeElement;
+            var tagname = node.nodeName.toLowerCase();
+            if (tagname == 'input' || tagname == 'textarea') {
+                basicInputEl = node;
+            }
+        }
+
+        if (basicInputEl) {
+            var value = basicInputEl.value;
+            var selStart = basicInputEl.selectionStart;
+            var selEnd = basicInputEl.selectionEnd;
+            basicInputEl.value = value.substr(0, selStart) + key + value.substr(selEnd, value.length-selEnd);
+            basicInputEl.setSelectionRange(selStart+1, selStart+1);
+
+            var evt = new KeyboardEvent('input');
+            basicInputEl.dispatchEvent(evt);
+            evt = new KeyboardEvent('change');
+            basicInputEl.dispatchEvent(evt);
+        }
+
+        if (contenteditableEl) {
             var endnode = ran.endContainer;
             if (editable &&
-                (endnode == node ||
+                (endnode == contenteditableEl ||
                  // editable node contains endnode
-                 endnode.compareDocumentPosition(node) & 8)
+                 endnode.compareDocumentPosition(contenteditableEl) & 8)
             ) {
                 // selection fully inside editable area
                 ran.deleteContents();
@@ -103,9 +119,6 @@
                 sel.addRange(ran);
             }
         }
-
-
-
     }
 
 // TODO handle keydown differently (keycode messes)
@@ -152,6 +165,9 @@
                             key.charCodeAt(0) :
                             key.toUpperCase().charCodeAt(0);
 
+                    // can be 0 in FF
+                    var keyCode = e.keyCode ? code : e.keyCode;
+
 
                     var keypressEvent = new KeyboardEvent(name, {
                         bubbles     : e.bubbles,
@@ -176,7 +192,7 @@
                         repeat      : e.repeat,
                         isComposing : e.isComposing,
                         charCode    : e.charCode,
-                        keyCode     : code,
+                        keyCode     : keyCode,
                         which       : code
                     }); 
 
@@ -184,13 +200,14 @@
                         Object.defineProperty(keypressEvent, 'charCode', {get:function(){return this.charCodeVal;}}); 
                     }
 
-                    Object.defineProperty(keypressEvent, 'keyCode', {get:function(){return this.charCodeVal;}}); 
+                    Object.defineProperty(keypressEvent, 'keyCode', {get:function(){return this.keyCodeVal;}}); 
                     Object.defineProperty(keypressEvent, 'which', {get:function(){return this.charCodeVal;}}); 
                     Object.defineProperty(keypressEvent, 'code', {get:function(){return this.codeVal;}}); 
                     Object.defineProperty(keypressEvent, 'key', {get:function(){return this.keyVal;}}); 
                     keypressEvent.charCodeVal = code;
                     keypressEvent.codeVal = e.code;
                     keypressEvent.keyVal = key;
+                    keypressEvent.keyCodeVal = keyCode;
 
 
                     e.target.dispatchEvent(keypressEvent);
