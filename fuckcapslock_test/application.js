@@ -28,8 +28,11 @@ window.addEventListener('load', function() {
 
     password.addEventListener('input', update);
 
+    var common = 'isComposing';
+
     var control = {
-        keydown : [
+        keypress : [
+            common,
             'code',
             'charCode',
             'ctrlKey',
@@ -40,6 +43,7 @@ window.addEventListener('load', function() {
         ],
 
         keyup : [
+            common,
             'code',
             'charCode',
             'ctrlKey',
@@ -49,7 +53,8 @@ window.addEventListener('load', function() {
             'which'
         ],
 
-        keypress : [
+        keydown : [
+            common,
             'code',
             'charCode',
             'ctrlKey',
