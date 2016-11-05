@@ -1,4 +1,4 @@
-
+ 
 window.addEventListener('keydown', function(e) {
     if (e.keyCode == 20) {
         // capslock held
