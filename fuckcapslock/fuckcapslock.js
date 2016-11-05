@@ -14,9 +14,13 @@
         factory();
     }
 }(this, function () {
+    var ifInput = function(el) {
+        var nodename = el.nodeName.toLowerCase();
+        return (nodename == 'input'||nodename == 'textarea') ? el : null;
+    }
+
     var printKey = function(key) {
         var basicInputEl = null;
-        var contenteditableEl = null;
 
         var sel = window.getSelection();
         if (sel.rangeCount) {
@@ -25,21 +29,12 @@
             if (ran.startContainer == ran.endContainer &&
                 ran.startOffset == ran.endOffset
             ) {
-                var tagname = ran.startContainer.nodeName.toLowerCase();
-                if (tagname == 'input' || tagname == 'textarea') {
-                    // in FF startContainer points to input element
-                    basicInputEl = ran.startContainer;
-                }
-
-                if (ran.startContainer.firstChild) {
-                    var child = ran.startContainer.childNodes[ran.startOffset];
-                    tagname = child.nodeName.toLowerCase();
-                    
-                    if (tagname == 'input' || tagname == 'textarea') {
-                        // in Chrome input element is the given subchild
-                        basicInputEl = child;
-                    }
-                }
+                // in Chrome input element is the given subchild
+                // in FF startContainer points to input element itself
+                basicInputEl = 
+                    ifInput(ran.startContainer) ||
+                    (ran.startContainer.firstChild ? 
+                     ifInput(ran.startContainer.childNodes[ran.startOffset]) : null);
             }
 
             var editable = false;
@@ -56,16 +51,47 @@
             } while (node.parentNode);
 
             if (editable) {
-                contenteditableEl = node;
+                var endnode = ran.endContainer;
+                if (editable &&
+                    (endnode == node ||
+                     // editable node contains endnode
+                     endnode.compareDocumentPosition(node) & 8)
+                ) {
+                    // selection fully inside editable area
+                    ran.deleteContents();
+                    node = ran.startContainer;
+                    if (node.firstChild &&
+                        ran.startOffset > 0 &&
+                        node.childNodes[ran.startOffset-1].length
+                    ) {
+                        // standing right after text node, moving into
+                        node = node.childNodes[ran.startOffset-1];
+                        ran.setStart(node, node.length);
+                        ran.setEnd(node, node.length);
+                    }
+
+                    if (node.length) {
+                        // text node, inserting inside element
+                        value = node.textContent;
+                        var point = ran.startOffset;
+                        node.textContent = value.substr(0, point) + key + value.substr(point, value.length-point);
+                        ran.setStart(node, point+1);
+                        ran.setEnd(node, point+1);
+                    } else {
+                        // between nodes, inserting textnode
+                        var textnode = document.createTextNode(key);
+                        ran.insertNode(textnode);
+                        ran.setStartAfter(textnode);
+                        ran.setEndAfter(textnode);
+                    }
+                    sel.removeAllRanges();
+                    sel.addRange(ran);
+                }
             }
         } else {
             // in FF focused inputs are sometimes not reflected in
             // selection
-            var node = document.activeElement;
-            var tagname = node.nodeName.toLowerCase();
-            if (tagname == 'input' || tagname == 'textarea') {
-                basicInputEl = node;
-            }
+            basicInputEl = ifInput(document.activeElement);
         }
 
         if (basicInputEl) {
@@ -81,47 +107,8 @@
             basicInputEl.dispatchEvent(evt);
         }
 
-        if (contenteditableEl) {
-            var endnode = ran.endContainer;
-            if (editable &&
-                (endnode == contenteditableEl ||
-                 // editable node contains endnode
-                 endnode.compareDocumentPosition(contenteditableEl) & 8)
-            ) {
-                // selection fully inside editable area
-                ran.deleteContents();
-                node = ran.startContainer;
-                if (node.firstChild &&
-                    ran.startOffset > 0 &&
-                    node.childNodes[ran.startOffset-1].length
-                ) {
-                    // standing right after text node, moving into
-                    node = node.childNodes[ran.startOffset-1];
-                    ran.setStart(node, node.length);
-                    ran.setEnd(node, node.length);
-                }
-
-                if (node.length) {
-                    // text node, inserting inside element
-                    value = node.textContent;
-                    var point = ran.startOffset;
-                    node.textContent = value.substr(0, point) + key + value.substr(point, value.length-point);
-                    ran.setStart(node, point+1);
-                    ran.setEnd(node, point+1);
-                } else {
-                    // between nodes, inserting textnode
-                    var textnode = document.createTextNode(key);
-                    ran.insertNode(textnode);
-                    ran.setStartAfter(textnode);
-                    ran.setEndAfter(textnode);
-                }
-                sel.removeAllRanges();
-                sel.addRange(ran);
-            }
-        }
     }
 
-// TODO handle keydown differently (keycode messes)
     var events = [
         'keypress',
         'keydown',
@@ -132,7 +119,6 @@
         var event = events[i];
         var handler = function(name) {
             return function(e) {
-//                if (name=='keydown')debugger
                 var shift = false;
                 if (e.shiftKey) {
                     shift = e.shiftKey;
