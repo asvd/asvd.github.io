@@ -99,6 +99,9 @@
             var selStart = basicInputEl.selectionStart;
             var selEnd = basicInputEl.selectionEnd;
             basicInputEl.value = value.substr(0, selStart) + key + value.substr(selEnd, value.length-selEnd);
+            // blur and focus will scroll to selection
+            basicInputEl.blur();
+            basicInputEl.focus();
             basicInputEl.setSelectionRange(selStart+1, selStart+1);
 
             // not for IE
@@ -146,7 +149,7 @@
                 if (capslock) {
                     if (name != 'keydown') {
                         e.preventDefault();
-                    }  // keypress fires other events
+                    }  // keydown fires other events
                     e.stopPropagation(); 
                     e.stopImmediatePropagation(); 
                     key = key[shift ? 'toUpperCase' : 'toLowerCase']();
@@ -158,9 +161,9 @@
                     // can be 0 in FF
                     var keyCode = e.keyCode ? code : e.keyCode;
 
-                    var keypressEvent;
+                    var fixedEvent;
                     try {
-                        keypressEvent = new KeyboardEvent(name, {
+                        fixedEvent = new KeyboardEvent(name, {
                             bubbles     : e.bubbles,
                             composed    : e.composed,
                             view        : e.view,
@@ -180,9 +183,9 @@
                                 modifiers.push(all[i]);
                             }
                         }
-                        keypressEvent = document.createEvent('KeyboardEvent');
+                        fixedEvent = document.createEvent('KeyboardEvent');
 
-                        keypressEvent.initKeyboardEvent(
+                        fixedEvent.initKeyboardEvent(
                             name,
                             e.bubbles,
                             e.cancelable,
@@ -196,17 +199,17 @@
                     }
 
                     if (name == 'keypress') {
-                        Object.defineProperty(keypressEvent, 'charCode', {get:function(){return this.charCodeVal;}}); 
+                        Object.defineProperty(fixedEvent, 'charCode', {get:function(){return this.charCodeVal;}}); 
                     }
-                    Object.defineProperty(keypressEvent, 'which', {get:function(){return this.charCodeVal;}}); 
-                    Object.defineProperty(keypressEvent, 'keyCode', {get:function(){return this.keyCodeVal;}}); 
-                    Object.defineProperty(keypressEvent, 'code', {get:function(){return this.codeVal;}}); 
+                    Object.defineProperty(fixedEvent, 'which', {get:function(){return this.charCodeVal;}}); 
+                    Object.defineProperty(fixedEvent, 'keyCode', {get:function(){return this.keyCodeVal;}}); 
+                    Object.defineProperty(fixedEvent, 'code', {get:function(){return this.codeVal;}}); 
 
-                    keypressEvent.keyCodeVal = keyCode;
-                    keypressEvent.charCodeVal = code;
-                    keypressEvent.codeVal = e.code;
+                    fixedEvent.keyCodeVal = keyCode;
+                    fixedEvent.charCodeVal = code;
+                    fixedEvent.codeVal = e.code;
 
-                    e.target.dispatchEvent(keypressEvent);
+                    e.target.dispatchEvent(fixedEvent);
 
                     if (name == 'keydown') {
                         printKey(key);

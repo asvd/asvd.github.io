@@ -104,6 +104,8 @@ window.addEventListener('load', function() {
         }(name));
     }
 
+
+/*
     show = [
         'keydown',
 //        'beforeinput',
@@ -125,6 +127,7 @@ window.addEventListener('load', function() {
             }
         }(name));
     }
+*/
 
 
 });
