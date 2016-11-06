@@ -104,5 +104,27 @@ window.addEventListener('load', function() {
         }(name));
     }
 
+    show = [
+        'keydown',
+//        'beforeinput',
+        'keypress',
+        'input',
+        'keyup',
+        'change'
+    ];
+
+    var el = window;
+
+//    el = document.getElementById('txt');
+
+    for (var i = 0; i < show.length; i++) {
+        var name = show[i];
+        el.addEventListener(name, function(name) {
+            return function(e) {
+                console.log(name);
+            }
+        }(name));
+    }
+
 
 });

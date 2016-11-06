@@ -101,13 +101,17 @@
             basicInputEl.value = value.substr(0, selStart) + key + value.substr(selEnd, value.length-selEnd);
             basicInputEl.setSelectionRange(selStart+1, selStart+1);
 
-            var evt = new KeyboardEvent('input');
-            basicInputEl.dispatchEvent(evt);
-            evt = new KeyboardEvent('change');
-            basicInputEl.dispatchEvent(evt);
+            // not for IE
+            try {
+                var evt = new KeyboardEvent('input');
+                basicInputEl.dispatchEvent(evt);
+                evt = new KeyboardEvent('change');
+                basicInputEl.dispatchEvent(evt);
+            } catch(e) {}
         }
 
     }
+
 
     var events = [
         'keypress',
@@ -142,7 +146,7 @@
                 if (capslock) {
                     if (name != 'keydown') {
                         e.preventDefault();
-                    }
+                    }  // keypress fires other events
                     e.stopPropagation(); 
                     e.stopImmediatePropagation(); 
                     key = key[shift ? 'toUpperCase' : 'toLowerCase']();
@@ -154,16 +158,43 @@
                     // can be 0 in FF
                     var keyCode = e.keyCode ? code : e.keyCode;
 
-                    var keypressEvent = new KeyboardEvent(name, {
-                        bubbles     : e.bubbles,
-                        composed    : e.composed,
-                        view        : e.view,
-                        key         : key,
-                        ctrlKey     : e.ctlKey,
-                        shiftKey    : e.shiftKey,
-                        altKey      : e.altKey,
-                        metaKey     : e.metaKey
-                    }); 
+                    var keypressEvent;
+                    try {
+                        keypressEvent = new KeyboardEvent(name, {
+                            bubbles     : e.bubbles,
+                            composed    : e.composed,
+                            view        : e.view,
+                            key         : key,
+                            ctrlKey     : e.ctlKey,
+                            shiftKey    : e.shiftKey,
+                            altKey      : e.altKey,
+                            metaKey     : e.metaKey
+                        }); 
+                    } catch(e) {
+                        var all = [
+                            'Ctrl', 'Shift', 'Alt', 'Meta'
+                        ];
+                        var modifiers = [];
+                        for (var i = 0; i < all.length; i++) {
+                            if (e[all[i].toLowerCase() + 'Key']) {
+                                modifiers.push(all[i]);
+                            }
+                        }
+                        keypressEvent = document.createEvent('KeyboardEvent');
+
+                        keypressEvent.initKeyboardEvent(
+                            name,
+                            e.bubbles,
+                            e.cancelable,
+                            window,
+                            key,
+                            e.location,
+                            modifiers.join(' '),
+                            e.repeat,
+                            e.locale
+                        );
+                    }
+
                     if (name == 'keypress') {
                         Object.defineProperty(keypressEvent, 'charCode', {get:function(){return this.charCodeVal;}}); 
                     }
@@ -182,10 +213,9 @@
                     }
                 }
 
-
             }
-            
         }
+
         window.addEventListener(event, handler(event), 0);
 
     }
