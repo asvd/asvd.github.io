@@ -132,7 +132,6 @@
                 } else if (e.modifiers) {
                     shift = !!(e.modifiers & 4);
                 }
-
                 var key = false;
                 if (e.key && e.key.length == 1) {
                     key = e.key;
@@ -142,11 +141,15 @@
                     key = String.fromCharCode(e.keyCode);
                 }
 
+                var isLetter = key.toLowerCase() != key.toUpperCase();
+
                 var capslock = 
+                        e.getModifierState ?
+                        e.getModifierState('CapsLock') :
                    ((key != key.toLowerCase() && !shift) ||
                     (key != key.toUpperCase() && shift));
 
-                if (capslock) {
+                if (isLetter && capslock) {
                     if (name != 'keydown') {
                         e.preventDefault();
                     }  // keydown fires other events
