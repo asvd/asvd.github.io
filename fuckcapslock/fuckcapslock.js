@@ -144,12 +144,9 @@
         var event = events[i];
         var handler = function(name) {
             return function(e) {
-                var shift = false;
-                if (e.shiftKey) {
-                    shift = e.shiftKey;
-                } else if (e.modifiers) {
-                    shift = !!(e.modifiers & 4);
-                }
+                var shift = e.shiftKey;
+                var ctrl = e.ctrlKey;
+
                 var key = false;
                 if (e.key && e.key.length == 1) {
                     key = e.key;
@@ -167,7 +164,7 @@
                    ((key != key.toLowerCase() && !shift) ||
                     (key != key.toUpperCase() && shift));
 
-                if (isLetter && capslock) {
+                if (!ctrl && isLetter && capslock) {
                     if (name != 'keydown') {
                         e.preventDefault();
                     }  // keydown fires other events
