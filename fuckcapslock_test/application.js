@@ -21,18 +21,16 @@ window.addEventListener('load', function() {
     var password_result = document.getElementById('password_result');
 
     var update = function() {
-        password_result.innerText = 'value: ' +password.value;
+        password_result.innerText = password.value;
     };
 
     update();
 
     password.addEventListener('input', update);
 
-    var common = 'isComposing';
-
     var control = {
         keypress : [
-            common,
+            'isComposing',
             'code',
             'charCode',
             'ctrlKey',
@@ -43,7 +41,7 @@ window.addEventListener('load', function() {
         ],
 
         keyup : [
-            common,
+            'isComposing',
             'code',
             'charCode',
             'ctrlKey',
@@ -54,14 +52,14 @@ window.addEventListener('load', function() {
         ],
 
         keydown : [
-            common,
+            'isComposing',
             'code',
             'charCode',
             'ctrlKey',
             'shiftKey',
             'key',
             'keyCode',
-            'which'
+            'which' 
         ],
 
         input : [
@@ -70,72 +68,32 @@ window.addEventListener('load', function() {
 
         change : [
             'type'
+        ],
+
+        blur : [
+            'type'
+        ],
+
+        focus : [
+            'type'
         ]
     }
 
-    document.getElementById('txt').addEventListener('focus', function(e) {
-        console.log('FOCUS');
-    });
 
-    document.getElementById('txt').addEventListener('blur', function(e) {
-        console.log('BULR');
-    });
-
-    var show = [
-//        'keypress',
-//        'keydown',
-//        'keyup'
-    ];
-
-    for (var i = 0; i < show.length; i++) {
-        var name = show[i];
-        window.addEventListener(name, function(name) {
-            return function(e) {
-                if (e.charCode != 20 && e.which != 20) {
-                    var result = name + ' FIRED:';
-                    for (var i = 0; i < control[name].length; i++) {
-                        var key = control[name][i];
-                        result += '\n  ' + key + ' : ' + e[key];
-                    }
-                    result += '\n';
-
-                    console.log(result);
-
-                    result += '\n\n';
-
-                    result = result.replace(/\\n/g, '<br/>');
-                    var log = document.getElementById('log');
-//                    log.innerText += result;
-                    log.scrollTop = log.scrollHeight;
-                }
-            }
-        }(name));
+    // creates an event reflector and subsribes to the event
+    var reflect = function(el, name) {
+        el.addEventListener(name, function(e) {
+        });
     }
 
 
-/*
-    show = [
-        'keydown',
-//        'beforeinput',
-        'keypress',
-        'input',
-        'keyup',
-        'change'
-    ];
-
-    var el = window;
-
-//    el = document.getElementById('txt');
-
-    for (var i = 0; i < show.length; i++) {
-        var name = show[i];
-        el.addEventListener(name, function(name) {
-            return function(e) {
-                console.log(name);
-            }
-        }(name));
+    for (var name in control) if (control.hasOwnProperty(name)) {
+        reflect(window, name);
     }
-*/
+
+    for (name in control) if (control.hasOwnProperty(name)) {
+        reflect(document.getElementById('txt'), name);
+    }
 
 
 });

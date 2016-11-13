@@ -27,12 +27,25 @@ a:hover {
 }
 
 
+.caps_container {
+    width : 300px;
+}
+
+
 .caps_held, .caps_released {
-    border : 1px solid white;
+    border : 1px solid #334455;
+    text-align : center;
+    margin-top : 10px;
+    margin-bottom : 10px;
+    margin-right : auto;
+    margin-left: auto;
+    height : 25px;
+    width : 100px;
+    padding-top : 5px;
 }
 
 .caps_held {
-    background-color : #334455;
+    background-color : #223344;
 }
 
 .caps_released {
@@ -43,3 +56,57 @@ a:hover {
     height : 200px;
     overflow:scroll;
 }
+
+.content {
+    margin-left: auto;
+    margin-right: auto;
+    width : 300px;
+}
+
+textarea {
+    width : 298px;
+    padding : 0;
+    height : 100px;
+    background-color : #112233;
+    outline: none !important;
+    border : 1px solid #334455;
+    color : #aabbcc;
+    resize : none;
+    font-family : sans;
+    text-size: 12px;
+}
+
+input {
+    margin-top : 5px;
+    width : 298px;
+    padding : 0;
+    background-color : #112233;
+    outline: none !important;
+    border : 1px solid #334455;
+    color : #aabbcc;
+    font-family : sans;
+    text-size: 12px;
+}
+
+
+#password_result {
+    height : 20px;
+    font-family : sans;
+    text-size: 12px;
+    color : #778899;
+}
+
+
+.editable_area {
+    width : 298px;
+    padding : 0;
+    height : 100px;
+    background-color : #112233;
+    outline: none !important;
+    border : 1px solid #334455;
+    color : #aabbcc;
+    resize : none;
+    font-family : sans;
+    text-size: 12px;
+}
+
