@@ -99,12 +99,30 @@
             var selStart = basicInputEl.selectionStart;
             var selEnd = basicInputEl.selectionEnd;
             basicInputEl.value = value.substr(0, selStart) + key + value.substr(selEnd, value.length-selEnd);
+
+
             // blur and focus will scroll to selection
+            // (also suppressing the respective events)
+            var suppress = function(e) {
+                e.preventDefault();
+                e.stopImmediatePropagation(); 
+                return false;
+            }
+            basicInputEl.setSelectionRange(selStart+1, selStart+1);
+
+            window.addEventListener('focus', suppress, true);
+            window.addEventListener('blur', suppress, true);
+
             basicInputEl.blur();
             basicInputEl.focus();
+
+            window.removeEventListener('focus', suppress, true);
+            window.removeEventListener('blur', suppress, true);
+
             basicInputEl.setSelectionRange(selStart+1, selStart+1);
 
             // not for IE
+            // TODO
             try {
                 var evt = new KeyboardEvent('input');
                 basicInputEl.dispatchEvent(evt);
@@ -153,7 +171,6 @@
                     if (name != 'keydown') {
                         e.preventDefault();
                     }  // keydown fires other events
-                    e.stopPropagation(); 
                     e.stopImmediatePropagation(); 
                     key = key[shift ? 'toUpperCase' : 'toLowerCase']();
                     var code =

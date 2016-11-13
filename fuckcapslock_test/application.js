@@ -73,6 +73,14 @@ window.addEventListener('load', function() {
         ]
     }
 
+    document.getElementById('txt').addEventListener('focus', function(e) {
+        console.log('FOCUS');
+    });
+
+    document.getElementById('txt').addEventListener('blur', function(e) {
+        console.log('BULR');
+    });
+
     var show = [
 //        'keypress',
 //        'keydown',
