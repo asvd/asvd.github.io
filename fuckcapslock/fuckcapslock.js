@@ -15,8 +15,12 @@
     }
 }(this, function () {
     var ifInput = function(el) {
-        var nodename = el.nodeName.toLowerCase();
-        return (nodename == 'input'||nodename == 'textarea') ? el : null;
+        var result = null;
+        if (el) {
+            var nodename = el.nodeName.toLowerCase();
+            result = (nodename == 'input'||nodename == 'textarea') ? el : null;
+        }
+        return result;
     }
 
     var printKey = function(key) {
