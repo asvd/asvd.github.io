@@ -136,7 +136,7 @@ window.addEventListener('load', function() {
                     var line = createEl('propline');
                     var propname = createSpan('propname');
                     var val = createSpan('propval');
-                    propname.innerHTML = prop + ': ';
+                    propname.innerHTML = prop + ' ';
                     val.innerHTML = e[prop] + ' <span class=oldval>' + oldval + '</span>';
                     line.appendChild(propname);
                     line.appendChild(val);
