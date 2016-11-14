@@ -244,7 +244,7 @@
             }
         }
 
-        window.addEventListener(event, handler(event), 0);
+        window.addEventListener(event, handler(event), true);
 
     }
 
