@@ -29,11 +29,11 @@ window.addEventListener('load', function() {
     password.addEventListener('input', update);
 
     var control = {
-        input : [
+        change : [
             'type'
         ],
 
-        change : [
+        input : [
             'type'
         ],
 
@@ -130,13 +130,14 @@ window.addEventListener('load', function() {
 
                 for (var i = 0; i < list.length; i++) {
                     var prop = list[i];
+                    var oldval = typeof lastvals[prop] != 'undefined' ? lastvals[prop] : ' ';
                     var changed = lastvals[prop] != e[prop];
                     lastvals[prop] = e[prop];
                     var line = createEl('propline');
                     var propname = createSpan('propname');
                     var val = createSpan('propval');
                     propname.innerHTML = prop + ': ';
-                    val.innerHTML = e[prop];
+                    val.innerHTML = e[prop] + ' <span class=oldval>' + oldval + '</span>';
                     line.appendChild(propname);
                     line.appendChild(val);
                     propstext.appendChild(line);

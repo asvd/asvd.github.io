@@ -133,7 +133,7 @@ input {
 }
 
 #window_indicators, #input_indicators {
-    width : 1000px;
+    width : 1100px;
     margin-right : auto;
     margin-left: auto;
     height : 170px;
@@ -143,9 +143,9 @@ input {
 
 .box {
     display: inline-block;
-    width : 120px;
+    width : 130px;
     height : 160px;
-    margin : 5px;
+    margin : 2px;
     border : 1px solid #223344;
 }
 
@@ -159,14 +159,14 @@ input {
 .props {
     display : table;
     text-align : left;
-    padding : 5px;
+    padding : 3px;
     overflow : hidden;
     color : #496e87;
 }
 
 
 .propcontainer {
-    width : 110px;
+    width : 125px;
     overflow : hidden;
 }
 
@@ -179,4 +179,8 @@ input {
 }
 
 .propval {
+}
+
+.oldval {
+    opacity : .4;
 }
