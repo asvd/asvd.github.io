@@ -86,6 +86,12 @@ window.addEventListener('load', function() {
         return node;
     }
 
+    var createSpan = function(cls) {
+        var node = document.createElement('span');
+        node.className = cls;
+        return node;
+    }
+
 
     // creates an event reflector and subsribes to the event
     var reflect = function(el, name) {
@@ -108,26 +114,50 @@ window.addEventListener('load', function() {
         );
         parent.appendChild(reflector);
 
+        var lastvals = {};
+
         var count = 0;
         el.addEventListener(name, function(e) {
-            count++;
-            headertext.textContent = name + ': ' + count;
+            if (e.key != 'CapsLock') {
+                count++;
+                headertext.textContent = name + ': ' + count;
 
-            var list = control[name];
+                while(propstext.firstChild) {
+                    propstext.removeChild(propstext.firstChild);
+                }
 
-            var text = '';
-            for (var i = 0; i < list.length; i++) {
-                var prop = list[i];
-                text += '<span class="propname">' + prop + '</span>: ' + e[prop] + '<br/>';
+                var list = control[name];
+
+                for (var i = 0; i < list.length; i++) {
+                    var prop = list[i];
+                    var changed = lastvals[prop] != e[prop];
+                    lastvals[prop] = e[prop];
+                    var line = createEl('propline');
+                    var propname = createSpan('propname');
+                    var val = createSpan('propval');
+                    propname.innerHTML = prop + ': ';
+                    val.innerHTML = e[prop];
+                    line.appendChild(propname);
+                    line.appendChild(val);
+                    propstext.appendChild(line);
+
+
+                    if (changed) {
+                        line.style.transition = 'color 0s';
+                        line.style.color = '#99BeE7';
+                        line.offsetHeight;
+                        line.style.transition = 'color .3s';
+                        line.style.color = '#496e87';
+                    }
+                }
+
+
+                header.style.transition = 'background-color 0s';
+                header.style.backgroundColor = '#223344';
+                header.offsetHeight;
+                header.style.transition = 'background-color .4s';
+                header.style.backgroundColor = '#112233';
             }
-            propstext.innerHTML = text;
-
-
-            header.style.transition = 'background-color 0s';
-            header.style.backgroundColor = '#334455';
-            header.offsetHeight;
-            header.style.transition = 'background-color .4s';
-            header.style.backgroundColor = '#112233';
         });
     }
 

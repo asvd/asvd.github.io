@@ -136,7 +136,7 @@ input {
     width : 1000px;
     margin-right : auto;
     margin-left: auto;
-    height : 160px;
+    height : 170px;
     text-align: center;
     margin-top : 10px;
 }
@@ -144,7 +144,7 @@ input {
 .box {
     display: inline-block;
     width : 120px;
-    height : 150px;
+    height : 160px;
     margin : 5px;
     border : 1px solid #223344;
 }
@@ -163,6 +163,13 @@ input {
     color : #496e87;
 }
 
+
+.propline {
+}
+
 .propname {
     font-weight : bold;
+}
+
+.propval {
 }
