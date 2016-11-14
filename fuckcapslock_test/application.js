@@ -29,6 +29,14 @@ window.addEventListener('load', function() {
     password.addEventListener('input', update);
 
     var control = {
+        input : [
+            'type'
+        ],
+
+        change : [
+            'type'
+        ],
+
         keypress : [
             'type',
             'code',
@@ -62,19 +70,11 @@ window.addEventListener('load', function() {
             'which' 
         ],
 
-        input : [
-            'type'
-        ],
-
-        change : [
+        focus : [
             'type'
         ],
 
         blur : [
-            'type'
-        ],
-
-        focus : [
             'type'
         ]
     }
@@ -102,7 +102,7 @@ window.addEventListener('load', function() {
         reflector.appendChild(header);
 
         var props = createEl('props');
-        var propstext = createEl('');
+        var propstext = createEl('propcontainer');
         props.appendChild(propstext);
         reflector.appendChild(props);
 

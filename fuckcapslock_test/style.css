@@ -152,19 +152,26 @@ input {
 .boxheader {
     height : 20px;
     background-color :  #112233;
-    color : #b6d6f6;
+    color : #7394b5;
+    padding-top : 2px;
 }
 
 .props {
     display : table;
     text-align : left;
-    padding : 3px;
+    padding : 5px;
     overflow : hidden;
     color : #496e87;
 }
 
 
+.propcontainer {
+    width : 110px;
+    overflow : hidden;
+}
+
 .propline {
+    white-space: nowrap;
 }
 
 .propname {
