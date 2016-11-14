@@ -121,6 +121,13 @@ window.addEventListener('load', function() {
                 text += '<span class="propname">' + prop + '</span>: ' + e[prop] + '<br/>';
             }
             propstext.innerHTML = text;
+
+
+            header.style.transition = 'background-color 0s';
+            header.style.backgroundColor = '#334455';
+            header.offsetHeight;
+            header.style.transition = 'background-color .4s';
+            header.style.backgroundColor = '#112233';
         });
     }
 
