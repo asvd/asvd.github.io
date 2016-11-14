@@ -128,9 +128,13 @@
             // not for IE
             // TODO
             try {
-                var evt = new KeyboardEvent('input');
+                var evt = new KeyboardEvent('input', {
+                    bubbles : true
+                });
                 basicInputEl.dispatchEvent(evt);
-                evt = new KeyboardEvent('change');
+                evt = new KeyboardEvent('change', {
+                    bubbles : true
+                });
                 basicInputEl.dispatchEvent(evt);
             } catch(e) {}
         }
