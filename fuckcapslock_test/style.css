@@ -6,6 +6,18 @@ body {
     cursor : default;
 }
 
+
+::selection {
+  background: #86a5c4;
+}
+
+::-moz-selection {
+  background: #86a5c4;
+}
+
+
+
+
 .title {
     padding-top : 30px;
     font-size: 26px;
@@ -23,7 +35,8 @@ a:hover {
 }
 
 .editable_area {
-    border : 1px solid #aabbcc;
+    border : 1px solid #86a5c4;
+    margin-bottom : 10px;
 }
 
 
@@ -41,11 +54,16 @@ a:hover {
     margin-left: auto;
     height : 25px;
     width : 100px;
-    padding-top : 5px;
+    padding-top : 6px;
+    border-radius : 2px;
+    color : #86a5c4;
 }
 
 .caps_held {
     background-color : #223344;
+    text-shadow : 0px 0px 3px rgba(183, 219, 255, 0.61);
+    color : #b6d6f6;
+    border-color : #5d7791;
 }
 
 .caps_released {
@@ -70,20 +88,20 @@ textarea {
     background-color : #112233;
     outline: none !important;
     border : 1px solid #334455;
-    color : #aabbcc;
+    color : #86a5c4;
     resize : none;
     font-family : sans;
     text-size: 12px;
 }
 
 input {
-    margin-top : 5px;
+    margin-top : 10px;
     width : 298px;
     padding : 0;
     background-color : #112233;
     outline: none !important;
     border : 1px solid #334455;
-    color : #aabbcc;
+    color : #86a5c4;
     font-family : sans;
     text-size: 12px;
 }
@@ -92,8 +110,11 @@ input {
 #password_result {
     height : 20px;
     font-family : sans;
-    text-size: 12px;
-    color : #778899;
+    font-size: 12px;
+    color : #86a5c4;
+    padding-top : 3px;
+    overflow : hidden;
+    white-space: nowrap;
 }
 
 
@@ -104,9 +125,44 @@ input {
     background-color : #112233;
     outline: none !important;
     border : 1px solid #334455;
-    color : #aabbcc;
+    color : #86a5c4;
     resize : none;
     font-family : sans;
     text-size: 12px;
+    overflow : auto;
 }
 
+#window_indicators, #input_indicators {
+    width : 1000px;
+    margin-right : auto;
+    margin-left: auto;
+    height : 160px;
+    text-align: center;
+    margin-top : 10px;
+}
+
+.box {
+    display: inline-block;
+    width : 120px;
+    height : 150px;
+    margin : 5px;
+    border : 1px solid #223344;
+}
+
+.boxheader {
+    height : 20px;
+    background-color :  #112233;
+    color : #b6d6f6;
+}
+
+.props {
+    display : table;
+    text-align : left;
+    padding : 3px;
+    overflow : hidden;
+    color : #496e87;
+}
+
+.propname {
+    font-weight : bold;
+}
