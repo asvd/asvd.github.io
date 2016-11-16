@@ -150,11 +150,11 @@
 
     var preventDefaultOriginal = Event.prototype.preventDefault;
 
-    var keydownPreventingDefault = false;
+    var preventingDefault = false;
     var keydownDefaultPrevented = false;
 
     Event.prototype.preventDefault = function() {
-        if (keydownPreventingDefault) {
+        if (preventingDefault) {
             keydownDefaultPrevented = true;
         }
         preventDefaultOriginal.apply(this, arguments);
@@ -250,26 +250,27 @@
                     fixedEvent.keyIdentifierVal = e.keyIdentifier;
 
                     // keydown default action is printing the
-                    // character, but the particular letter to be
-                    // typed can only be recognized by keypress:
-                    // therefore we suppress typing if default was
+                    // character and emitting the keypress, but the
+                    // particular character to be typed can only be
+                    // recognized on keypress - therefore typing and
+                    // keypress are suppressed if default action was
                     // prevented for keydown
                     if (name == 'keydown') {
-                        keydownPreventingDefault = true;
+                        preventingDefault = true;
                     }
 
                     if (name == 'keypress') {
-                        if (keydownDefaultPrevented) {
-                            keydownDefaultPrevented = false;
-                        } else {
+                        if (!keydownDefaultPrevented) {
                             printKey(key);
                             e.target.dispatchEvent(fixedEvent);
                         }
+
+                        keydownDefaultPrevented = false;
                     } else {
                         e.target.dispatchEvent(fixedEvent);
                     }
 
-                    keydownPreventingDefault = false;
+                    preventingDefault = false;
                 }
 
             }
