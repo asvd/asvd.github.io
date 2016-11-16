@@ -18,7 +18,14 @@ window.addEventListener('keyup', function(e) {
 window.addEventListener('load', function() {
     // prevent keydown if it is the key T
     document.getElementById('txt').addEventListener('keydown', function(e) {
-        if (e.keyCode == 84) {
+        if (e.keyCode == 84) { // T
+            e.preventDefault();
+        }
+    }, true);
+
+    // prevent keypress if it is the key R
+    document.getElementById('txt').addEventListener('keypress', function(e) {
+        if (e.keyCode == 114) { // R
             e.preventDefault();
         }
     }, true);
