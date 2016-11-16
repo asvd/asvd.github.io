@@ -1,4 +1,3 @@
- 
 window.addEventListener('keydown', function(e) {
     if (e.keyCode == 20) {
         // capslock held
@@ -17,6 +16,13 @@ window.addEventListener('keyup', function(e) {
 
 
 window.addEventListener('load', function() {
+    // prevent keydown if it is the key T
+    document.getElementById('txt').addEventListener('keydown', function(e) {
+        if (e.keyCode == 84) {
+            e.preventDefault();
+        }
+    }, true);
+
     var password = document.getElementById('password');
     var password_result = document.getElementById('password_result');
 
@@ -43,6 +49,7 @@ window.addEventListener('load', function() {
             'charCode',
             'ctrlKey',
             'shiftKey',
+            'keyIdentifier',
             'key',
             'keyCode',
             'which'
@@ -54,6 +61,7 @@ window.addEventListener('load', function() {
             'charCode',
             'ctrlKey',
             'shiftKey',
+            'keyIdentifier',
             'key',
             'keyCode',
             'which'
@@ -65,6 +73,7 @@ window.addEventListener('load', function() {
             'charCode',
             'ctrlKey',
             'shiftKey',
+            'keyIdentifier',
             'key',
             'keyCode',
             'which' 
@@ -118,7 +127,7 @@ window.addEventListener('load', function() {
 
         var count = 0;
         el.addEventListener(name, function(e) {
-            if (e.key != 'CapsLock') {
+            if (e.code != 'CapsLock') {
                 count++;
                 headertext.textContent = name + ': ' + count;
 
@@ -170,6 +179,7 @@ window.addEventListener('load', function() {
     for (name in control) if (control.hasOwnProperty(name)) {
         reflect(document.getElementById('txt'), name);
     }
+
 
 
 });

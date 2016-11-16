@@ -148,6 +148,18 @@
         'keyup'
     ];
 
+    var preventDefaultOriginal = Event.prototype.preventDefault;
+
+    var keydownPreventingDefault = false;
+    var keydownDefaultPrevented = false;
+
+    Event.prototype.preventDefault = function() {
+        if (keydownPreventingDefault) {
+            keydownDefaultPrevented = true;
+        }
+        preventDefaultOriginal.apply(this, arguments);
+    }
+
     for (var i = 0; i < events.length; i++) {
         var event = events[i];
         var handler = function(name) {
@@ -158,9 +170,9 @@
                 var key = false;
                 if (e.key && e.key.length == 1) {
                     key = e.key;
-                } else if (e.which) {
+                } else if (typeof e.which != 'undefined') {
                     key = String.fromCharCode(e.which);
-                } else if (e.keyCode) {
+                } else if (typeof e.keyCode != 'undefined') {
                     key = String.fromCharCode(e.keyCode);
                 }
 
@@ -230,24 +242,43 @@
                     Object.defineProperty(fixedEvent, 'keyCode', {get:function(){return this.keyCodeVal;}}); 
                     Object.defineProperty(fixedEvent, 'code', {get:function(){return this.codeVal;}}); 
 
+                    Object.defineProperty(fixedEvent, 'keyIdentifier', {get:function(){return this.keyIdentifierVal;}}); 
+
                     fixedEvent.keyCodeVal = keyCode;
                     fixedEvent.charCodeVal = code;
                     fixedEvent.codeVal = e.code;
+                    fixedEvent.keyIdentifierVal = e.keyIdentifier;
 
-                    e.target.dispatchEvent(fixedEvent);
-
+                    // keydown default action is printing the
+                    // character, but the particular letter to be
+                    // typed can only be recognized by keypress:
+                    // therefore we suppress typing if default was
+                    // prevented for keydown
                     if (name == 'keydown') {
-                        printKey(key);
+                        keydownPreventingDefault = true;
                     }
+
+                    if (name == 'keypress') {
+                        if (keydownDefaultPrevented) {
+                            keydownDefaultPrevented = false;
+                        } else {
+                            printKey(key);
+                            e.target.dispatchEvent(fixedEvent);
+                        }
+                    } else {
+                        e.target.dispatchEvent(fixedEvent);
+                    }
+
+                    keydownPreventingDefault = false;
                 }
 
             }
         }
 
         window.addEventListener(event, handler(event), true);
-
     }
 
 
     
 }));
+
