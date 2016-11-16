@@ -234,20 +234,21 @@
                             e.locale
                         );
                     }
+ 
+ // TODO fix uppercase cyrillic && lower case when suppressed
+                    
+                    var codeVal = e.code;
+                    var keyIdentifier = e.keyIdentifier;
 
                     if (name == 'keypress') {
-                        Object.defineProperty(fixedEvent, 'charCode', {get:function(){return this.charCodeVal;}}); 
+                        Object.defineProperty(fixedEvent, 'charCode', {get:function(){return code;}}); 
                     }
-                    Object.defineProperty(fixedEvent, 'which', {get:function(){return this.charCodeVal;}}); 
-                    Object.defineProperty(fixedEvent, 'keyCode', {get:function(){return this.keyCodeVal;}}); 
-                    Object.defineProperty(fixedEvent, 'code', {get:function(){return this.codeVal;}}); 
+                    Object.defineProperty(fixedEvent, 'which', {get:function(){return code;}}); 
+                    Object.defineProperty(fixedEvent, 'keyCode', {get:function(){return keyCode;}}); 
+                    Object.defineProperty(fixedEvent, 'code', {get:function(){return codeVal;}});
 
-                    Object.defineProperty(fixedEvent, 'keyIdentifier', {get:function(){return this.keyIdentifierVal;}}); 
+                    Object.defineProperty(fixedEvent, 'keyIdentifier', {get:function(){return keyIdentifier;}}); 
 
-                    fixedEvent.keyCodeVal = keyCode;
-                    fixedEvent.charCodeVal = code;
-                    fixedEvent.codeVal = e.code;
-                    fixedEvent.keyIdentifierVal = e.keyIdentifier;
 
                     // keydown default action is printing the
                     // character and emitting the keypress, but the
