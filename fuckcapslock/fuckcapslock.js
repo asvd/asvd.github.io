@@ -142,23 +142,27 @@
     }
 
 
+    // redefining preventDefault to recognize if it was called for
+    // artificially emitted events
+    var preventingDefault = false;
+    var defaultPrevented = false;
+    var preventDefaultOriginal = Event.prototype.preventDefault;
+    Event.prototype.preventDefault = function() {
+        if (preventingDefault) {
+            defaultPrevented = true;
+        }
+
+        preventDefaultOriginal.apply(this, arguments);
+    }
+
+
     var events = [
         'keypress',
         'keydown',
         'keyup'
     ];
 
-    var preventDefaultOriginal = Event.prototype.preventDefault;
 
-    var preventingDefault = false;
-    var keydownDefaultPrevented = false;
-
-    Event.prototype.preventDefault = function() {
-        if (preventingDefault) {
-            keydownDefaultPrevented = true;
-        }
-        preventDefaultOriginal.apply(this, arguments);
-    }
 
     for (var i = 0; i < events.length; i++) {
         var event = events[i];
@@ -185,10 +189,6 @@
                     (key != key.toUpperCase() && shift));
 
                 if (!ctrl && isLetter && capslock) {
-                    if (name != 'keydown') {
-                        e.preventDefault();
-                    }  // keydown fires other events
-                    e.stopImmediatePropagation(); 
                     key = key[shift ? 'toUpperCase' : 'toLowerCase']();
                     var code =
                             name == 'keypress' ?
@@ -249,31 +249,28 @@
 
                     Object.defineProperty(fixedEvent, 'keyIdentifier', {get:function(){return keyIdentifier;}}); 
 
-
-                    // keydown default action is printing the
-                    // character and emitting the keypress, but the
-                    // particular character to be typed can only be
-                    // recognized on keypress - therefore typing and
-                    // keypress are suppressed if default action was
-                    // prevented for keydown
-                    if (name == 'keydown') {
-                        preventingDefault = true;
-                    }
-
-                    if (name == 'keypress') {
-                        if (!keydownDefaultPrevented) {
-                            printKey(key);
-                            e.target.dispatchEvent(fixedEvent);
-                        }
-
-                        keydownDefaultPrevented = false;
-                    } else {
-                        e.target.dispatchEvent(fixedEvent);
-                    }
-
+                    preventingDefault = true;
+                    e.target.dispatchEvent(fixedEvent);
                     preventingDefault = false;
-                }
 
+                    if (name == 'keydown') {
+                        if (defaultPrevented) {
+                            e.preventDefault();
+                        }  // default emits the keypress
+                    } else {
+                        e.preventDefault();
+                        if (name == 'keypress') {
+                            if (!defaultPrevented) {
+                                // default prints the character
+                                printKey(key);
+                            }
+                        }
+                    }
+
+                    defaultPrevented = false;
+
+                    e.stopImmediatePropagation(); 
+                }
             }
         }
 
