@@ -162,7 +162,7 @@ input {
     display : block;
     width : 150px;
     height : 158px;
-    overflow : auto;
+    overflow : hidden;
 }
 
 
