@@ -23,7 +23,9 @@
         return result;
     }
 
-    var printChr = function(chr) {
+
+    // prints the given character in currently edited element
+    var putChr = function(chr) {
         var basicInputEl = null;
 
         var sel = window.getSelection();
@@ -251,7 +253,7 @@
                         );
                     }
 
-
+                    // defining getters for the event properties
                     for (var cfgKey in cfg) if (cfg.hasOwnProperty(cfgKey)) {
                         var cfgVal = cfg[cfgKey];
                         Object.defineProperty(
@@ -265,6 +267,7 @@
                         );
                     }
 
+                    // emitting the event and tracking preventDefault
                     preventingDefault = true;
                     defaultPrevented = false;
                     e.target.dispatchEvent(fixedEvent);
@@ -279,7 +282,7 @@
                         if (name == 'keypress') {
                             if (!defaultPrevented && !ctrl) {
                                 // default prints the character
-                                printChr(chr);
+                                putChr(chr);
                             }
                         }
                     }
