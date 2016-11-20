@@ -117,6 +117,7 @@
             window.addEventListener('focus', suppress, true);
             window.addEventListener('blur', suppress, true);
 
+// TODO blur hides the caret in FF and does not restore it on focus
             basicInputEl.blur();
             basicInputEl.focus();
 
@@ -191,7 +192,7 @@
                     (chr != chr.toUpperCase() && shift));
 
 // TODO ctrl+capital letter event can be different
-                if (!ctrl && isLetter && capslock) {
+                if (isLetter && capslock) {
                     chr = chr[shift ? 'toUpperCase' : 'toLowerCase']();
                     var chrcode = chr.charCodeAt(0);
 
@@ -215,7 +216,10 @@
                     if (name == 'keypress') {
                         cfg.charCode  = chrcode;
                         cfg.which     = chrcode;
-                        cfg.keyCode   = chrcode;
+                        // can be 0 in FF, and should be kept
+                        if (e.keyCode != 0) {
+                            cfg.keyCode   = chrcode;
+                        }
                     }
 
                     // creating the event
@@ -249,9 +253,6 @@
                     }
 
 
- // TODO fix uppercase cyrillic && lower case when suppressed
-
-
                     for (var cfgKey in cfg) if (cfg.hasOwnProperty(cfgKey)) {
                         var cfgVal = cfg[cfgKey];
                         Object.defineProperty(
@@ -276,7 +277,7 @@
                     } else {
                         e.preventDefault();
                         if (name == 'keypress') {
-                            if (!defaultPrevented) {
+                            if (!defaultPrevented && !ctrl) {
                                 // default prints the character
                                 printChr(chr);
                             }
