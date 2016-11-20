@@ -106,27 +106,31 @@
             var selEnd = basicInputEl.selectionEnd;
             basicInputEl.value = value.substr(0, selStart) + chr + value.substr(selEnd, value.length-selEnd);
 
+            basicInputEl.setSelectionRange(selStart+1, selStart+1);
 
             // blur and focus will scroll to selection
             // (also suppressing the respective events)
-            var suppress = function(e) {
-                e.preventDefault();
-                e.stopImmediatePropagation(); 
-                return false;
+
+            // check if we are not in FF where this trick is not
+            // needed and leads to caret disappear
+            if (typeof InstallTrigger == 'undefined') {
+                var suppress = function(e) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation(); 
+                    return false;
+                }
+
+                window.addEventListener('focus', suppress, true);
+                window.removeEventListener('blur', suppress, true);
+
+                basicInputEl.blur();
+                basicInputEl.focus();
+
+                window.removeEventListener('focus', suppress, true);
+                window.removeEventListener('blur', suppress, true);
+
+                basicInputEl.setSelectionRange(selStart+1, selStart+1);
             }
-            basicInputEl.setSelectionRange(selStart+1, selStart+1);
-
-            window.addEventListener('focus', suppress, true);
-            window.addEventListener('blur', suppress, true);
-
-// TODO blur hides the caret in FF and does not restore it on focus
-            basicInputEl.blur();
-            basicInputEl.focus();
-
-            window.removeEventListener('focus', suppress, true);
-            window.removeEventListener('blur', suppress, true);
-
-            basicInputEl.setSelectionRange(selStart+1, selStart+1);
 
             // not for IE
             // TODO
