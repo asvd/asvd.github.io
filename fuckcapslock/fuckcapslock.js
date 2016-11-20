@@ -132,6 +132,8 @@
                     bubbles : true
                 });
                 basicInputEl.dispatchEvent(evt);
+
+ // TODO fire on blur if flag was triggered at this point
                 evt = new KeyboardEvent('change', {
                     bubbles : true
                 });
@@ -205,7 +207,6 @@
 
                         key           : chr,
                         code          : e.code,
-                        keyIdentifier : e.keyIdentifier,
                         charCode      : e.charCode,
                         which         : e.which,
                         keyCode       : e.keyCode
@@ -231,6 +232,7 @@
                                 modifiers.push(all[i]);
                             }
                         }
+
                         fixedEvent = document.createEvent('KeyboardEvent');
 
                         fixedEvent.initKeyboardEvent(
