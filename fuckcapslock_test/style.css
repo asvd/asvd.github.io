@@ -141,6 +141,28 @@ input {
     margin-top : 10px;
 }
 
+.basicBox {
+    display: inline-block;
+    width : 150px;
+    height : 180px;
+    margin : 2px;
+}
+
+.basicHolder {
+    display : inline-table;
+}
+
+
+.basicReflector {
+    width : 150px;
+    height : 20px;
+    background-color :  #112233;
+    color : #7394b5;
+    padding-top : 2px;
+    margin-bottom : 2px;
+    border : 1px solid #223344;
+}
+
 .box {
     display: inline-block;
     width : 150px;

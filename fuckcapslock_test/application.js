@@ -43,14 +43,6 @@ window.addEventListener('load', function() {
     password.addEventListener('input', update);
 
     var control = {
-        change : [
-            'type'
-        ],
-
-        input : [
-            'type'
-        ],
-
         keypress : [
             'type',
             'code',
@@ -82,16 +74,16 @@ window.addEventListener('load', function() {
             'charCode',
             'which',
             'keyCode'
-        ],
-
-        focus : [
-            'type'
-        ],
-
-        blur : [
-            'type'
         ]
     }
+
+
+    var basicEvents = [
+        'change',
+        'input',
+        'focus',
+        'blur'
+    ];
 
 
     var createEl = function(cls) {
@@ -105,6 +97,55 @@ window.addEventListener('load', function() {
         node.className = cls;
         return node;
     }
+
+
+
+    // reflecting basic events
+    var basicInputContainer = createEl('basicBox');
+    document.getElementById('input_indicators').appendChild(basicInputContainer);
+    var basicInputHolder = createEl('basicHolder');
+    basicInputContainer.appendChild(basicInputHolder);
+
+    
+    var basicWindowContainer = createEl('basicBox');
+    document.getElementById('window_indicators').appendChild(basicWindowContainer);
+    var basicWindowHolder = createEl('basicHolder');
+    basicWindowContainer.appendChild(basicWindowHolder);
+
+
+
+    var reflectBasic = function(el, name) {
+        var container = el == window ?
+            basicWindowHolder :
+            basicInputHolder;
+
+        var reflector = createEl('basicReflector');
+
+        var text = document.createTextNode(name + ': 0');
+        reflector.appendChild(text);
+        container.appendChild(reflector);
+
+        var count = 0;
+        el.addEventListener(name, function(e) {
+            count++;
+            text.textContent = name + ': ' + count;
+
+            reflector.style.transition = 'background-color 0s';
+            reflector.style.backgroundColor = '#223344';
+            reflector.offsetHeight;
+            reflector.style.transition = 'background-color .4s';
+            reflector.style.backgroundColor = '#112233';
+        });
+        
+    }
+
+    for (var i = 0; i < basicEvents.length; i++) {
+        name = basicEvents[i];
+        reflectBasic(window, name);
+        reflectBasic(document.getElementById('txt'), name);
+    }
+
+    
 
 
     // creates an event reflector and subsribes to the event
@@ -184,7 +225,5 @@ window.addEventListener('load', function() {
     for (name in control) if (control.hasOwnProperty(name)) {
         reflect(document.getElementById('txt'), name);
     }
-
-
 
 });
