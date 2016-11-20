@@ -190,14 +190,11 @@
 
                 if (!ctrl && isLetter && capslock) {
                     key = key[shift ? 'toUpperCase' : 'toLowerCase']();
-                    var code =
-                            name == 'keypress' ?
-                            key.charCodeAt(0) :
-                            key.toUpperCase().charCodeAt(0);
+                    var code = (name == 'keypress' ? key : key.toUpperCase()).charCodeAt(0);
 
                     // can be 0 in FF
                     var keyCode = e.keyCode ? code : e.keyCode;
-
+ 
                     var fixedEvent;
                     try {
                         fixedEvent = new KeyboardEvent(name, {
@@ -244,7 +241,7 @@
                         Object.defineProperty(fixedEvent, 'charCode', {get:function(){return code;}}); 
                     }
                     Object.defineProperty(fixedEvent, 'which', {get:function(){return code;}}); 
-                    Object.defineProperty(fixedEvent, 'keyCode', {get:function(){return keyCode;}}); 
+                    Object.defineProperty(fixedEvent, 'keyCode', {get:function(){return code;}}); 
                     Object.defineProperty(fixedEvent, 'code', {get:function(){return codeVal;}});
 
                     Object.defineProperty(fixedEvent, 'keyIdentifier', {get:function(){return keyIdentifier;}}); 
