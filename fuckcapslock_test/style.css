@@ -158,16 +158,23 @@ input {
     height : 180px;
 }
 
+.logHolder1 {
+    display : table;
+    width : 144px;
+    height : 154px;
+    padding : 3px;
+}
+
 .logHolder2 {
     display : block;
-    width : 150px;
-    height : 158px;
+    width : 144px;
+    height : 152px;
     overflow : hidden;
 }
 
 
 .basicReflector {
-    width : 150px;
+    width : 144px;
     height : 20px;
     background-color :  #112233;
     color : #7394b5;
@@ -190,6 +197,13 @@ input {
     background-color :  #112233;
     color : #7394b5;
     padding-top : 2px;
+}
+
+.boxheader_event {
+    height : 20px;
+    background-color :  #112233;
+    padding-top : 2px;
+    color : #99BEE7;
 }
 
 .props {
