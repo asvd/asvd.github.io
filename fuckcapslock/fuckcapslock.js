@@ -121,7 +121,7 @@
                 }
 
                 window.addEventListener('focus', suppress, true);
-                window.removeEventListener('blur', suppress, true);
+                window.addEventListener('blur', suppress, true);
 
                 basicInputEl.blur();
                 basicInputEl.focus();
