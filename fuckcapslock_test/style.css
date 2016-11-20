@@ -152,6 +152,19 @@ input {
     display : inline-table;
 }
 
+.logHolder {
+    display : table;
+    width : 150px;
+    height : 180px;
+}
+
+.logHolder2 {
+    display : block;
+    width : 150px;
+    height : 158px;
+    overflow : auto;
+}
+
 
 .basicReflector {
     width : 150px;
@@ -195,6 +208,11 @@ input {
 
 .propline {
     white-space: nowrap;
+}
+
+.logline {
+    white-space: nowrap;
+    text-align : left;
 }
 
 .propname {

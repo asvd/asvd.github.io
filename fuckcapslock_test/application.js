@@ -226,4 +226,71 @@ window.addEventListener('load', function() {
         reflect(document.getElementById('txt'), name);
     }
 
+
+    // reflecting events logs
+    var logInputContainer = createEl('box');
+    document.getElementById('input_indicators').appendChild(logInputContainer);
+    var header = createEl('boxheader');
+    var headertext = document.createTextNode('log');
+    header.appendChild(headertext);
+    logInputContainer.appendChild(header);
+
+    
+    var logInputHolder = createEl('logHolder');
+    logInputContainer.appendChild(logInputHolder);
+
+    var logInputHolder2 = createEl('logHolder2');
+    logInputHolder.appendChild(logInputHolder2);
+
+    
+    var logWindowContainer = createEl('box');
+    document.getElementById('window_indicators').appendChild(logWindowContainer);
+
+    header = createEl('boxheader');
+    headertext = document.createTextNode('log');
+    header.appendChild(headertext);
+    logWindowContainer.appendChild(header);
+
+    var logWindowHolder = createEl('logHolder');
+    logWindowContainer.appendChild(logWindowHolder);
+
+    var logWindowHolder2 = createEl('logHolder2');
+    logWindowHolder.appendChild(logWindowHolder2);
+
+
+    var addlog = function(el, name) {
+        var holder = el == window ?
+                logWindowHolder2 :
+                logInputHolder2;
+
+        el.addEventListener(name, function(e) {
+            var line = createEl('logline');
+            line.innerHTML = name;
+            holder.appendChild(line);
+
+            line.style.transition = 'color 0s';
+            line.style.color = '#99BeE7';
+            line.offsetHeight;
+            line.style.transition = 'color 2s';
+            line.style.color = '#496e87';
+
+            holder.scrollTop = holder.scrollHeight;
+        });
+        
+    }
+
+    for (var name in control) if (control.hasOwnProperty(name)) {
+        addlog(window, name);
+        addlog(document.getElementById('txt'), name);
+    }
+
+    for (var i = 0; i < basicEvents.length; i++) {
+        name = basicEvents[i];
+        addlog(window, name);
+        addlog(document.getElementById('txt'), name);
+    }
+
+
+    
+
 });
