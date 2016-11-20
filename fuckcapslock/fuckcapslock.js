@@ -148,7 +148,7 @@
     // redefining preventDefault to recognize if it was called for
     // artificially emitted events
     var preventingDefault = false;
-    var defaultPrevented = false;
+    var defaultPrevented;
     var preventDefaultOriginal = Event.prototype.preventDefault;
     Event.prototype.preventDefault = function() {
         if (preventingDefault) {
@@ -191,7 +191,6 @@
                    ((chr != chr.toLowerCase() && !shift) ||
                     (chr != chr.toUpperCase() && shift));
 
-// TODO ctrl+capital letter event can be different
                 if (isLetter && capslock) {
                     chr = chr[shift ? 'toUpperCase' : 'toLowerCase']();
                     var chrcode = chr.charCodeAt(0);
@@ -267,6 +266,7 @@
                     }
 
                     preventingDefault = true;
+                    defaultPrevented = false;
                     e.target.dispatchEvent(fixedEvent);
                     preventingDefault = false;
 
@@ -283,8 +283,6 @@
                             }
                         }
                     }
-
-                    defaultPrevented = false;
 
                     e.stopImmediatePropagation(); 
                 }
