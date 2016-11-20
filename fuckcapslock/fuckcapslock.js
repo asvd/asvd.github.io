@@ -23,7 +23,7 @@
         return result;
     }
 
-    var printKey = function(key) {
+    var printChr = function(chr) {
         var basicInputEl = null;
 
         var sel = window.getSelection();
@@ -78,12 +78,12 @@
                         // text node, inserting inside element
                         value = node.textContent;
                         var point = ran.startOffset;
-                        node.textContent = value.substr(0, point) + key + value.substr(point, value.length-point);
+                        node.textContent = value.substr(0, point) + chr + value.substr(point, value.length-point);
                         ran.setStart(node, point+1);
                         ran.setEnd(node, point+1);
                     } else {
                         // between nodes, inserting textnode
-                        var textnode = document.createTextNode(key);
+                        var textnode = document.createTextNode(chr);
                         ran.insertNode(textnode);
                         ran.setStartAfter(textnode);
                         ran.setEndAfter(textnode);
@@ -102,7 +102,7 @@
             var value = basicInputEl.value;
             var selStart = basicInputEl.selectionStart;
             var selEnd = basicInputEl.selectionEnd;
-            basicInputEl.value = value.substr(0, selStart) + key + value.substr(selEnd, value.length-selEnd);
+            basicInputEl.value = value.substr(0, selStart) + chr + value.substr(selEnd, value.length-selEnd);
 
 
             // blur and focus will scroll to selection
@@ -171,42 +171,59 @@
                 var shift = e.shiftKey;
                 var ctrl = e.ctrlKey;
 
-                var key = false;
+                var chr = false;
                 if (e.key && e.key.length == 1) {
-                    key = e.key;
+                    chr = e.key;
                 } else if (typeof e.which != 'undefined') {
-                    key = String.fromCharCode(e.which);
+                    chr = String.fromCharCode(e.which);
                 } else if (typeof e.keyCode != 'undefined') {
-                    key = String.fromCharCode(e.keyCode);
+                    chr = String.fromCharCode(e.keyCode);
                 }
 
-                var isLetter = key.toLowerCase() != key.toUpperCase();
+                var isLetter = chr.toLowerCase() != chr.toUpperCase();
 
                 var capslock = 
                         e.getModifierState ?
                         e.getModifierState('CapsLock') :
-                   ((key != key.toLowerCase() && !shift) ||
-                    (key != key.toUpperCase() && shift));
+                   ((chr != chr.toLowerCase() && !shift) ||
+                    (chr != chr.toUpperCase() && shift));
 
+// TODO ctrl+capital letter event can be different
                 if (!ctrl && isLetter && capslock) {
-                    key = key[shift ? 'toUpperCase' : 'toLowerCase']();
-                    var code = (name == 'keypress' ? key : key.toUpperCase()).charCodeAt(0);
+                    chr = chr[shift ? 'toUpperCase' : 'toLowerCase']();
+                    var chrcode = chr.charCodeAt(0);
+                    var keycode = chr.toUpperCase().charCodeAt(0);
 
-                    // can be 0 in FF
-                    var keyCode = e.keyCode ? code : e.keyCode;
- 
+                    // fixed event config
+                    var cfg = {
+                        bubbles       : e.bubbles,
+                        composed      : e.composed,
+                        view          : e.view,
+                        ctrlKey       : e.ctrlKey,
+                        shiftKey      : e.shiftKey,
+                        altKey        : e.altKey,
+                        metaKey       : e.metaKey,
+
+                        key           : chr,
+                        charCode      : e.charCode,
+                        which         : keycode,
+                        keyCode       : keycode,
+                        code          : e.code,
+                        keyIdentifier : e.keyIdentifier
+                    }
+
+                    switch (name) {
+                    case 'keypress':
+                        cfg.charCode  = chrcode;
+                        cfg.which     = chrcode;
+                        cfg.keyCode   = chrcode;
+                        break;
+                    }
+
+                    // creating the event
                     var fixedEvent;
                     try {
-                        fixedEvent = new KeyboardEvent(name, {
-                            bubbles     : e.bubbles,
-                            composed    : e.composed,
-                            view        : e.view,
-                            key         : key,
-                            ctrlKey     : e.ctlKey,
-                            shiftKey    : e.shiftKey,
-                            altKey      : e.altKey,
-                            metaKey     : e.metaKey
-                        }); 
+                        fixedEvent = new KeyboardEvent(name, cfg);
                     } catch(e) {
                         var all = [
                             'Ctrl', 'Shift', 'Alt', 'Meta'
@@ -221,31 +238,35 @@
 
                         fixedEvent.initKeyboardEvent(
                             name,
-                            e.bubbles,
-                            e.cancelable,
+                            cfg.bubbles,
+                            cfg.cancelable,
                             window,
-                            key,
+                            chr,
                             e.location,
                             modifiers.join(' '),
                             e.repeat,
                             e.locale
                         );
                     }
- 
+
+
  // TODO fix uppercase cyrillic && lower case when suppressed
-                    
-                    var codeVal = e.code;
-                    var keyIdentifier = e.keyIdentifier;
 
-                    if (name == 'keypress') {
-                        Object.defineProperty(fixedEvent, 'charCode', {get:function(){return code;}}); 
+
+                    for (var cfgKey in cfg) if (cfg.hasOwnProperty(cfgKey)) {
+                        var cfgVal = cfg[cfgKey];
+                        Object.defineProperty(
+                            fixedEvent,
+                            cfgKey,
+                            {
+                                get: (function(val){
+                                    return function(){return val}
+                                })(cfg[cfgKey])
+                            }
+                        );
                     }
-                    Object.defineProperty(fixedEvent, 'which', {get:function(){return code;}}); 
-                    Object.defineProperty(fixedEvent, 'keyCode', {get:function(){return code;}}); 
-                    Object.defineProperty(fixedEvent, 'code', {get:function(){return codeVal;}});
 
-                    Object.defineProperty(fixedEvent, 'keyIdentifier', {get:function(){return keyIdentifier;}}); 
-
+// TODO remake preventing preperly
                     preventingDefault = true;
                     e.target.dispatchEvent(fixedEvent);
                     preventingDefault = false;
@@ -259,7 +280,7 @@
                         if (name == 'keypress') {
                             if (!defaultPrevented) {
                                 // default prints the character
-                                printKey(key);
+                                printChr(chr);
                             }
                         }
                     }
