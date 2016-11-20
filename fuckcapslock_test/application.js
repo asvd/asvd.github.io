@@ -18,14 +18,14 @@ window.addEventListener('keyup', function(e) {
 window.addEventListener('load', function() {
     // prevent keydown if it is the key T
     document.getElementById('txt').addEventListener('keydown', function(e) {
-        if (e.keyCode == 84) { // T
+        if (e.code == 'KeyT') {
             e.preventDefault();
         }
     }, true);
 
     // prevent keypress if it is the key R
     document.getElementById('txt').addEventListener('keypress', function(e) {
-        if (e.keyCode == 114) { // R
+        if (e.code == 'KeyR') {
             e.preventDefault();
         }
     }, true);
@@ -53,37 +53,37 @@ window.addEventListener('load', function() {
         keypress : [
             'type',
             'code',
-            'charCode',
             'ctrlKey',
             'shiftKey',
             'keyIdentifier',
             'key',
-            'keyCode',
-            'which'
+            'charCode',
+            'which',
+            'keyCode'
         ],
 
         keyup : [
             'type',
             'code',
-            'charCode',
             'ctrlKey',
             'shiftKey',
             'keyIdentifier',
             'key',
-            'keyCode',
-            'which'
+            'charCode',
+            'which',
+            'keyCode'
         ],
 
         keydown : [
             'type',
             'code',
-            'charCode',
             'ctrlKey',
             'shiftKey',
             'keyIdentifier',
             'key',
-            'keyCode',
-            'which' 
+            'charCode',
+            'which',
+            'keyCode'
         ],
 
         focus : [

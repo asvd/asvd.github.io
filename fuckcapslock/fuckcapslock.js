@@ -192,7 +192,6 @@
                 if (!ctrl && isLetter && capslock) {
                     chr = chr[shift ? 'toUpperCase' : 'toLowerCase']();
                     var chrcode = chr.charCodeAt(0);
-                    var keycode = chr.toUpperCase().charCodeAt(0);
 
                     // fixed event config
                     var cfg = {
@@ -205,19 +204,17 @@
                         metaKey       : e.metaKey,
 
                         key           : chr,
-                        charCode      : e.charCode,
-                        which         : keycode,
-                        keyCode       : keycode,
                         code          : e.code,
-                        keyIdentifier : e.keyIdentifier
+                        keyIdentifier : e.keyIdentifier,
+                        charCode      : e.charCode,
+                        which         : e.which,
+                        keyCode       : e.keyCode
                     }
 
-                    switch (name) {
-                    case 'keypress':
+                    if (name == 'keypress') {
                         cfg.charCode  = chrcode;
                         cfg.which     = chrcode;
                         cfg.keyCode   = chrcode;
-                        break;
                     }
 
                     // creating the event
@@ -258,7 +255,7 @@
                         Object.defineProperty(
                             fixedEvent,
                             cfgKey,
-                            {
+                            { // val should not get into closure
                                 get: (function(val){
                                     return function(){return val}
                                 })(cfg[cfgKey])
@@ -266,7 +263,6 @@
                         );
                     }
 
-// TODO remake preventing preperly
                     preventingDefault = true;
                     e.target.dispatchEvent(fixedEvent);
                     preventingDefault = false;
