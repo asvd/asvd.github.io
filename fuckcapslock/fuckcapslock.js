@@ -14,17 +14,22 @@
         factory();
     }
 }(this, function () {
-    var ifInput = function(el) {
+    // returns the given element if it is input or textarea
+    var ifBasicInput = function(el) {
         var result = null;
         if (el) {
             var nodename = el.nodeName.toLowerCase();
-            result = (nodename == 'input'||nodename == 'textarea') ? el : null;
+            if (nodename == 'input' || nodename == 'textarea') {
+                result = el;
+            }
         }
         return result;
     }
 
+    var blurTrackedEls = [];
 
-    // prints the given character in currently edited element
+
+    // prints the given character in the currently edited element
     var putChr = function(chr) {
         var basicInputEl = null;
 
@@ -38,32 +43,33 @@
                 // in Chrome input element is the given subchild
                 // in FF startContainer points to input element itself
                 basicInputEl = 
-                    ifInput(ran.startContainer) ||
+                    ifBasicInput(ran.startContainer) ||
                     (ran.startContainer.firstChild ? 
-                     ifInput(ran.startContainer.childNodes[ran.startOffset]) : null);
+                     ifBasicInput(ran.startContainer.childNodes[ran.startOffset]) :
+                     null);
             }
 
-            var editable = false;
+            var contenteditable = false;
             var node = ran.startContainer;
 
             do {
                 if (node.getAttribute &&
                     node.getAttribute('contenteditable')=='true'
                 ) {
-                    editable = true;
+                    contenteditable = true;
                     break;
                 }
                 node = node.parentNode;
             } while (node.parentNode);
 
-            if (editable) {
+            if (contenteditable) {
                 var endnode = ran.endContainer;
-                if (editable &&
+                if (contenteditable &&
                     (endnode == node ||
-                     // editable node contains endnode
+                     // contenteditable node contains endnode
                      endnode.compareDocumentPosition(node) & 8)
                 ) {
-                    // selection fully inside editable area
+                    // selection fully inside contenteditable area
                     ran.deleteContents();
                     node = ran.startContainer;
                     if (node.firstChild &&
@@ -80,7 +86,10 @@
                         // text node, inserting inside element
                         value = node.textContent;
                         var point = ran.startOffset;
-                        node.textContent = value.substr(0, point) + chr + value.substr(point, value.length-point);
+                        node.textContent = 
+                            value.substr(0, point) +
+                            chr +
+                            value.substr(point, value.length-point);
                         ran.setStart(node, point+1);
                         ran.setEnd(node, point+1);
                     } else {
@@ -97,14 +106,17 @@
         } else {
             // in FF focused inputs are sometimes not reflected in
             // selection
-            basicInputEl = ifInput(document.activeElement);
+            basicInputEl = ifBasicInput(document.activeElement);
         }
 
         if (basicInputEl) {
             var value = basicInputEl.value;
             var selStart = basicInputEl.selectionStart;
             var selEnd = basicInputEl.selectionEnd;
-            basicInputEl.value = value.substr(0, selStart) + chr + value.substr(selEnd, value.length-selEnd);
+            basicInputEl.value =
+                value.substr(0, selStart) +
+                chr +
+                value.substr(selEnd, value.length-selEnd);
 
             basicInputEl.setSelectionRange(selStart+1, selStart+1);
 
@@ -117,7 +129,6 @@
                 var suppress = function(e) {
                     e.preventDefault();
                     e.stopImmediatePropagation(); 
-                    return false;
                 }
 
                 window.addEventListener('focus', suppress, true);
@@ -139,13 +150,60 @@
                     bubbles : true
                 });
                 basicInputEl.dispatchEvent(evt);
-
- // TODO fire on blur if flag was triggered at this point
-                evt = new KeyboardEvent('change', {
-                    bubbles : true
-                });
-                basicInputEl.dispatchEvent(evt);
             } catch(e) {}
+
+            // change event should be fired on blur, which does not
+            // happen if the element was only changed via putChr(), so
+            // it should be tracked and re-emitted
+            var tracked = false;
+            for (var i = 0; i < blurTrackedEls.length; i++) {
+                if (blurTrackedEls[i] == basicInputEl) {
+                    tracked = true;
+                    break;
+                }
+            }
+
+            if (!tracked) {
+                var blurListener = function(e) {
+                    if (basicInputEl == (e.target || e.srcElement)) {
+                        // blur should be fired after change, so we
+                        // suppress and reemit the events in the right
+                        // order
+                        basicInputEl.dispatchEvent(new KeyboardEvent('change', {
+                            bubbles : true
+                        }));
+
+                        e.stopImmediatePropagation(); 
+                    }
+                }
+
+                var changeListener = function() {
+                    // cancelling the tracking
+                    basicInputEl.removeEventListener(
+                        'change', changeListener, true
+                    );
+                    basicInputEl.removeEventListener(
+                        'blur', blurListener, true
+                    );
+
+                    for (var i = 0; i < blurTrackedEls.length; i++) {
+                        if (blurTrackedEls[i] == basicInputEl) {
+                            blurTrackedEls.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+
+                basicInputEl.addEventListener(
+                    'change', changeListener, true
+                );
+
+                basicInputEl.addEventListener(
+                    'blur', blurListener, true
+                );
+
+                blurTrackedEls.push(basicInputEl);
+            } // otherwise blur already tracked
         }
 
     }
@@ -171,11 +229,12 @@
         'keyup'
     ];
 
-
-
     for (var i = 0; i < events.length; i++) {
-        var event = events[i];
-        var handler = function(name) {
+        var name = events[i];
+
+        // handler is generated in order to prevent event name from
+        // getting into the closure
+        var genHandler = function(name) {
             return function(e) {
                 var shift = e.shiftKey;
                 var ctrl = e.ctrlKey;
@@ -195,7 +254,7 @@
                         e.getModifierState ?
                         e.getModifierState('CapsLock') :
                    ((chr != chr.toLowerCase() && !shift) ||
-                    (chr != chr.toUpperCase() && shift));
+                    (chr != chr.toUpperCase() &&  shift));
 
                 if (isLetter && capslock) {
                     chr = chr[shift ? 'toUpperCase' : 'toLowerCase']();
@@ -221,7 +280,7 @@
                     if (name == 'keypress') {
                         cfg.charCode  = chrcode;
                         cfg.which     = chrcode;
-                        // can be 0 in FF, and should be kept
+                        // can be 0 in FF, and should be preserved
                         if (e.keyCode != 0) {
                             cfg.keyCode   = chrcode;
                         }
@@ -296,7 +355,7 @@
             }
         }
 
-        window.addEventListener(event, handler(event), true);
+        window.addEventListener(name, genHandler(name), true);
     }
 
 

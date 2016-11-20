@@ -16,15 +16,16 @@ window.addEventListener('keyup', function(e) {
 
 
 window.addEventListener('load', function() {
+    var txt = document.getElementById('txt');
     // prevent keydown if it is the key T
-    document.getElementById('txt').addEventListener('keydown', function(e) {
+    txt.addEventListener('keydown', function(e) {
         if (e.code == 'KeyT') {
             e.preventDefault();
         }
     }, true);
 
     // prevent keypress if it is the key R
-    document.getElementById('txt').addEventListener('keypress', function(e) {
+    txt.addEventListener('keypress', function(e) {
         if (e.code == 'KeyR') {
             e.preventDefault();
         }
