@@ -143,8 +143,8 @@
                 basicInputEl.setSelectionRange(selStart+1, selStart+1);
             }
 
-            // not for IE
-            // TODO
+// not for IE 11
+// TODO
             try {
                 var evt = new KeyboardEvent('input', {
                     bubbles : true
@@ -169,9 +169,23 @@
                         // blur should be fired after change, so we
                         // suppress and reemit the events in the right
                         // order
-                        basicInputEl.dispatchEvent(new KeyboardEvent('change', {
-                            bubbles : true
-                        }));
+                        var ev;
+                        try {
+                            ev = new KeyboardEvent('change', {
+                                bubbles : true
+                            });
+                        } catch(e) {
+                            ev = document.createEvent('CustomEvent');
+
+                            ev.initCustomEvent(
+                                'change',
+                                true,
+                                false,
+                                null
+                            )
+                            
+                        }
+                        basicInputEl.dispatchEvent(ev);
 
                         e.stopImmediatePropagation(); 
                     }
