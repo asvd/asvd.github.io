@@ -200,15 +200,16 @@ var indicateControlEvents = function() {
 
         var count = 0;
         el.addEventListener(name, function(e) {
-                console.log(' ');
-                console.log(name);
-                console.log('================================');
+            var log = '';
+                log += (' \n');
+                log += (name + '\n');
+                log += ('================================\n');
             for (var key in e) {
                 if ((typeof e[key]).toLowerCase() != 'function') {
-                    console.log(key + ' : ' + e[key]);
+                    log += (key + ' : ' + e[key] + '\n');
                 }
             }
-                console.log('================================');
+                log += ('================================\n');
 var modifiers = [
     'Alt',
     'AltGraph',
@@ -224,10 +225,12 @@ var modifiers = [
 
             for (var i = 0; i < modifiers.length; i++) {
                 var mod = modifiers[i];
-                console.log('['+mod + ']: ' + e.getModifierState(mod));
+                log += ('['+mod + ']: ' + e.getModifierState(mod) + '\n');
             }
-                console.log('================================');
-                console.log(' ');
+                log += ('================================\n');
+                log += (' \n');
+
+            console.log(log);
 
 
             
