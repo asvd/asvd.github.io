@@ -17,7 +17,10 @@
    id="svg8"
    inkscape:version="0.92.2 (5c3e80d, 2017-08-06)"
    sodipodi:docname="hands-on.svg"
-   style="enable-background:new">
+   style="enable-background:new"
+   inkscape:export-filename="/home/xpostman/projects/code/asvd.github.io/atom/hands-on.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs2">
     <inkscape:path-effect
@@ -844,8 +847,8 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="0.99999996"
-     inkscape:cx="167.99528"
-     inkscape:cy="292.73895"
+     inkscape:cx="157.49528"
+     inkscape:cy="172.73895"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -884,15 +887,15 @@
   </g>
   <use
      xlink:href="./key.svg"
-     x="40"
-     y="40"
-     width="30"
-     xlink:type="simple"
-     xlink:actuate="onLoad"
-     height="30"
-     id="use8793"
+     transform="translate(0,15.875)"
      xlink:show="embed"
-     transform="translate(0,15.875)" />
+     id="use8793"
+     height="30"
+     xlink:actuate="onLoad"
+     xlink:type="simple"
+     width="30"
+     y="40"
+     x="40" />
   <g
      inkscape:groupmode="layer"
      id="layer2"
