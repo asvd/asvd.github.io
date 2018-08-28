@@ -365,7 +365,6 @@
                 win.FUCKAPSLOCK_HREF != win.location.href
             ) {
                 win.FUCKAPSLOCK_HREF = win.location.href;
-                console.log('init ' + win.location.href);
 
                 // redefining preventDefault to recognize if it was called for
                 // artificially emitted events

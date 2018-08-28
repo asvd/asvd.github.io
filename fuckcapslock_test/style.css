@@ -16,7 +16,23 @@ body {
 }
 
 
+iframe {
+    border: none;
+    height: 17px;
+    margin-top: 10px;
+}
 
+body.iframe {
+    margin: 0px;
+}
+
+.iframe_input {
+    margin: 0px;
+}
+
+.noline {
+    line-height: 0px;
+}
 
 .title {
     padding-top : 30px;
