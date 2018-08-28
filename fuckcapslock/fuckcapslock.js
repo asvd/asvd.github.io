@@ -1,9 +1,9 @@
 /**
  * @fileoverview fuckcapslock - ignores capslock state
  * @version 0.0.0
- * 
+ *
  * @license MIT, see http://github.com/asvd/fuckcapslock
- * @copyright 2015 asvd <heliosframework@gmail.com> 
+ * @copyright 2018 asvd <heliosframework@gmail.com>
  */
 
 
@@ -30,10 +30,11 @@
 
 
     // prints the given character in the currently edited element
-    var putChr = function(chr) {
+    var putChr = function(win, chr) {
+        var doc = win.document;
         var basicInputEl = null;
 
-        var sel = window.getSelection();
+        var sel = win.getSelection();
         if (sel.rangeCount) {
             var ran = sel.getRangeAt(0);
 
@@ -42,9 +43,9 @@
             ) {
                 // in Chrome input element is the given subchild
                 // in FF startContainer points to input element itself
-                basicInputEl = 
+                basicInputEl =
                     ifBasicInput(ran.startContainer) ||
-                    (ran.startContainer.firstChild ? 
+                    (ran.startContainer.firstChild ?
                      ifBasicInput(ran.startContainer.childNodes[ran.startOffset]) :
                      null);
             }
@@ -86,7 +87,7 @@
                         // text node, inserting inside element
                         value = node.textContent;
                         var point = ran.startOffset;
-                        node.textContent = 
+                        node.textContent =
                             value.substr(0, point) +
                             chr +
                             value.substr(point, value.length-point);
@@ -94,7 +95,7 @@
                         ran.setEnd(node, point+1);
                     } else {
                         // between nodes, inserting textnode
-                        var textnode = document.createTextNode(chr);
+                        var textnode = doc.createTextNode(chr);
                         ran.insertNode(textnode);
                         ran.setStartAfter(textnode);
                         ran.setEndAfter(textnode);
@@ -106,7 +107,7 @@
         } else {
             // in FF focused inputs are sometimes not reflected in
             // selection
-            basicInputEl = ifBasicInput(document.activeElement);
+            basicInputEl = ifBasicInput(doc.activeElement);
         }
 
         if (basicInputEl) {
@@ -125,20 +126,20 @@
 
             // check if we are not in FF where this trick is not
             // needed and leads to caret disappear
-            if (typeof InstallTrigger == 'undefined') {
+            if (typeof win.InstallTrigger == 'undefined') {
                 var suppress = function(e) {
                     e.preventDefault();
-                    e.stopImmediatePropagation(); 
+                    e.stopImmediatePropagation();
                 }
 
-                window.addEventListener('focus', suppress, true);
-                window.addEventListener('blur', suppress, true);
+                win.addEventListener('focus', suppress, true);
+                win.addEventListener('blur', suppress, true);
 
                 basicInputEl.blur();
                 basicInputEl.focus();
 
-                window.removeEventListener('focus', suppress, true);
-                window.removeEventListener('blur', suppress, true);
+                win.removeEventListener('focus', suppress, true);
+                win.removeEventListener('blur', suppress, true);
 
                 basicInputEl.setSelectionRange(selStart+1, selStart+1);
             }
@@ -175,19 +176,19 @@
                                 bubbles : true
                             });
                         } catch(e) {
-                            ev = document.createEvent('CustomEvent');
+                            ev = doc.createEvent('CustomEvent');
 
                             ev.initCustomEvent(
                                 'change',
                                 true,
                                 false,
                                 null
-                            )
-                            
+                            );
+
                         }
                         basicInputEl.dispatchEvent(ev);
 
-                        e.stopImmediatePropagation(); 
+                        e.stopImmediatePropagation();
                     }
                 }
 
@@ -222,157 +223,181 @@
 
     }
 
-
-    // redefining preventDefault to recognize if it was called for
-    // artificially emitted events
-    var preventingDefault = false;
-    var defaultPrevented;
-    var preventDefaultOriginal = Event.prototype.preventDefault;
-    Event.prototype.preventDefault = function() {
-        if (preventingDefault) {
-            defaultPrevented = true;
-        }
-
-        preventDefaultOriginal.apply(this, arguments);
-    }
-
-
     var events = [
         'keypress',
         'keydown',
         'keyup'
     ];
 
-    for (var i = 0; i < events.length; i++) {
-        var name = events[i];
 
-        // handler is generated in order to prevent event name from
-        // getting into the closure
-        var genHandler = function(name) {
-            return function(e) {
-                var shift = e.shiftKey;
-                var ctrl = e.ctrlKey;
+    // generates handler for the given event name, and window
+    var genHandler = function(win, name) {
+        return function(e) {
+            var shift = e.shiftKey;
+            var ctrl = e.ctrlKey;
 
-                var chr = false;
-                if (e.key && e.key.length == 1) {
-                    chr = e.key;
-                } else if (typeof e.which != 'undefined') {
-                    chr = String.fromCharCode(e.which);
-                } else if (typeof e.keyCode != 'undefined') {
-                    chr = String.fromCharCode(e.keyCode);
+            var chr = false;
+            if (e.key && e.key.length == 1) {
+                chr = e.key;
+            } else if (typeof e.which != 'undefined') {
+                chr = String.fromCharCode(e.which);
+            } else if (typeof e.keyCode != 'undefined') {
+                chr = String.fromCharCode(e.keyCode);
+            }
+
+            var isLetter = chr.toLowerCase() != chr.toUpperCase();
+
+            var capslock =
+                    e.getModifierState ?
+                    e.getModifierState('CapsLock') :
+               ((chr != chr.toLowerCase() && !shift) ||
+                (chr != chr.toUpperCase() &&  shift));
+
+            if (isLetter && capslock) {
+                chr = chr[shift ? 'toUpperCase' : 'toLowerCase']();
+                var chrcode = chr.charCodeAt(0);
+
+                // fixed event config
+                var cfg = {
+                    bubbles       : e.bubbles,
+                    composed      : e.composed,
+                    view          : e.view,
+                    ctrlKey       : e.ctrlKey,
+                    shiftKey      : e.shiftKey,
+                    altKey        : e.altKey,
+                    metaKey       : e.metaKey,
+
+                    key           : chr,
+                    code          : e.code,
+                    charCode      : e.charCode,
+                    which         : e.which,
+                    keyCode       : e.keyCode
                 }
 
-                var isLetter = chr.toLowerCase() != chr.toUpperCase();
-
-                var capslock = 
-                        e.getModifierState ?
-                        e.getModifierState('CapsLock') :
-                   ((chr != chr.toLowerCase() && !shift) ||
-                    (chr != chr.toUpperCase() &&  shift));
-
-                if (isLetter && capslock) {
-                    chr = chr[shift ? 'toUpperCase' : 'toLowerCase']();
-                    var chrcode = chr.charCodeAt(0);
-
-                    // fixed event config
-                    var cfg = {
-                        bubbles       : e.bubbles,
-                        composed      : e.composed,
-                        view          : e.view,
-                        ctrlKey       : e.ctrlKey,
-                        shiftKey      : e.shiftKey,
-                        altKey        : e.altKey,
-                        metaKey       : e.metaKey,
-
-                        key           : chr,
-                        code          : e.code,
-                        charCode      : e.charCode,
-                        which         : e.which,
-                        keyCode       : e.keyCode
+                if (name == 'keypress') {
+                    cfg.charCode  = chrcode;
+                    cfg.which     = chrcode;
+                    // can be 0 in FF, and should be preserved
+                    if (e.keyCode != 0) {
+                        cfg.keyCode   = chrcode;
                     }
+                }
 
-                    if (name == 'keypress') {
-                        cfg.charCode  = chrcode;
-                        cfg.which     = chrcode;
-                        // can be 0 in FF, and should be preserved
-                        if (e.keyCode != 0) {
-                            cfg.keyCode   = chrcode;
+                // creating the event
+                var fixedEvent;
+                try {
+                    fixedEvent = new KeyboardEvent(name, cfg);
+                } catch(e) {
+                    var all = [
+                        'Ctrl', 'Shift', 'Alt', 'Meta'
+                    ];
+                    var modifiers = [];
+                    for (var i = 0; i < all.length; i++) {
+                        if (e[all[i].toLowerCase() + 'Key']) {
+                            modifiers.push(all[i]);
                         }
                     }
 
-                    // creating the event
-                    var fixedEvent;
-                    try {
-                        fixedEvent = new KeyboardEvent(name, cfg);
-                    } catch(e) {
-                        var all = [
-                            'Ctrl', 'Shift', 'Alt', 'Meta'
-                        ];
-                        var modifiers = [];
-                        for (var i = 0; i < all.length; i++) {
-                            if (e[all[i].toLowerCase() + 'Key']) {
-                                modifiers.push(all[i]);
-                            }
+                    fixedEvent = win.document.createEvent('KeyboardEvent');
+
+                    fixedEvent.initKeyboardEvent(
+                        name,
+                        cfg.bubbles,
+                        cfg.cancelable,
+                        win,
+                        chr,
+                        e.location,
+                        modifiers.join(' '),
+                        e.repeat,
+                        e.locale
+                    );
+                }
+
+                // defining getters for the event properties
+                for (var cfgKey in cfg) if (cfg.hasOwnProperty(cfgKey)) {
+                    var cfgVal = cfg[cfgKey];
+                    Object.defineProperty(
+                        fixedEvent,
+                        cfgKey,
+                        { // val should not get into closure
+                            get: (function(val){
+                                return function(){return val}
+                            })(cfg[cfgKey])
                         }
+                    );
+                }
 
-                        fixedEvent = document.createEvent('KeyboardEvent');
+                // emitting the event and tracking preventDefault
+                preventingDefault = true;
+                defaultPrevented = false;
+                e.target.dispatchEvent(fixedEvent);
+                preventingDefault = false;
 
-                        fixedEvent.initKeyboardEvent(
-                            name,
-                            cfg.bubbles,
-                            cfg.cancelable,
-                            window,
-                            chr,
-                            e.location,
-                            modifiers.join(' '),
-                            e.repeat,
-                            e.locale
-                        );
-                    }
-
-                    // defining getters for the event properties
-                    for (var cfgKey in cfg) if (cfg.hasOwnProperty(cfgKey)) {
-                        var cfgVal = cfg[cfgKey];
-                        Object.defineProperty(
-                            fixedEvent,
-                            cfgKey,
-                            { // val should not get into closure
-                                get: (function(val){
-                                    return function(){return val}
-                                })(cfg[cfgKey])
-                            }
-                        );
-                    }
-
-                    // emitting the event and tracking preventDefault
-                    preventingDefault = true;
-                    defaultPrevented = false;
-                    e.target.dispatchEvent(fixedEvent);
-                    preventingDefault = false;
-
-                    if (name == 'keydown') {
-                        if (defaultPrevented) {
-                            e.preventDefault();
-                        }  // default emits the keypress
-                    } else {
+                if (name == 'keydown') {
+                    if (defaultPrevented) {
                         e.preventDefault();
-                        if (name == 'keypress') {
-                            if (!defaultPrevented && !ctrl) {
-                                // default prints the character
-                                putChr(chr);
-                            }
+                    }  // default emits the keypress
+                } else {
+                    e.preventDefault();
+                    if (name == 'keypress') {
+                        if (!defaultPrevented && !ctrl) {
+                            // default prints the character
+                            putChr(win, chr);
                         }
                     }
-
-                    e.stopImmediatePropagation(); 
                 }
+
+                e.stopImmediatePropagation();
             }
         }
-
-        window.addEventListener(name, genHandler(name), true);
     }
 
 
-    
-}));
+    var update = function(win) {
+        var bodyAccessible = false;
+        try {
+            // can fail for x-origin frames
+            bodyAccessible = win.document.body || win.document.body === null;
+        } catch(e) {}
 
+        if (bodyAccessible) {
+            if (!win.FUCKAPSLOCK_HREF ||
+                win.FUCKAPSLOCK_HREF != win.location.href
+            ) {
+                win.FUCKAPSLOCK_HREF = win.location.href;
+                console.log('init ' + win.location.href);
+
+                // redefining preventDefault to recognize if it was called for
+                // artificially emitted events
+                var preventingDefault = false;
+                var defaultPrevented;
+                var preventDefaultOriginal = win.Event.prototype.preventDefault;
+                win.Event.prototype.preventDefault = function() {
+                    if (preventingDefault) {
+                        defaultPrevented = true;
+                    }
+
+                    preventDefaultOriginal.apply(this, arguments);
+                }
+
+                for (var i = 0; i < events.length; i++) {
+                    var name = events[i];
+                    win.addEventListener(name, genHandler(win, name), true);
+                }
+
+                win.addEventListener('blur', function() {
+                    update(window);  // focus can get on a new iframe
+                }, false);
+            }
+
+            // update subframes
+            for (var i = 0; i < win.frames.length; i++) {
+                update(win.frames[i]);
+            }
+        }
+
+
+    }
+
+    update(window);
+}));
