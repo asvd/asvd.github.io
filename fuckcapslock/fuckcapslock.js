@@ -1,6 +1,6 @@
 /**
  * @fileoverview fuckcapslock - ignores capslock state
- * @version 0.0.0
+ * @version 0.0.2
  *
  * @license MIT, see http://github.com/asvd/fuckcapslock
  * @copyright 2018 asvd <heliosframework@gmail.com>
@@ -352,6 +352,7 @@
         }
     }
 
+    var preventingDefault, defaultPrevented;
 
     var update = function(win) {
         var bodyAccessible = false;
@@ -368,8 +369,7 @@
 
                 // redefining preventDefault to recognize if it was called for
                 // artificially emitted events
-                var preventingDefault = false;
-                var defaultPrevented;
+                preventingDefault = false;
                 var preventDefaultOriginal = win.Event.prototype.preventDefault;
                 win.Event.prototype.preventDefault = function() {
                     if (preventingDefault) {

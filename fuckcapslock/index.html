@@ -17,18 +17,18 @@
 
       <div>
         Fuckcapslock is a JavaScript library that negotiates
-        effect of the CapsLock button &mdash; the case of the typed
+        effect of the CapsLock button &mdash; case of typed
         characters is not affected any longer, and the whole page
         behaves as if CapsLock was never active.
       </div>
-      <textarea>You can try it yourself by switching the CapsLock on and off on your keyboard (if you have it), and entering some text into this textarea.</textarea>
+      <textarea>You can try it yourself in this textarea by switching the CapsLock on and off on your keyboard (if you have it), and entering some text here.</textarea>
 
     <div class=title>Why?</div>
 
       <p>
         The CapsLock button has extremely attractive position: it is
-        located in the home row  &mdash; the one in the middle, where your
-        hands lie when relaxed. It is therefore easily accessible without
+        located on the home row  &mdash; the one in the middle, where your
+        hands lie relaxed. It is therefore easily accessible without
         bending the fingers. In fact, CapsLock is accessible easier than any
         other non-letter key (perhaps with except for Spacebar).
       </p>
@@ -38,15 +38,14 @@
         For historical reasons, the most accessible button has the
         most stupid function assigned to it &mdash; TO MAKE ALL THE
         TYPED CHARACTERS APPEAR IN CAPS. This rudimental side-effect
-        made the button useless for other purposes.
+        made the button useless for other purposes as a modifier.
       </p>
 
 
       <p>
         Until now. With fuckcapslock.js the state of the CapsLock key
         is disregarded. There is yet an opprotunity to handle its
-        events and reuse the button as a convenient hotkey or a
-        modifier. It exposes the keyboard events in the normal way and
+        events and reuse the button as a convenient hotkey. It exposes the keyboard events in the normal way and
         can be identified by the key code 20 or code 'CapsLock'. Just
         like as this indicator reflects you pushing the CapsLock:
       </p>
@@ -54,6 +53,13 @@
 </div>
 
       <div id=caps_indicator class=caps_released>CapsLock</div>
+
+      <p>
+          There is no more need to warn user that his CapsLock is on before
+          entering passwords or any other data, if he joined the
+          session with CapsLock active by mistake. It can be ignored, simply
+          and transparently.
+      </p>
 
 
       <p>
@@ -72,7 +78,7 @@
       Text in all capitals is harder to read (it has all the same line shape). If you still wish to use the CapsLock when
       typing an expressive message implying to SHOUT OUT LOUD,
       just remind yourself that in real life shouting requires some
-      extra effort, therefore you might also consider to make a
+      extra effort, therefore you might consider to make a
       little effort when typing as well by HOLDING THE FUCKING SHIFT.
     </p>
 
@@ -106,8 +112,26 @@
       Track the CapsLock keypress as following, checking against the keycode == 20 or code == 'CapsLock':
     </p>
 
+    <p>
+        <b>Note on frames</b>: fuckcapslock.js tries to burrow recursively
+        into the subframes (even if those are created in the runtime
+        dynamically), but it will only initialize within directly
+        accessible ones &mdash; the frames created within the same
+        application. Cross-origin frames are protected
+        by browser against external fuckapslock.js initialization.
+        The solution is to explicitly load fuckapslock.js into
+        those frames as well.
+    </p>
 
-    <div class=title>What exactly does fuckcapslock.js</div>
+    <p>
+        Of course the CapsLock button state will only be properly
+        disregarded within the browser tab where fuckcapslock.js is
+        included, and if user leaves the tab having the CapsLock on,
+        it will distract (but we have to start somewhere).
+    </p>
+
+
+    <div class=title>What exactly fuckcapslock.js does</div>
 
     <p>
       It tracks the state of the CapsLock upon keyboard events, and if
@@ -119,7 +143,7 @@
       <li>
         Changing the content of the inputs, textareas and
         content-editable divs is prevented, the library then inserts
-        the characters which would appear if the CapsLock was
+        the characters that would appear if the CapsLock was
         inactive;
       </li>
 
@@ -132,7 +156,7 @@
     </ul>
 
     <div class=title>Compatibility</div>
-
+---
     <p>
       Fuck CapsLock! Make use of the button! Make the world a better place! <span style="text-decoration: line-through;">Make America great again!</span>
     </p>
